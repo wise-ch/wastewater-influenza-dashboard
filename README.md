@@ -1,1 +1,1 @@
-# dashboard for wastewater Re estimation
+# dashboard for wastewater R<sub>e</sub> estimation

@@ -7,6 +7,17 @@ library(viridis)
 library(EpiEstim)
 library(zoo)
 
+# setting the basic plotting theme
+
+theme_set(theme_minimal() +
+            theme(
+              strip.text = element_text(size=16),
+              axis.text= element_text(size=14),
+              axis.title =  element_text(size=16),
+              legend.text= element_text(size=14),
+              legend.title= element_text(size=16)
+            ))
+
 #### ZURICH ####
 ZH_flow_url = "http://parsivel-eawag.ch/sarscov2/__data__/ARA%20Werdhoelzli_flow_cases.csv"
 ZH_genes_url = "http://parsivel-eawag.ch/sarscov2/__data__/ARA%20Werdhoelzli_genes.csv"
@@ -41,6 +52,7 @@ raw_data_ZH <- raw_data_ZH %>%
 
 # Plot `raw' WW data - Zurich #####
 # Required to be displayed
+
 # List of all raw ww plots.
 all_raw_plots <- list()
 
@@ -50,8 +62,7 @@ all_raw_plots[["zh"]] <- ggplot(raw_data_ZH, aes(x=date, y = n1)) +
   geom_smooth(method = 'loess', colour = 'black',
               method.args = list(span = 0.05, degree = 1) ) +
   labs(x = 'Date' , y='N1 load') +
-  ggtitle("Wastewater Gene Copies in Zurich") +
-  theme_light()
+  ggtitle("Wastewater Gene Copies in Zurich") 
 
 
 
