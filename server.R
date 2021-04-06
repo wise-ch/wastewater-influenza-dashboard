@@ -17,7 +17,7 @@ function(input, output) {
         {
             # from all the raw plots, it picks region
             # as per drop down menu
-            #all_raw_plots[[input$region]]
+            all_raw_plots[[input$region]]
         }
     )
     

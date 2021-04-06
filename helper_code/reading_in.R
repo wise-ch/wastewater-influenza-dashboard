@@ -2,10 +2,10 @@
 # Zurich only first
 library(tidyverse)
 library(lubridate)
-library(patchwork)
+#library(patchwork) - not on server
 library(viridis)
 library(EpiEstim)
-
+library(zoo)
 
 #### ZURICH ####
 ZH_flow_url = "http://parsivel-eawag.ch/sarscov2/__data__/ARA%20Werdhoelzli_flow_cases.csv"
