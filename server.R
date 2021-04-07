@@ -1,6 +1,7 @@
 library(shiny)
 
 source("helper_code/reading_in.R")
+source("helper_code/plotting.R")
 
 #### Define server logic ####
 function(input, output) {

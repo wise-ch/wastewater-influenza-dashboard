@@ -9,9 +9,7 @@ library(viridis)
 library(EpiEstim)
 # the code further requires zoo for data imputation
 
-#app_location = '/Users/jana/Documents/PhD/covid/covid-19-re-shiny-app'
-# my app_location (as from github repository - shiny-dailyRe)
-app_location = '/Users/taru/Documents/shiny-dailyRe'
+app_location = '/Users/jana/Documents/PhD/covid/covid-19-re-shiny-app'
 
 source(paste0(app_location,'/app/otherScripts/2_utils_getInfectionIncidence.R'))
 source(paste0(app_location,'/app/otherScripts/3_utils_doReEstimates.R'))

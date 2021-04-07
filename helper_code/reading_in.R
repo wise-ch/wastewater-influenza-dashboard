@@ -1,4 +1,4 @@
-#### Reading in the data ####
+#### Reading in and pre-processing the data ####
 # Zurich only first
 library(tidyverse)
 library(lubridate)
@@ -39,20 +39,6 @@ raw_data_ZH <- raw_flow_data_ZH %>%
 # drop n2 and n2_smooth as it is no longer recorded from February 2021
 raw_data_ZH <- raw_data_ZH %>%
   select(-n2, -n2_smooth)
-
-# Plot `raw' WW data - Zurich #####
-# Required to be displayed
-# List of all raw ww plots.
-all_raw_plots <- list()
-
-all_raw_plots[["zh"]] <- ggplot(raw_data_ZH, aes(x=date, y = n1)) +
-  geom_point(colour = 'blue') +
-  geom_line(colour = 'black', linetype = 'dashed') +
-  geom_smooth(method = 'loess', colour = 'black',
-              method.args = list(span = 0.05, degree = 1) ) +
-  labs(x = 'Date' , y='N1 load') +
-  ggtitle("Wastewater Covid Gene Copies in Zurich") +
-  theme_light()
 
 
 
