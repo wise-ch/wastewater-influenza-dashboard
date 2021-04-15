@@ -11,7 +11,6 @@ source("helper_code/reading_in.R")
 
 # List of all raw ww plots.
 all_raw_plots <- list()
-all_re_plots <- list()
 
 #### ZURICH ####
 #### Wastewater raw  - Zurich ####

@@ -9,6 +9,9 @@ library(zoo)
 
 
 #### ZURICH ####
+
+# set up cron jobs for this? ####
+
 ZH_flow_url = "http://parsivel-eawag.ch/sarscov2/__data__/ARA%20Werdhoelzli_flow_cases.csv"
 ZH_genes_url = "http://parsivel-eawag.ch/sarscov2/__data__/ARA%20Werdhoelzli_genes.csv"
 
@@ -34,13 +37,6 @@ raw_data_ZH <- raw_flow_data_ZH %>%
   mutate(orig_data = TRUE) %>%
   complete(date = seq.Date(min(date), max(date), by = 'days')) %>%
   mutate(across(where(is.numeric), ~ zoo::na.approx(.x, na.rm = F) )) %>%
-  mutate(region = 'ZH')
-
-# drop n2 and n2_smooth as it is no longer recorded from February 2021
-raw_data_ZH <- raw_data_ZH %>%
-  select(-n2, -n2_smooth)
-
-
-
-
+  mutate(region = 'ZH') %>% 
+  select(-n2, -n2_smooth) # drop n2, n2_smooth as no longer recorded from 02.21
 

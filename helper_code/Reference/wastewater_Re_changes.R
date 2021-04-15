@@ -13,21 +13,25 @@ library(EpiEstim)
 # my app_location (as from github repository - shiny-dailyRe)
 app_location = '/Users/taru/Documents/shiny-dailyRe'
 
+
+
 source(paste0(app_location,'/app/otherScripts/2_utils_getInfectionIncidence.R'))
 source(paste0(app_location,'/app/otherScripts/3_utils_doReEstimates.R'))
 
-source('wastewater_functions.R')
 
-plot_dir = '../figures'
+helper_location = '/Users/taru/wastewater_re_shiny/helper_code'
 
-theme_set(theme_minimal() +
-            theme(
-              strip.text = element_text(size=20),
-              axis.text= element_text(size=17),
-              axis.title =  element_text(size=20),
-              legend.text= element_text(size=17),
-              legend.title= element_text(size=20)
-            ))
+source(paste0(helper_location, '/wastewater_functions.R'))
+
+
+# theme_set(theme_minimal() +
+#             theme(
+#               strip.text = element_text(size=20),
+#               axis.text= element_text(size=17),
+#               axis.title =  element_text(size=20),
+#               legend.text= element_text(size=17),
+#               legend.title= element_text(size=20)
+#             ))
 
 
 ### ZURICH ####
@@ -159,8 +163,9 @@ Restimates <- Restimates_canton %>%
 
 ## Normalisation ####
 
-# At LOQ we see 1 case # Min observed
+# At LOQ we see 1 case # Min observed - shedding quantity for one infected individual
 # only n1. See if this can be fixed plant-wise
+# value to change if possible
 norm_min <- min(raw_data_ZH$n1)
 
 # LOQ: limit of quantification?
@@ -212,7 +217,7 @@ ww_data_plot_normalised <- ggplot() +
              size = 2, show.legend = F) +
   geom_line(data = plot_raw_ww_data_normalised %>% filter(orig_data), 
             aes(x=date, y= value,colour = name), linetype = 'dotted', show.legend = F) +
-  labs(x = 'Date' , y='Infections per day') + # is that what the normalised data is?
+  labs(x = 'Date' , y='Normalised gene copies per day') + # is that what the normalised data is?
   scale_x_date(limits = c(as_date(min(plot_raw_ww_data[["date"]])), as_date(max(plot_raw_ww_data[["date"]])))) +
   scale_colour_manual(values = c(viridis(4)[3:4], 'lightgrey'), 
                       labels = c('Norm_N1', 'Imputed'),
@@ -269,6 +274,8 @@ Re_ww <- data.frame()
 
 row_i <- 1
 
+# Time consuming ####
+# - set to run after data changes 
 new_deconv_data = deconvolveIncidence(ww_data %>% 
                                         filter(region == config_df[row_i, 'region']), 
                                       incidence_var = config_df[row_i, 'incidence_var'],
@@ -316,7 +323,7 @@ deconv_plot <- ggplot() +
                 aes(x=date, ymin = value -sd,  ymax = value +sd, colour = incidence_var),
                 show.legend = T) +
   facet_wrap(vars(data_type), ncol = 1, scale = 'free_y') +
-  labs(x = 'Date' , y='Infections per day') +
+  labs(x = 'Date' , y='Devonvolved values') +
   scale_x_date(limits = c(as_date(min(mean_deconv_data[["date"]])), 
                           as_date(max(mean_deconv_data[["date"]]))) ) +
   scale_colour_manual(values = viridis(4),
@@ -354,7 +361,10 @@ cases_plot <- ggplot(raw_data_ZH, aes(x=date, y = cases)) +
   labs(x = 'Date' , y='Confirmed cases per day') +
   ggtitle("Confirmed cases in the Werdhölzli (Zurich) catchment area") 
 
-cases_plot
+cases_plot # looks different as wastewater does not give EXACT cases, but
+# is useful to see the changes of covid levels in the wastewater
+# which helps compute Re
+# the actual deconvolution values do not matter - they are not exactly cases
 
 #ggsave(plot = deconv_plot, paste0(plot_dir, '/', 'Wastewater_data_deconv_CH.pdf'), height = 11, width = 16)
 #ggsave(plot = deconv_plot, paste0(plot_dir, '/', 'Wastewater_data_deconv_CH.png'), height = 11, width = 16)
@@ -417,6 +427,7 @@ plotData <- Restimates %>%
 
 ## Plot Re for all ####
 
+# Give the option to the user to select which one they want to see.
 
 Re_plot <- ggplot(plotData) +
   geom_line(aes(x = date, y = median_R_mean, colour = data_type), 
