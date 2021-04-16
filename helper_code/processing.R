@@ -71,5 +71,40 @@ Re_ww <- Re_ww %>%
                            'norm_n1' = 'N1'))
 
 
+# All other Re estimates  ####
+
+Restimates_url = "https://raw.githubusercontent.com/covid-19-Re/dailyRe-Data/master/CHE-estimates.csv"
+
+Restimates_canton <- read_csv(Restimates_url,
+                              col_names = c('country', 'region','source','data_type',
+                                            'estimate_type','date','median_R_mean',
+                                            'median_R_highHPD','median_R_lowHPD',
+                                            'countryIso3'),
+                              col_types = cols(date = col_date(format = '')),
+                              skip = 1) 
+
+Restimates <- Restimates_canton %>%
+  filter(region %in% c('ZH'),
+         estimate_type == "Cori_slidingWindow",
+         date >= as_date("2020-09-01"))
+
+
+date_ranges <- Re_ww %>%
+  group_by(region) %>%
+  summarise(min_date = min(date),
+            max_date = max(date))
+
+Re_ww_needed <- Re_ww %>% select(region, data_type, date, 
+                                 median_R_mean, median_R_highHPD, median_R_lowHPD)
+
+plotData <- Restimates %>%
+  filter(region %in% c('ZH'),
+         estimate_type == 'Cori_slidingWindow',
+         data_type != 'Confirmed cases / tests',
+         date >= date_ranges[date_ranges$region == 'ZH', ]$min_date,
+         date <= date_ranges[date_ranges$region == 'ZH',]$max_date ) %>%
+  dplyr::select(-estimate_type, -countryIso3, -country, -source) %>%
+  bind_rows(Re_ww_needed) %>% mutate(data_type = factor(data_type)) %>% # the rww binded
+  mutate(data_type = recode_factor(data_type, "infection_norm_n1" = "Wastewater"))
 
 

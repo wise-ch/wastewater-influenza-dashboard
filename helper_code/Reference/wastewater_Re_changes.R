@@ -4,7 +4,7 @@
 ###########################################################
 library(tidyverse)
 library(lubridate)
-library(patchwork)
+#library(patchwork)
 library(viridis)
 library(EpiEstim)
 # the code further requires zoo for data imputation

@@ -33,7 +33,7 @@ raw_gene_data_ZH <- read_delim(ZH_genes_url, delim = ';',
 raw_data_ZH <- raw_flow_data_ZH %>%
   left_join(raw_gene_data_ZH, c('date')) %>%
   filter(!is.na(n1),
-         date >= as_date("2021-01-20")) %>%
+         date >= as_date("2020-09-01")) %>%
   mutate(orig_data = TRUE) %>%
   complete(date = seq.Date(min(date), max(date), by = 'days')) %>%
   mutate(across(where(is.numeric), ~ zoo::na.approx(.x, na.rm = F) )) %>%
