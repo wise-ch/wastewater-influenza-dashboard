@@ -1,4 +1,5 @@
 library(shiny)
+library(gridExtra)
 
 #source("helper_code/reading_in.R")
 source("helper_code/plotting_raw.R") # will call in reading_in
@@ -17,6 +18,18 @@ function(input, output) {
     # also keeps track of reactivity - re-computes when input changes
     # use input values when you make your output. Access with $ and Id
     # this value changes as the input bar/slider/button changes. Reactive.
+    #fixed_width <- unit(2, 'cm')
+    #all_raw_plots[[1]]$widths <- fixed_width
+    #all_re_plots[[1]]$widths <- fixed_width
+    
+    # output$plots <- renderPlot(
+    #     {
+    #     raw <- all_raw_plots[[input$region]]
+    #     re <- all_re_plots[[input$region]]
+    #     plot_grid(raw, re, ncol = 1, nrow = 2, align = "v")        
+    #     }
+    # )
+    
     output$raw <- renderPlot(
         {
             # from all the raw plots, it picks region
