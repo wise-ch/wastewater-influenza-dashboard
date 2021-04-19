@@ -24,7 +24,7 @@ date_range <- range(raw_data[["ZH"]][["date"]], raw_data[["VD"]][["date"]])
 #### ZURICH ####
 #### Wastewater raw  - Zurich ####
 par(mar=c(5,6,4,2)+0.1,mgp=c(5,1,0))
-all_raw_plots[["ZH"]] <- ggplot(raw_data_ZH, aes(x=date, y = n1)) +
+all_raw_plots[["ZH"]] <- ggplot(raw_data[["ZH"]], aes(x=date, y = n1)) +
   geom_point(colour = "#440154FF") +
   scale_x_date(limits = c(date_range[1], date_range[2])) +
   geom_line(colour = "#440154FF", linetype = 'dashed') +
@@ -34,7 +34,7 @@ all_raw_plots[["ZH"]] <- ggplot(raw_data_ZH, aes(x=date, y = n1)) +
 # Lausanne ####
 
 par(mar=c(5,6,4,2)+0.1,mgp=c(5,1,0))
-all_raw_plots[["VD"]] <- ggplot(raw_data_VD, aes(x=date, y = n1)) +
+all_raw_plots[["VD"]] <- ggplot(raw_data[["VD"]], aes(x=date, y = n1)) +
   geom_point(colour = "#440154FF") +
   scale_x_date(limits = c(date_range[1], date_range[2])) +
   geom_line(colour = "#440154FF", linetype = 'dashed') +

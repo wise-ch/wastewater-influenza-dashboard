@@ -46,7 +46,7 @@ all_re_plots[["VD"]] <- ggplot(plotData[["VD"]]) +
   geom_hline(yintercept = 1) +
   scale_colour_viridis(discrete = T) +
   scale_fill_viridis(discrete = T) +
-  scale_x_date(limits = c(date_range_vd[1], date_range_vd[2])) +
+  scale_x_date(limits = c(date_range[1], date_range[2])) +
   labs( x = 'Date', y = expression("Estimated R"["e"]),
         colour = 'Source', fill = 'Source') +
   guides(color = guide_legend(override.aes = list(size=5))) +  
