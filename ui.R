@@ -18,8 +18,8 @@ navbarPage(HTML(paste0("Wastewater R",tags$sub("e"))),
                      #plotOutput("raw") - changing now ####
                      tabPanel("Plot",
                               # fluidRow( plotting ... )
-                              plotOutput("raw"),
-                              plotOutput("re"))
+                              #plotOutput("raw"),
+                              plotOutput("plots"))
                  )
              )
     ),

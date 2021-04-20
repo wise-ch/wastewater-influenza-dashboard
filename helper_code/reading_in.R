@@ -1,89 +1,46 @@
 #### Reading in and pre-processing the data ####
-# Zurich only first
 library(tidyverse)
 library(lubridate)
-#library(patchwork) - not on server
-library(viridis)
-library(EpiEstim)
 library(zoo)
-library(cowplot)
 
+# Reading in wastewater data ####
 
-raw_data <- list()
+ww_data <- data.frame()
 
-#### ZURICH ####
-
-# set up cron jobs for this? ####
+ww_read_in <- function(flow, genes, ww, region) {
+  raw_flow_data <- read_delim(flow, delim = ';',
+                                 col_names = c('date', 'cases', 'cases_smooth', 
+                                               'flow', 'n1_smooth', 'n2_smooth'),
+                                 col_types = cols(date = col_date(format = '')),
+                                 skip = 1) 
+  
+  raw_gene_data <- read_delim(genes, delim = ';',
+                                 col_names = c('date', 'n1', 'n2'),
+                                 col_types = cols(date = col_date(format = '')),
+                                 skip = 1) 
+  
+  new_ww_data <- raw_flow_data %>%
+    left_join(raw_gene_data, c('date')) %>%
+    filter(!is.na(n1),
+           date >= as_date("2020-09-01")) %>%
+    mutate(orig_data = TRUE) %>%
+    complete(date = seq.Date(min(date), max(date), by = 'days')) %>%
+    mutate(across(where(is.numeric), ~ zoo::na.approx(.x, na.rm = F) )) %>%
+    mutate(region = region) %>% 
+    select(-n2, -n2_smooth) %>%# drop n2, n2_smooth as no longer recorded from 02.21
+    mutate(norm_n1 = n1/min(n1)) # normalise!
+  
+  ww_data <- bind_rows(ww, new_ww_data)
+}
 
 ZH_flow_url = "http://parsivel-eawag.ch/sarscov2/__data__/ARA%20Werdhoelzli_flow_cases.csv"
 ZH_genes_url = "http://parsivel-eawag.ch/sarscov2/__data__/ARA%20Werdhoelzli_genes.csv"
 
-raw_flow_data_ZH <- read_delim(ZH_flow_url, delim = ';',
-                               col_names = c('date', 'cases', 'cases_smooth', 
-                                             'flow', 'n1_smooth', 'n2_smooth'),
-                               col_types = cols(date = col_date(format = '')),
-                               skip = 1) 
-
-raw_gene_data_ZH <- read_delim(ZH_genes_url, delim = ';',
-                               col_names = c('date', 'n1', 'n2'),
-                               col_types = cols(date = col_date(format = '')),
-                               skip = 1) 
-
-# We select data from January 20th, because the sampling was different before
-# Missing data is imputed with linear interpolation
-# This is necessary because we don't expect 0 in between
-# and otherwise our smoothing step makes the average too low
-raw_data[["ZH"]] <- raw_flow_data_ZH %>%
-  left_join(raw_gene_data_ZH, c('date')) %>%
-  filter(!is.na(n1),
-         date >= as_date("2020-09-01")) %>%
-  mutate(orig_data = TRUE) %>%
-  complete(date = seq.Date(min(date), max(date), by = 'days')) %>%
-  mutate(across(where(is.numeric), ~ zoo::na.approx(.x, na.rm = F) )) %>%
-  mutate(region = 'ZH') %>% 
-  select(-n2, -n2_smooth) # drop n2, n2_smooth as no longer recorded from 02.21
-
-
-# LAUSANNE ####
+ww_data <- ww_read_in(ZH_flow_url, ZH_genes_url, ww_data, "ZH")
 
 VD_flow_url = "https://sensors-eawag.ch/sarscov2/__data__/STEP%20Vidy_flow_cases.csv"
 VD_genes_url = "http://sensors-eawag.ch/sarscov2/__data__/STEP%20Vidy_genes.csv"
 
-raw_flow_data_VD <- read_delim(VD_flow_url, delim = ';',
-                               col_names = c('date', 'cases', 'cases_smooth', 
-                                             'flow', 'n1_smooth', 'n2_smooth'),
-                               col_types = cols(date = col_date(format = '')),
-                               skip = 1) 
-
-raw_gene_data_VD <- read_delim(VD_genes_url, delim = ';',
-                               col_names = c('date', 'n1', 'n2'),
-                               col_types = cols(date = col_date(format = '')),
-                               skip = 1) 
-
-# We select data from January 20th, because the sampling was different before
-# Missing data is imputed with linear interpolation
-# This is necessary because we don't expect 0 in between
-# and otherwise our smoothing step makes the average too low
-raw_data[["VD"]] <- raw_flow_data_VD %>%
-  left_join(raw_gene_data_VD, c('date')) %>%
-  filter(!is.na(n1),
-         date >= as_date("2020-09-01")) %>%
-  mutate(orig_data = TRUE) %>%
-  complete(date = seq.Date(min(date), max(date), by = 'days')) %>%
-  mutate(across(where(is.numeric), ~ zoo::na.approx(.x, na.rm = F) )) %>%
-  mutate(region = 'VD') %>% 
-  select(-n2, -n2_smooth) # drop n2, n2_smooth as no longer recorded from 02.21
+ww_data <- ww_read_in(VD_flow_url, VD_genes_url, ww_data, "VD")
 
 
-
-# Reading in cantonal Re estimates ####
-
-Restimates_url = "https://raw.githubusercontent.com/covid-19-Re/dailyRe-Data/master/CHE-estimates.csv"
-
-Restimates_canton <- read_csv(Restimates_url,
-                              col_names = c('country', 'region','source','data_type',
-                                            'estimate_type','date','median_R_mean',
-                                            'median_R_highHPD','median_R_lowHPD',
-                                            'countryIso3'),
-                              col_types = cols(date = col_date(format = '')),
-                              skip = 1) 
