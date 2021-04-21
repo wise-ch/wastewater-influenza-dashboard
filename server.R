@@ -22,7 +22,7 @@ function(input, output) {
             # from all the raw plots, it picks region
             # as per drop down menu
             all_plots[[input$region]]
-        }
+        }, height = 600 # not sure if good idea to fix height.
     )
 
     

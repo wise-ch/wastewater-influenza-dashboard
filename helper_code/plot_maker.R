@@ -7,7 +7,7 @@ library(EpiEstim)
 
 
 # cronjobs to do source work ####
-source("helper_code/reading_in.R") # will later no longer be needed
+source("helper_code/reading_in.R") # 
 source("helper_code/Rww_estimation.R") # will later no longer be needed
 
 # Reading in cantonal Re estimates ####
@@ -51,14 +51,20 @@ date_range <- range(plotData[["date"]])
 
 all_raw_plots <- list()
 
-all_raw_plots[["ZH"]] <- ww_data %>% filter(region == "ZH") %>%
+all_raw_plots[["ZH"]] <- ww_data %>% filter(region == "ZH") %>% # so would still need the reading_in...?
   ggplot( aes(x=date, y = n1)) +
   geom_point(colour = "#440154FF") +
   scale_x_date(limits = c(date_range[1], date_range[2])) +
   geom_line(colour = "#440154FF", linetype = 'dashed') +
   labs(x = 'Date' , y='Gene copies per day') +
   ggtitle("SARS-CoV2-RNA copies in Zurich Wastewater") +
-  theme_minimal()
+  theme_minimal() +
+  theme(strip.text = element_text(size=20),
+        axis.text= element_text(size=17),
+        axis.title =  element_text(size=20),
+        legend.text= element_text(size=17),
+        legend.title= element_text(size=20),
+        plot.title = element_text(size = 20))
 
 # Lausanne ####
 
@@ -69,7 +75,13 @@ all_raw_plots[["VD"]] <-  ww_data %>% filter(region == "VD") %>%
   geom_line(colour = "#440154FF", linetype = 'dashed') +
   labs(x = 'Date' , y='Gene copies per day') +
   ggtitle("SARS-CoV2-RNA copies in Lausanne Wastewater") +
-  theme_minimal()
+  theme_minimal() +
+  theme(strip.text = element_text(size=20),
+        axis.text= element_text(size=17),
+        axis.title =  element_text(size=20),
+        legend.text= element_text(size=17),
+        legend.title= element_text(size=20),
+        plot.title = element_text(size = 20))
 
 # Re plots ####
 
@@ -92,12 +104,17 @@ all_re_plots[["ZH"]] <- plotData %>% filter(region == "ZH") %>%
   coord_cartesian(ylim = c(0, 2)) +
   labs( x = 'Date', y = expression("Estimated R"["e"]),
         colour = 'Source', fill = 'Source') +
-  guides(color = guide_legend(override.aes = list(size=5))) +  
-  theme(
-    panel.spacing.y = unit(2, "lines"),
-    legend.position = 'bottom') + 
+  guides(color = guide_legend(override.aes = list(size=5))) + 
   ggtitle(expression("Estimated R"["e"]*" in Zurich using different data sources")) + 
-  theme_minimal()
+  theme_minimal() +
+  theme(strip.text = element_text(size=20),
+        axis.text= element_text(size=17),
+        axis.title =  element_text(size=20),
+        legend.text= element_text(size=17),
+        legend.title= element_text(size=20),
+        plot.title = element_text(size = 20),
+        panel.spacing.y = unit(2, "lines"),
+        legend.position = 'bottom')
 
 
 #### Lausanne ####
@@ -117,11 +134,16 @@ all_re_plots[["VD"]] <- plotData %>% filter(region == "VD") %>%
   labs( x = 'Date', y = expression("Estimated R"["e"]),
         colour = 'Source', fill = 'Source') +
   guides(color = guide_legend(override.aes = list(size=5))) +  
-  theme(
-    panel.spacing.y = unit(2, "lines"),
-    legend.position = 'bottom') + 
   ggtitle(expression("Estimated R"["e"]*" in Lausanne using different data sources")) +
-  theme_minimal()
+  theme_minimal() +
+  theme(strip.text = element_text(size=20),
+         axis.text= element_text(size=17),
+         axis.title =  element_text(size=20),
+         legend.text= element_text(size=17),
+         legend.title= element_text(size=20),
+        plot.title = element_text(size = 20),
+        panel.spacing.y = unit(2, "lines"),
+        legend.position = 'bottom')
 
 
 ####  ALL PLOTS ALIGNED ####
