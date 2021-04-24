@@ -28,7 +28,8 @@ ww_read_in <- function(flow, genes, ww, region) {
     mutate(across(where(is.numeric), ~ zoo::na.approx(.x, na.rm = F) )) %>%
     mutate(region = region) %>% 
     select(-n2, -n2_smooth) %>%# drop n2, n2_smooth as no longer recorded from 02.21
-    mutate(norm_n1 = n1/min(n1)) # normalise!
+    mutate(norm_n1 = n1/min(n1)) %>%# normalise! 
+    mutate(name_orig = ifelse(!is.na(orig_data), 'N1', 'Imputed')) # identifies whether imputed or not
   
   ww_data <- bind_rows(ww, new_ww_data)
 }

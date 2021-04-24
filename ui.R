@@ -9,7 +9,15 @@ navbarPage("Covid-19: Wastewater Re",
              sidebarLayout(
                  sidebarPanel(
                      selectInput(inputId = "region", label = "Region:",
-                                choices = c("Zurich" = "ZH", "Lausanne" = "VD"))
+                                choices = c("Zurich" = "ZH", "Lausanne" = "VD"),
+                                ),
+                     checkboxGroupInput(inputId = "data_type", 
+                                        label = "Data Source (select to compare):",
+                                        choices = c("Wastewater" = "Wastewater",
+                                          "Confirmed cases" = "Confirmed cases",
+                                          "Deaths" = "Deaths",
+                                          "Hospitalized patients"= "Hospitalized patients"),
+                                        selected = "Wastewater")
                  ),
                  # in the main panel, you will see the raw plot
                  # Re plot also needs to be added.
@@ -17,9 +25,10 @@ navbarPage("Covid-19: Wastewater Re",
                  mainPanel(
                      #plotOutput("raw") - changing now ####
                      tabPanel("Plot",
-                              # fluidRow( plotting ... )
+                              fluidRow( plotOutput("plots")
+                                        )
                               #plotOutput("raw"),
-                              plotOutput("plots"))
+                              )
                  )
              )
     ),
@@ -40,7 +49,6 @@ navbarPage("Covid-19: Wastewater Re",
                           br(),
                           
                           h3("Who is involved?"), 
-                          br(),
                           p(HTML(paste0("Jana Huissman et al. developed the pipeline to take the raw data of SARS-CoV-2 gene copies in wastewater and using the R",tags$sub("e")," estimation pipeline,
                           optimised it for wastewater R",tags$sub("e")," estimates. The methods used for the R",tags$sub("e"), " estimation pipeline are described ")),
                             a(href = "https://www.medrxiv.org/content/10.1101/2020.11.26.20239368v1.article-info", "here", .noWS = "outside"),

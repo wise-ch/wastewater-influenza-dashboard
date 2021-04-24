@@ -8,7 +8,7 @@ library(EpiEstim)
 
 # cronjobs to do source work ####
 source("helper_code/reading_in.R") # 
-source("helper_code/Rww_estimation.R") # will later no longer be needed
+#source("helper_code/Rww_estimation.R") # will later no longer be needed
 
 # Reading in cantonal Re estimates ####
 
@@ -46,113 +46,66 @@ all_raw_plots <- list()
 
 date_range <- range(plotData[["date"]])
 
-#### ZURICH ####
 #### Wastewater raw  - Zurich ####
 
-all_raw_plots <- list()
+raw_plotter <- function(data = ww_data, canton) {
+  ww_data %>% filter(region == canton) %>% 
+    ggplot( ) +
+    geom_point(aes(x=date, y = n1, colour = name_orig)) +
+    scale_x_date(limits = c(date_range[1], date_range[2]), 
+                 date_breaks = "months", date_labels = "%b") +
+    scale_colour_manual(values = c(viridis(4)[1], 'lightseagreen'), 
+                        labels = c('N1', 'Imputed'),
+                        breaks = c('N1', 'Imputed'),
+                        name = 'Reading') +
+    geom_line(data = ww_data %>% filter(region == canton) %>% filter(orig_data), 
+              aes(x=date, y= n1,colour = name_orig), linetype = 'dashed', colour = "darkgrey") +
+    labs(x = 'Date' , y='Gene copies per day') +
+    ggtitle(paste0("SARS-CoV2-RNA copies in ", canton," Wastewater")) +
+    theme_minimal() +
+    theme(strip.text = element_text(size=20),
+          axis.text= element_text(size=17),
+          axis.title =  element_text(size=20),
+          legend.text= element_text(size=17),
+          legend.title= element_text(size=20),
+          plot.title = element_text(size = 20),
+          panel.spacing.y = unit(2, "lines"),
+          legend.position = 'bottom')
+}
 
-all_raw_plots[["ZH"]] <- ww_data %>% filter(region == "ZH") %>% # so would still need the reading_in...?
-  ggplot( aes(x=date, y = n1)) +
-  geom_point(colour = "#440154FF") +
-  scale_x_date(limits = c(date_range[1], date_range[2])) +
-  geom_line(colour = "#440154FF", linetype = 'dashed') +
-  labs(x = 'Date' , y='Gene copies per day') +
-  ggtitle("SARS-CoV2-RNA copies in Zurich Wastewater") +
-  theme_minimal() +
-  theme(strip.text = element_text(size=20),
-        axis.text= element_text(size=17),
-        axis.title =  element_text(size=20),
-        legend.text= element_text(size=17),
-        legend.title= element_text(size=20),
-        plot.title = element_text(size = 20))
 
-# Lausanne ####
-
-all_raw_plots[["VD"]] <-  ww_data %>% filter(region == "VD") %>%
-  ggplot( aes(x=date, y = n1)) +
-  geom_point(colour = "#440154FF") +
-  scale_x_date(limits = c(date_range[1], date_range[2])) +
-  geom_line(colour = "#440154FF", linetype = 'dashed') +
-  labs(x = 'Date' , y='Gene copies per day') +
-  ggtitle("SARS-CoV2-RNA copies in Lausanne Wastewater") +
-  theme_minimal() +
-  theme(strip.text = element_text(size=20),
-        axis.text= element_text(size=17),
-        axis.title =  element_text(size=20),
-        legend.text= element_text(size=17),
-        legend.title= element_text(size=20),
-        plot.title = element_text(size = 20))
 
 # Re plots ####
 
-# List of all raw ww plots.
-all_re_plots <- list()
-
-#### ZURICH ####
-
-all_re_plots[["ZH"]] <- plotData %>% filter(region == "ZH") %>%
-  ggplot() +
-  geom_line(aes(x = date, y = median_R_mean, colour = data_type), 
-            alpha = 0.7) +
-  geom_ribbon(aes(x = date, ymin = median_R_lowHPD,
-                  ymax = median_R_highHPD, fill = data_type),
-              alpha = 0.2, show.legend = F) +
-  geom_hline(yintercept = 1) +
-  scale_colour_viridis(discrete = T) +
-  scale_fill_viridis(discrete = T) +
-  scale_x_date(limits = c(date_range[1], date_range[2])) +
-  coord_cartesian(ylim = c(0, 2)) +
-  labs( x = 'Date', y = expression("Estimated R"["e"]),
-        colour = 'Source', fill = 'Source') +
-  guides(color = guide_legend(override.aes = list(size=5))) + 
-  ggtitle(expression("Estimated R"["e"]*" in Zurich using different data sources")) + 
-  theme_minimal() +
-  theme(strip.text = element_text(size=20),
-        axis.text= element_text(size=17),
-        axis.title =  element_text(size=20),
-        legend.text= element_text(size=17),
-        legend.title= element_text(size=20),
-        plot.title = element_text(size = 20),
-        panel.spacing.y = unit(2, "lines"),
-        legend.position = 'bottom')
-
-
-#### Lausanne ####
-
-all_re_plots[["VD"]] <- plotData %>% filter(region == "VD") %>%
-  ggplot() +
-  geom_line(aes(x = date, y = median_R_mean, colour = data_type), 
-            alpha = 0.7) +
-  geom_ribbon(aes(x = date, ymin = median_R_lowHPD,
-                  ymax = median_R_highHPD, fill = data_type),
-              alpha = 0.2, show.legend = F) +
-  geom_hline(yintercept = 1) +
-  scale_colour_viridis(discrete = T) +
-  scale_fill_viridis(discrete = T) +
-  scale_x_date(limits = c(date_range[1], date_range[2])) +
-  coord_cartesian(ylim = c(0, 2)) +
-  labs( x = 'Date', y = expression("Estimated R"["e"]),
-        colour = 'Source', fill = 'Source') +
-  guides(color = guide_legend(override.aes = list(size=5))) +  
-  ggtitle(expression("Estimated R"["e"]*" in Lausanne using different data sources")) +
-  theme_minimal() +
-  theme(strip.text = element_text(size=20),
-         axis.text= element_text(size=17),
-         axis.title =  element_text(size=20),
-         legend.text= element_text(size=17),
-         legend.title= element_text(size=20),
-        plot.title = element_text(size = 20),
-        panel.spacing.y = unit(2, "lines"),
-        legend.position = 'bottom')
-
-
-####  ALL PLOTS ALIGNED ####
-
-all_plots <- list()
-
-all_plots[["ZH"]] <- all_raw_plots[["ZH"]] + all_re_plots[["ZH"]] + plot_layout(ncol = 1)
-all_plots[["VD"]] <- all_raw_plots[["VD"]] + all_re_plots[["VD"]] + plot_layout(ncol = 1)
-
+re_plotter <- function(data = ww_data, source, canton) {
+  plotData %>% filter(region == canton) %>%
+    filter(data_type %in% source) %>%
+    ggplot() +
+    geom_line(aes(x = date, y = median_R_mean, colour = data_type), 
+              alpha = 0.7) +
+    geom_ribbon(aes(x = date, ymin = median_R_lowHPD,
+                    ymax = median_R_highHPD, fill = data_type),
+                alpha = 0.2, show.legend = F) +
+    geom_hline(yintercept = 1) +
+    scale_colour_viridis(discrete = T) +
+    scale_fill_viridis(discrete = T) +
+    scale_x_date(limits = c(date_range[1], date_range[2]), 
+                 date_breaks = "months", date_labels = "%b") +
+    coord_cartesian(ylim = c(0, 2)) +
+    labs( x = 'Date', y = expression("Estimated R"["e"]),
+          colour = 'Source', fill = 'Source') +
+    guides(color = guide_legend(override.aes = list(size=5))) + 
+    ggtitle(expression("Estimated R"["e"]*" using different data sources")) + 
+    theme_minimal() +
+    theme(strip.text = element_text(size=20),
+          axis.text= element_text(size=17),
+          axis.title =  element_text(size=20),
+          legend.text= element_text(size=17),
+          legend.title= element_text(size=20),
+          plot.title = element_text(size = 20),
+          panel.spacing.y = unit(2, "lines"),
+          legend.position = 'bottom')
+}
 
 
 
