@@ -54,12 +54,12 @@ raw_plotter <- function(data = ww_data, canton) {
     geom_point(aes(x=date, y = n1, colour = name_orig)) +
     scale_x_date(limits = c(date_range[1], date_range[2]), 
                  date_breaks = "months", date_labels = "%b") +
-    scale_colour_manual(values = c(viridis(4)[1], 'lightseagreen'), 
+    scale_colour_manual(values = c(viridis(4)[1], "grey"), #'lightseagreen'
                         labels = c('N1', 'Imputed'),
                         breaks = c('N1', 'Imputed'),
                         name = 'Reading') +
     geom_line(data = ww_data %>% filter(region == canton) %>% filter(orig_data), 
-              aes(x=date, y= n1,colour = name_orig), linetype = 'dashed', colour = "darkgrey") +
+              aes(x=date, y= n1,colour = name_orig), linetype = 'dashed', colour = "black") +
     labs(x = 'Date' , y='Gene copies per day') +
     ggtitle(paste0("SARS-CoV2-RNA copies in ", canton," Wastewater")) +
     theme_minimal() +

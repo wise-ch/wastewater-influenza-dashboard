@@ -49,7 +49,7 @@ navbarPage("Covid-19: Wastewater Re",
                           br(),
                           
                           h3("Who is involved?"), 
-                          p(HTML(paste0("Jana Huissman et al. developed the pipeline to take the raw data of SARS-CoV-2 gene copies in wastewater and using the R",tags$sub("e")," estimation pipeline,
+                          p(HTML(paste0("Jana Huisman et al. developed the pipeline to take the raw data of SARS-CoV-2 gene copies in wastewater and using the R",tags$sub("e")," estimation pipeline,
                           optimised it for wastewater R",tags$sub("e")," estimates. The methods used for the R",tags$sub("e"), " estimation pipeline are described ")),
                             a(href = "https://www.medrxiv.org/content/10.1101/2020.11.26.20239368v1.article-info", "here", .noWS = "outside"),
                             " and the code is available ", 
