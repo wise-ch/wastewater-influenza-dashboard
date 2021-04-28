@@ -2,6 +2,8 @@
 # to be run with cronjobs - does the heavylifting then writes Rww for all regions to csv
 # runs for all specified cantons
 
+setwd("/home/tsinghal/ShinyApps/wastewater_re_shiny")
+
 daily_re_helpers1 = "https://raw.githubusercontent.com/covid-19-Re/shiny-dailyRe/master/app/otherScripts/2_utils_getInfectionIncidence.R"
 daily_re_helpers2 = "https://raw.githubusercontent.com/covid-19-Re/shiny-dailyRe/master/app/otherScripts/3_utils_doReEstimates.R"
 

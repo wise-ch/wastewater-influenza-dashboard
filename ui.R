@@ -8,7 +8,7 @@ navbarPage("Covid-19: Wastewater Re",
              # in the sidebar dropdown, you can pick region
              sidebarLayout(
                  sidebarPanel(
-                     selectInput(inputId = "region", label = "Region:",
+                     selectInput(inputId = "region", label = "Select wastewater treatment plan:",
                                 choices = c("Zurich" = "ZH", "Lausanne" = "VD"),
                                 ),
                      checkboxGroupInput(inputId = "data_type", 
