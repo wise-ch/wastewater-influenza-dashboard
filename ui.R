@@ -9,7 +9,10 @@ navbarPage("Covid-19: Wastewater Re",
              sidebarLayout(
                  sidebarPanel(
                      selectInput(inputId = "region", label = "Select wastewater treatment plant:",
-                                choices = c("Zurich" = "ZH", "Lausanne" = "VD"),
+                                choices = c("Zurich" = "ZH", "Lausanne" = "VD",
+                                            "Altenrhein" = "AR/SG?", "Chur" = "GR",
+                                            "Laupen" = "BE/FR?", "Lugano" = "TI"
+                                            ), # ask about these two cantonal catchments
                                 ),
                      checkboxGroupInput(inputId = "data_type", 
                                         label = "Data Source (select to compare):",
@@ -19,15 +22,12 @@ navbarPage("Covid-19: Wastewater Re",
                                           "Hospitalized patients"= "Hospitalized patients"),
                                         selected = "Wastewater")
                  ),
-                 # in the main panel, you will see the raw plot
-                 # Re plot also needs to be added.
                  # Home: main panel ####
                  mainPanel(
                      #plotOutput("raw") - changing now ####
                      tabPanel("Plot",
                               fluidRow( plotOutput("plots")
                                         )
-                              #plotOutput("raw"),
                               )
                  )
              )

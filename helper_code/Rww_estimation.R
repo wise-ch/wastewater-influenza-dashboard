@@ -1,6 +1,7 @@
 # Rww estimation ####
 # to be run with cronjobs - does the heavylifting then writes Rww for all regions to csv
 # runs for all specified cantons
+library(EpiEstim)
 
 setwd("/home/tsinghal/ShinyApps/wastewater_re_shiny")
 
@@ -24,7 +25,8 @@ deconv_ww_data <- data.frame()
 Re_ww <- data.frame()
 
 for(row_i in 1:nrow(config_df)){
-  new_deconv_data = deconvolveIncidence(ww_data %>% filter(region == config_df[row_i, 'region']), 
+  new_deconv_data = deconvolveIncidence(ww_data %>% 
+                                          filter(region == config_df[row_i, 'region']), 
                                         incidence_var = config_df[row_i, 'incidence_var'],
                                         getCountParams(unlist(config_df[row_i, 'GammaParams'])[1]), 
                                         getCountParams(unlist(config_df[row_i, 'GammaParams'])[2]),

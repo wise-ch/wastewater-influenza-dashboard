@@ -44,7 +44,7 @@ plotData <- Restimates_canton %>%
 # List of all raw ww plots.
 all_raw_plots <- list()
 
-date_range <- range(plotData[["date"]])
+date_range <- range((plotData %>% filter(data_type=="Wastewater") %>% select(date))[["date"]])
 
 #### Wastewater raw  - Zurich ####
 
@@ -87,8 +87,12 @@ re_plotter <- function(data = ww_data, source, canton) {
                     ymax = median_R_highHPD, fill = data_type),
                 alpha = 0.2, show.legend = F) +
     geom_hline(yintercept = 1) +
-    scale_colour_viridis(discrete = T) +
-    scale_fill_viridis(discrete = T) +
+    scale_colour_manual(values = c(viridis(4)), #'lightseagreen'
+                        labels = c('Wastewater', 'Confirmed cases', 'Deaths', 'Hospitalized patients'),
+                        breaks = c('Wastewater', 'Confirmed cases', 'Deaths', 'Hospitalized patients')) +
+    scale_fill_manual(values = c(viridis(4)), #'lightseagreen'
+                       labels = c('Wastewater', 'Confirmed cases', 'Deaths', 'Hospitalized patients'),
+                       breaks = c('Wastewater', 'Confirmed cases', 'Deaths', 'Hospitalized patients')) +
     scale_x_date(limits = c(date_range[1], date_range[2]), 
                  date_breaks = "months", date_labels = "%b") +
     coord_cartesian(ylim = c(0, 2)) +
