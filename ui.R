@@ -8,7 +8,7 @@ navbarPage("Covid-19: Wastewater Re",
              # in the sidebar dropdown, you can pick region
              sidebarLayout(
                  sidebarPanel(
-                     selectInput(inputId = "region", label = "Select wastewater treatment plan:",
+                     selectInput(inputId = "region", label = "Select wastewater treatment plant:",
                                 choices = c("Zurich" = "ZH", "Lausanne" = "VD"),
                                 ),
                      checkboxGroupInput(inputId = "data_type", 
@@ -36,33 +36,55 @@ navbarPage("Covid-19: Wastewater Re",
     tabPanel("About",
              fluidRow(column(
                           h3("What is our aim?"), 
-                          p(HTML(paste0("The effective reproductive number, R",tags$sub("e"),", quantifies the expected number of people an infected individual infects over time. 
-                          Currently, such estimates for Covid-19 are based on clinical data such as confirmed cases, hospitalisations and/or deaths. 
-                          Alhough, recently, progress has been made on using the SARS-CoV-2 RNA in wastewater to estimate the R",tags$sub("e"),". 
-                          This is because even though SARS-CoV-2 is an airborne disease, substantial amounts are excreted (via saliva, feces, and/or sputum) 
-                          into the sewershed. Wastewater sampling can therefore help quantify the extent to which people in a particular catchment area are infected with Covid-19.","<br>",
-                                        "<br>", 
-                            "The purpose of this dashboard is to visualise the wastewater R",tags$sub("e")," estimates for the different Swiss cantons 
-                          which are collecting and analyzing wastewater samples for SARS-CoV-2 RNA. These estimates can then be compared to 
-                          the existing R",tags$sub("e")," estimates from different data sources.")),
-                            style="text-align:justify;color:black;background-color:lavender;padding:15px;border-radius:10px"),
-                          br(),
-                          
+                          p(HTML(paste0("We provide estimates of the effective reproductive number, R",tags$sub("e"),", based on longitudinal measurements of SARS-CoV-2 RNA in wastewater.
+                          These estimates provide an independent account of COVID-19 transmission dynamics, complementing existing R",tags$sub("e"),
+                          " estimates based on clinical data such as confirmed cases, hospitalisations and/or deaths. ","<br>",
+                          "The purpose of this dashboard is to visualise the R",tags$sub("e")," 
+                          estimates from wastewater for the wastewater treatment plants that are part of the AbwasSARS-CoV-2 project in Switzerland. 
+                          These estimates are shown together with existing R",tags$sub("e")," estimates from clinical data sources (for the corresponding cantons).")),
+                            style="text-align:justify;color:black;padding:15px;border-radius:10px"),
+                          #br(),
+                          h3("How do we do it?"), 
+                          p(HTML(paste0("The effective reproductive number, R",tags$sub("e"),", quantifies the expected number of people an infected individual will infect over time. 
+                          Since infected individuals excrete substantial amounts of SARS-CoV-2 RNA into the sewer system (via saliva, feces, and/or sputum),  
+                         wastewater samples reflect the number of people in a particular catchment area that are infected with COVID-19.
+                            These longitudinal measurements of SARS-CoV-2 RNA in wastewater are then used to estimate R",tags$sub("e"),".","<br>", "As described in ")),
+                            a(href = "https://github.com/JSHuisman/wastewaterRe", "Huisman et al.", .noWS = "outside"),
+                            HTML(paste0(", we use a pipeline that was previously developed to estimate R",tags$sub("e")," from clinical data sources (")),
+                            a(href = "https://www.medrxiv.org/content/10.1101/2020.11.26.20239368v1.article-info", "Huisman, Scire et al.", .noWS = "outside"),
+                            HTML(paste0(") and adapted it for use with wastewater measurements. 
+                            The main difference between both methods is how the underlying time series of infection events is inferred from the input observations:
+                            clinical cases follow a delay distribution from infection to case confirmation, whereas wastewater measurements follow a 
+                            shedding load distribution from infection to viral shedding.")),
+                            HTML(paste0("<br>",
+                                        "Currently, these methods are applied to measurements of the ", strong("SARS-CoV-2 N1 gene"), "."
+                                        )),
+                            style="text-align:justify;color:black;padding:15px;border-radius:10px"),
+                          #br(),
                           h3("Who is involved?"), 
-                          p(HTML(paste0("Jana Huisman et al. developed the pipeline to take the raw data of SARS-CoV-2 gene copies in wastewater and using the R",tags$sub("e")," estimation pipeline,
-                          optimised it for wastewater R",tags$sub("e")," estimates. The methods used for the R",tags$sub("e"), " estimation pipeline are described ")),
+                          p(HTML(paste0("This dashboard is developed by Taru Singhal and Jana Huisman, supervised by Tanja Stadler (cEvo group, ETH Zurich).", "<br>",
+                          "The underlying wastewater measurements are collected by teams at the Swiss Federal Institute of Aquatic Science and Technology (EAWAG) and EPFL, 
+                          supervised by Tim Julian, Christoph Ort, and Tamar Kohn.", "<br>", 
+                         "Funding for this project stems from the Swiss Federal Office of Public Health.")),
+                            style="text-align:justify;color:black;padding:15px;border-radius:10px"),
+                          #br(),
+                          h3("Links and further reading"), 
+                          p(HTML(paste0("The method to estimate R",tags$sub("e"), " from wastewater is described ")),
+                            a(href = "https://github.com/JSHuisman/wastewaterRe", "here", .noWS = "outside"),
+                            " and the code is available ", 
+                            a(href = "https://github.com/JSHuisman/wastewaterRe", "here", .noWS = "outside"),
+                            HTML(paste0(".", "<br>")),
+                             HTML(paste0("The general R",tags$sub("e"), " estimation pipeline is described ")),
                             a(href = "https://www.medrxiv.org/content/10.1101/2020.11.26.20239368v1.article-info", "here", .noWS = "outside"),
                             " and the code is available ", 
                             a(href = "https://github.com/covid-19-Re/shiny-dailyRe", "here", .noWS = "outside"), ".",
-                            HTML("<br>"),HTML("<br>"),
-                            "The raw SARS-CoV-2 in wastewater data are publicly available on the respective pages of the Swiss Federal Institute of Aquatic Science and Technology (EAWAG): ",
-                            a(href = "https://www.eawag.ch/en/department/sww/projects/sars-cov2-in-wastewater/", "https://www.eawag.ch/en/department/sww/projects/sars-cov2-in-wastewater/", .noWS = "outside"),
-                            ". EAWAG, along with labs from EPFL, are analyzing wastewater samples in cantons of Zurich, Lausanne and Ticino for the quantity of Covid-19 RNA present. 
-                            Currently, the ", strong("SARS-CoV-2 N1 gene"), " is being isolated and analysed.",
+                            HTML("<br>"),
+                            "The raw measurements of SARS-CoV-2 in wastewater are publicly available on ",
+                            a(href = "https://www.eawag.ch/en/department/sww/projects/sars-cov2-in-wastewater/", "the respective EAWAG pages", .noWS = "outside"),
+                            ".",
                             .noWS = c("after-begin", "before-end"),
-                            style="text-align:justify;color:black;background-color:lavender;padding:15px;border-radius:10px"),
+                            style="text-align:justify;color:black;padding:15px;border-radius:10px"),
                           br(),
-
                           width=10),
              
              
