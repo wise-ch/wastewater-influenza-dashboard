@@ -1,4 +1,7 @@
 library(shiny)
+library(plotly)
+library(shinycssloaders)
+source("helper_code/plot_maker.R")
 
 #### Define UI ####
 navbarPage("Covid-19: Wastewater Re",
@@ -10,8 +13,8 @@ navbarPage("Covid-19: Wastewater Re",
                  sidebarPanel(
                      selectInput(inputId = "region", label = "Select wastewater treatment plant:",
                                 choices = c("Zurich" = "ZH", "Lausanne" = "VD",
-                                            "Altenrhein" = "AR/SG?", "Chur" = "GR",
-                                            "Laupen" = "BE/FR?", "Lugano" = "TI"
+                                            "Altenrhein" = "SG", "Chur" = "GR",
+                                            "Laupen" = "FR", "Lugano" = "TI"
                                             ), # ask about these two cantonal catchments
                                 ),
                      checkboxGroupInput(inputId = "data_type", 
@@ -24,9 +27,25 @@ navbarPage("Covid-19: Wastewater Re",
                  ),
                  # Home: main panel ####
                  mainPanel(
-                     #plotOutput("raw") - changing now ####
                      tabPanel("Plot",
-                              fluidRow( plotOutput("plots")
+                              fluidRow( 
+                                  
+                                        #plotOutput("raw_plots") %>% withSpinner(color="#0dc5c1"),
+                                        div(
+                                            style = "position:relative",
+                                            plotOutput("raw_plots", 
+                                                       hover = hoverOpts("plot_hover_raw", delay = 10))%>% 
+                                                withSpinner(color="#0dc5c1"),
+                                            uiOutput("hover_info_raw")
+                                        ),
+                                        div(
+                                            style = "position:relative",
+                                            plotOutput("re_plots", 
+                                                       hover = hoverOpts("plot_hover_re", delay = 10))%>% 
+                                                withSpinner(color="#0dc5c1"),
+                                            uiOutput("hover_info_re")
+                                        )
+                                        
                                         )
                               )
                  )
@@ -70,7 +89,7 @@ navbarPage("Covid-19: Wastewater Re",
                           #br(),
                           h3("Links and further reading"), 
                           p(HTML(paste0("The method to estimate R",tags$sub("e"), " from wastewater is described ")),
-                            a(href = "https://github.com/JSHuisman/wastewaterRe", "here", .noWS = "outside"),
+                            a(href = "https://www.medrxiv.org/content/10.1101/2021.04.29.21255961v1.article-info", "here", .noWS = "outside"),
                             " and the code is available ", 
                             a(href = "https://github.com/JSHuisman/wastewaterRe", "here", .noWS = "outside"),
                             HTML(paste0(".", "<br>")),

@@ -16,7 +16,7 @@ source("helper_code/wastewater_functions.R")
 
 # Rww estimation for all regions - bootstrap, deconvolve, compute Re ####
 
-config_df = expand.grid("region" = c('ZH', 'VD'),   # add regions as they come
+config_df = expand.grid("region" = c('ZH', 'VD', 'SG', 'GR', 'FR', 'TI'),   # add regions as they come
                         'incidence_var' = c('norm_n1'),
                         'GammaParams' = list(c('incubation', 'benefield')) )
 

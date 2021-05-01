@@ -3,12 +3,10 @@ library(tidyverse)
 library(lubridate)
 library(patchwork) 
 library(viridis)
-library(EpiEstim)
 
 
 # cronjobs to do source work ####
 source("helper_code/reading_in.R") # 
-#source("helper_code/Rww_estimation.R") # will later no longer be needed
 
 # Reading in cantonal Re estimates ####
 
@@ -24,7 +22,7 @@ Restimates_canton <- read_csv(Restimates_url,
 
 Restimates_canton <- Restimates_canton %>% filter(estimate_type == 'Cori_slidingWindow',
                                                   data_type != 'Confirmed cases / tests',
-                                                  date >= as_date("2020-09-01")) %>%
+                                                  date >= as_date("2020-10-01")) %>%
   dplyr::select(-estimate_type, -countryIso3, -country, -source)
 
 
@@ -44,12 +42,13 @@ plotData <- Restimates_canton %>%
 # List of all raw ww plots.
 all_raw_plots <- list()
 
-date_range <- range((plotData %>% filter(data_type=="Wastewater") %>% select(date))[["date"]])
 
 #### Wastewater raw  - Zurich ####
 
 raw_plotter <- function(data = ww_data, canton) {
-  ww_data %>% filter(region == canton) %>% 
+  date_range <- range((plotData %>% filter(data_type=="Wastewater", region == canton) %>% select(date))[["date"]])
+  
+  ww_data %>% filter(region == canton) %>% mutate(n1 = n1/10^13) %>%
     ggplot( ) +
     geom_point(aes(x=date, y = n1, colour = name_orig)) +
     scale_x_date(limits = c(date_range[1], date_range[2]), 
@@ -58,9 +57,9 @@ raw_plotter <- function(data = ww_data, canton) {
                         labels = c('N1', 'Imputed'),
                         breaks = c('N1', 'Imputed'),
                         name = 'Reading') +
-    geom_line(data = ww_data %>% filter(region == canton) %>% filter(orig_data), 
+    geom_line(data = ww_data %>% filter(region == canton) %>% filter(orig_data)  %>% mutate(n1 = n1/10^13), 
               aes(x=date, y= n1,colour = name_orig), linetype = 'dashed', colour = "black") +
-    labs(x = 'Date' , y='Gene copies per day') +
+    labs(x = 'Date' , y=expression("Gene copies in wastewater ("%*%"10"^13*")")) +
     ggtitle(paste0("SARS-CoV2-RNA copies in ", canton," Wastewater")) +
     theme_minimal() +
     theme(strip.text = element_text(size=20),
@@ -78,6 +77,8 @@ raw_plotter <- function(data = ww_data, canton) {
 # Re plots ####
 
 re_plotter <- function(data = ww_data, source, canton) {
+  date_range <- range((plotData %>% filter(data_type=="Wastewater", region == canton) %>% select(date))[["date"]])
+  
   plotData %>% filter(region == canton) %>%
     filter(data_type %in% source) %>%
     ggplot() +
