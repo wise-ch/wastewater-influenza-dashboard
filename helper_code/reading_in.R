@@ -15,6 +15,7 @@ ww_read_in <- function(data_url, region) {
                          skip = 1)
   
   new_case_data <- raw_data %>% select(date, cases, cases_smooth) %>%
+                    mutate(across(where(is.numeric), ~ zoo::na.approx(.x, na.rm = F) )) %>%
                      mutate(region = region)
     
                     
