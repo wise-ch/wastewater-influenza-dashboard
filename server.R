@@ -2,7 +2,7 @@ library(shiny)
 
 function(input, output) {
     
-    # also keeps track of reactivity - re-computes when input changes
+    # keeps track of reactivity - re-computes when input changes
     # use input values when you make your output. Access with $ and Id
     # this value changes as the input bar/slider/button changes. Reactive.
     # Plotting cases -------
