@@ -28,35 +28,33 @@ navbarPage("Covid-19: Wastewater Re",
                  ),
                  # Home: main panel ####
                  mainPanel(
-                     #tabPanel("Plot",
-                              fluidRow( 
-                                        div(
-                                            style = "position:relative",
-                                            plotOutput("case_plots", height = "300px", width = "800px",
-                                                       hover = hoverOpts("plot_hover_case", delay = 10))%>% 
-                                                withSpinner(color="#0dc5c1"),
-                                            uiOutput("hover_info_case")
-                                        ),
-                                        div(
-                                            style = "position:relative",
-                                            plotOutput("raw_plots", height = "300px", width = "800px",
-                                                       hover = hoverOpts("plot_hover_raw", delay = 10))%>% 
-                                                withSpinner(color="#0dc5c1"),
-                                            uiOutput("hover_info_raw")
-                                        ),
-                                        div(
-                                            style = "position:relative",
-                                            plotOutput("re_plots", height = "300px", width = "800px",
-                                                       hover = hoverOpts("plot_hover_re", delay = 10))%>% 
-                                                withSpinner(color="#0dc5c1"),
-                                            uiOutput("hover_info_re")
-                                        )
-                                        
-                                        )
-                              )
-                 #)
-             )
-    ),
+                        fluidRow( 
+                         div(
+                             style = "position:relative",
+                             plotOutput("case_plots", height = "300px", width = "800px",
+                                        hover = hoverOpts("plot_hover_case", delay = 10))%>% 
+                                 withSpinner(color="#0dc5c1"),
+                             uiOutput("hover_info_case")
+                         ),
+                         div(
+                             style = "position:relative",
+                             plotOutput("raw_plots", height = "300px", width = "800px",
+                                        hover = hoverOpts("plot_hover_raw", delay = 10))%>% 
+                                 withSpinner(color="#0dc5c1"),
+                             uiOutput("hover_info_raw")
+                         ),
+                         div(
+                             style = "position:relative",
+                             plotOutput("re_plots", height = "300px", width = "800px",
+                                        hover = hoverOpts("plot_hover_re", delay = 10))%>% 
+                                 withSpinner(color="#0dc5c1"),
+                             uiOutput("hover_info_re")
+                         )
+                         
+                     ) # fluid row
+                 ) # main panel
+             ) # Sidebar layout
+    ), # Home panel
     # About ####
     tabPanel("About",
              fluidRow(column(
@@ -114,8 +112,6 @@ navbarPage("Covid-19: Wastewater Re",
              
              
              hr()
-    
-             
              
         )
     )

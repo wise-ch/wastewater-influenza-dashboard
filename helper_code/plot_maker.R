@@ -45,7 +45,7 @@ plotData <- plotData %>%
 # Raw plots ####
 
 case_plotter <- function(data, canton) {
-  date_range <- range((plotData %>% filter(data_type=="Wastewater", region == canton) %>% select(date))[["date"]])
+  date_range <- range((ww_data %>% filter(region == canton) %>% select(date))[["date"]])
   ref <- c("ZH"="Zurich" ,  "VD"="Lausanne",
            "SG"="Altenrhein", "GR"="Chur",
            "FR"="Laupen", "TI"="Lugano")
@@ -68,7 +68,7 @@ case_plotter <- function(data, canton) {
 }
 
 raw_plotter <- function(data, canton) {
-  date_range <- range((plotData %>% filter(data_type=="Wastewater", region == canton) %>% select(date))[["date"]])
+  date_range <- range((ww_data %>% filter(region == canton) %>% select(date))[["date"]])
   ref <- c("ZH"="Zurich" ,  "VD"="Lausanne",
             "SG"="Altenrhein", "GR"="Chur",
            "FR"="Laupen", "TI"="Lugano")
@@ -101,7 +101,7 @@ raw_plotter <- function(data, canton) {
 # Re plots ####
 
 re_plotter <- function(source, canton) {
-  date_range <- range((plotData %>% filter(data_type=="Wastewater", region == canton) %>% select(date))[["date"]])
+  date_range <- range((ww_data %>% filter(region == canton) %>% select(date))[["date"]])
   
   plotData %>% filter(region == canton) %>%
     filter(data_type %in% source) %>%
