@@ -27,9 +27,10 @@ Restimates_canton <- Restimates_canton %>% filter(estimate_type == 'Cori_sliding
 
 
 
-# Reading in cantonal Rww estimates ####
+# Reading in cantonal Rww and catchment Rcc estimates ####
 
 Re_ww_needed <- read_csv("rww_data/Rww_cantonal.csv")
+Re_cc_needed <- read_csv("rww_data/Rcc_catchment.csv")
 
 # Binding the Re and Rww estimates ####
 
@@ -37,18 +38,41 @@ plotData <- Restimates_canton %>%
   bind_rows(Re_ww_needed) %>% mutate(data_type = factor(data_type)) %>% # the rww binded
   mutate(data_type = recode_factor(data_type, "infection_norm_n1" = "Wastewater"))
 
+plotData <- plotData %>%
+  bind_rows(Re_cc_needed) %>% mutate(data_type = factor(data_type)) %>% # the rww binded
+  mutate(data_type = recode_factor(data_type, "infection_cases" = "Confirmed (Catchment)"))
+
 # Raw plots ####
 
-# List of all raw ww plots.
-all_raw_plots <- list()
-
-
-#### Wastewater raw  - Zurich ####
-
-raw_plotter <- function(data = ww_data, canton) {
+case_plotter <- function(data, canton) {
   date_range <- range((plotData %>% filter(data_type=="Wastewater", region == canton) %>% select(date))[["date"]])
-  
-  ww_data %>% filter(region == canton) %>% mutate(n1 = n1/10^13) %>%
+  ref <- c("ZH"="Zurich" ,  "VD"="Lausanne",
+           "SG"="Altenrhein", "GR"="Chur",
+           "FR"="Laupen", "TI"="Lugano")
+  data %>% filter(region == canton) %>% 
+    ggplot(aes(x=date, y = cases) ) +
+    geom_bar(stat="identity", colour = viridis(4)[1], fill = viridis(4)[1], alpha = 0.7) +
+    scale_x_date(limits = c(date_range[1], date_range[2]), 
+                 date_breaks = "months", date_labels = "%b") +
+    labs(x = 'Date' , y=expression("Confirmed Cases")) +
+    ggtitle(paste0("Confirmed Cases in ", ref[[canton]], " Catchment Area")) +
+    theme_minimal() +
+    theme(strip.text = element_text(size=20),
+          axis.text= element_text(size=17),
+          axis.title =  element_text(size=20),
+          legend.text= element_text(size=17),
+          legend.title= element_text(size=20),
+          plot.title = element_text(size = 20),
+          panel.spacing.y = unit(2, "lines"),
+          legend.position = 'bottom')
+}
+
+raw_plotter <- function(data, canton) {
+  date_range <- range((plotData %>% filter(data_type=="Wastewater", region == canton) %>% select(date))[["date"]])
+  ref <- c("ZH"="Zurich" ,  "VD"="Lausanne",
+            "SG"="Altenrhein", "GR"="Chur",
+           "FR"="Laupen", "TI"="Lugano")
+  data %>% filter(region == canton) %>% mutate(n1 = n1/10^13) %>%
     ggplot( ) +
     geom_point(aes(x=date, y = n1, colour = name_orig)) +
     scale_x_date(limits = c(date_range[1], date_range[2]), 
@@ -57,10 +81,10 @@ raw_plotter <- function(data = ww_data, canton) {
                         labels = c('N1', 'Imputed'),
                         breaks = c('N1', 'Imputed'),
                         name = 'Reading') +
-    geom_line(data = ww_data %>% filter(region == canton) %>% filter(orig_data)  %>% mutate(n1 = n1/10^13), 
+    geom_line(data = data %>% filter(region == canton) %>% filter(orig_data)  %>% mutate(n1 = n1/10^13), 
               aes(x=date, y= n1,colour = name_orig), linetype = 'dashed', colour = "black") +
-    labs(x = 'Date' , y=expression("Gene copies in wastewater ("%*%"10"^13*")")) +
-    ggtitle(paste0("SARS-CoV2-RNA copies in ", canton," Wastewater")) +
+    labs(x = 'Date' , y=expression("Gene copies ("%*%"10"^13*")")) +
+    ggtitle(paste0("SARS-CoV2-RNA copies in Wastewater in ", ref[[canton]])) +
     theme_minimal() +
     theme(strip.text = element_text(size=20),
           axis.text= element_text(size=17),
@@ -76,7 +100,7 @@ raw_plotter <- function(data = ww_data, canton) {
 
 # Re plots ####
 
-re_plotter <- function(data = ww_data, source, canton) {
+re_plotter <- function(source, canton) {
   date_range <- range((plotData %>% filter(data_type=="Wastewater", region == canton) %>% select(date))[["date"]])
   
   plotData %>% filter(region == canton) %>%
@@ -88,12 +112,16 @@ re_plotter <- function(data = ww_data, source, canton) {
                     ymax = median_R_highHPD, fill = data_type),
                 alpha = 0.2, show.legend = F) +
     geom_hline(yintercept = 1) +
-    scale_colour_manual(values = c(viridis(4)), #'lightseagreen'
-                        labels = c('Wastewater', 'Confirmed cases', 'Deaths', 'Hospitalized patients'),
-                        breaks = c('Wastewater', 'Confirmed cases', 'Deaths', 'Hospitalized patients')) +
-    scale_fill_manual(values = c(viridis(4)), #'lightseagreen'
-                       labels = c('Wastewater', 'Confirmed cases', 'Deaths', 'Hospitalized patients'),
-                       breaks = c('Wastewater', 'Confirmed cases', 'Deaths', 'Hospitalized patients')) +
+    scale_colour_manual(values = viridis(5)[c(1, 4, 5, 3, 2)], #'lightseagreen'
+                        labels = c('Wastewater', 'Confirmed (Catchment)', 'Confirmed cases', 
+                                   'Deaths', 'Hospitalized patients'),
+                        breaks = c('Wastewater', 'Confirmed (Catchment)','Confirmed cases', 
+                                   'Deaths', 'Hospitalized patients')) +
+    scale_fill_manual(values = viridis(5)[c(1, 4, 5, 3, 2)], #'lightseagreen'
+                       labels = c('Wastewater', 'Confirmed (Catchment)', 'Confirmed cases', 
+                                  'Deaths', 'Hospitalized patients'),
+                       breaks = c('Wastewater', 'Confirmed (Catchment)', 'Confirmed cases', 
+                                  'Deaths', 'Hospitalized patients')) +
     scale_x_date(limits = c(date_range[1], date_range[2]), 
                  date_breaks = "months", date_labels = "%b") +
     coord_cartesian(ylim = c(0, 2)) +

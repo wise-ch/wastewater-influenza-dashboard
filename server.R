@@ -28,7 +28,41 @@ function(input, output) {
     #         #re_plotly
     #     }#, height = 600 # not sure if good idea to fix height.
     # )
-
+    output$case_plots <- renderPlot(
+        {
+            # from all the case plots, it picks region
+            # as per drop down menu
+            case <- case_plotter(ww_data, input$region)
+            #re <- re_plotter(ww_data, input$data_type, input$region)
+            case #+ re + plot_layout(ncol = 1)
+            
+        }
+    )
+    
+    output$hover_info_case <- renderUI({
+        hover_case <- input$plot_hover_case
+        point <- nearPoints(ww_data %>% filter(region == input$region),
+                            hover_case, threshold = 4, maxpoints = 1, addDist = TRUE)
+        if (nrow(point) == 0) return(NULL)
+        
+        left_px <- hover_case$coords_css$x
+        top_px <- hover_case$coords_css$y
+        
+        # create style property fot tooltip
+        # background color is set so tooltip is a bit transparent
+        # z-index is set so we are sure are tooltip will be on top
+        style <- paste0("position:absolute; z-index:100; background-color: rgba(245, 245, 245, 0.9); ",
+                        "left:", left_px+2, "px; top:", top_px+2, "px;")
+        
+        # actual tooltip created as wellPanel
+        wellPanel(
+            style = style,
+            p(HTML(paste0("<i>", point$date, "</i>", "<br/>",
+                          "<b> Confirmed cases</b>: ", round(point$cases, 2), "<br/>")))
+        )
+    })
+    
+    
     output$raw_plots <- renderPlot(
         {
             # from all the raw plots, it picks region
@@ -68,7 +102,7 @@ function(input, output) {
             # from all the raw plots, it picks region
             # as per drop down menu
             #raw <- raw_plotter(ww_data, input$region)
-            re <- re_plotter(ww_data, input$data_type, input$region)
+            re <- re_plotter(input$data_type, input$region)
             #raw + re + plot_layout(ncol = 1)
             re
 

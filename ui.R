@@ -20,6 +20,7 @@ navbarPage("Covid-19: Wastewater Re",
                      checkboxGroupInput(inputId = "data_type", 
                                         label = "Data Source (select to compare):",
                                         choices = c("Wastewater" = "Wastewater",
+                                          "Confirmed (Catchment)" = "Confirmed (Catchment)",
                                           "Confirmed cases" = "Confirmed cases",
                                           "Deaths" = "Deaths",
                                           "Hospitalized patients"= "Hospitalized patients"),
@@ -27,20 +28,25 @@ navbarPage("Covid-19: Wastewater Re",
                  ),
                  # Home: main panel ####
                  mainPanel(
-                     tabPanel("Plot",
+                     #tabPanel("Plot",
                               fluidRow( 
-                                  
-                                        #plotOutput("raw_plots") %>% withSpinner(color="#0dc5c1"),
                                         div(
                                             style = "position:relative",
-                                            plotOutput("raw_plots", 
+                                            plotOutput("case_plots", height = "300px", width = "800px",
+                                                       hover = hoverOpts("plot_hover_case", delay = 10))%>% 
+                                                withSpinner(color="#0dc5c1"),
+                                            uiOutput("hover_info_case")
+                                        ),
+                                        div(
+                                            style = "position:relative",
+                                            plotOutput("raw_plots", height = "300px", width = "800px",
                                                        hover = hoverOpts("plot_hover_raw", delay = 10))%>% 
                                                 withSpinner(color="#0dc5c1"),
                                             uiOutput("hover_info_raw")
                                         ),
                                         div(
                                             style = "position:relative",
-                                            plotOutput("re_plots", 
+                                            plotOutput("re_plots", height = "300px", width = "800px",
                                                        hover = hoverOpts("plot_hover_re", delay = 10))%>% 
                                                 withSpinner(color="#0dc5c1"),
                                             uiOutput("hover_info_re")
@@ -48,7 +54,7 @@ navbarPage("Covid-19: Wastewater Re",
                                         
                                         )
                               )
-                 )
+                 #)
              )
     ),
     # About ####
