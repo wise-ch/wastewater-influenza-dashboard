@@ -71,7 +71,7 @@ Re_cc <- data.frame()
 
 for(row_i in 1:nrow(config_df_cc)){
   # for confirmed cases
-  new_deconv_data = deconvolveIncidence(ww_data %>% 
+  new_deconv_data = deconvolveIncidence(case_data %>% 
                                           filter(region == config_df_cc[row_i, 'region']), 
                                         incidence_var = config_df_cc[row_i, 'incidence_var'],
                                         getCountParams(unlist(config_df_cc[row_i, 'GammaParams'])[1]), 

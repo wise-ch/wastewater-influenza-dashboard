@@ -10,14 +10,14 @@ function(input, output) {
         {
             # from all the case plots, it picks region
             # as per drop down menu
-            case <- case_plotter(ww_data, input$region)
+            case <- case_plotter(case_data, input$region)
             case 
         }
     )
     # Hover info
     output$hover_info_case <- renderUI({
         hover_case <- input$plot_hover_case
-        point <- nearPoints(ww_data %>% filter(region == input$region),
+        point <- nearPoints(case_data %>% filter(region == input$region),
                             hover_case, threshold = 4, maxpoints = 1, addDist = TRUE)
         if (nrow(point) == 0) return(NULL)
         

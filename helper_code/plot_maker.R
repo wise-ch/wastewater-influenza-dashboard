@@ -44,7 +44,7 @@ plotData <- plotData %>%
 
 # Raw plots ####
 
-case_plotter <- function(data, canton) {
+case_plotter <- function(data = case_data, canton) {
   date_range <- range((ww_data %>% filter(region == canton) %>% select(date))[["date"]])
   ref <- c("ZH"="Zurich" ,  "VD"="Lausanne",
            "SG"="Altenrhein", "GR"="Chur",
@@ -52,7 +52,7 @@ case_plotter <- function(data, canton) {
   data %>% filter(region == canton) %>% 
     ggplot(aes(x=date, y = cases) ) +
     geom_bar(stat="identity", colour = viridis(4)[1], fill = viridis(4)[1], alpha = 0.7) +
-    scale_x_date(limits = c(date_range[1], date_range[2]), 
+    scale_x_date(limits = c(date_range[1], today()), 
                  date_breaks = "months", date_labels = "%b") +
     labs(x = 'Date' , y=expression("Confirmed Cases")) +
     ggtitle(paste0("Confirmed Cases in ", ref[[canton]], " Catchment Area")) +
@@ -75,7 +75,7 @@ raw_plotter <- function(data, canton) {
   data %>% filter(region == canton) %>% mutate(n1 = n1/10^13) %>%
     ggplot( ) +
     geom_point(aes(x=date, y = n1, colour = name_orig)) +
-    scale_x_date(limits = c(date_range[1], date_range[2]), 
+    scale_x_date(limits = c(date_range[1], today()), 
                  date_breaks = "months", date_labels = "%b") +
     scale_colour_manual(values = c(viridis(4)[1], "grey"), #'lightseagreen'
                         labels = c('N1', 'Imputed'),
@@ -122,7 +122,7 @@ re_plotter <- function(source, canton) {
                                   'Deaths', 'Hospitalized patients'),
                        breaks = c('Wastewater', 'Confirmed (Catchment)', 'Confirmed cases', 
                                   'Deaths', 'Hospitalized patients')) +
-    scale_x_date(limits = c(date_range[1], date_range[2]), 
+    scale_x_date(limits = c(date_range[1], today()), 
                  date_breaks = "months", date_labels = "%b") +
     coord_cartesian(ylim = c(0, 2)) +
     labs( x = 'Date', y = expression("Estimated R"["e"]),
