@@ -54,8 +54,8 @@ case_plotter <- function(data = case_data, canton) {
     geom_bar(stat="identity", colour = viridis(4)[1], fill = viridis(4)[1], alpha = 0.7) +
     scale_x_date(limits = c(date_range[1], Sys.Date()), 
                  date_breaks = "months", date_labels = "%b") +
-    labs(x = 'Date' , y=expression("Confirmed Cases")) +
-    ggtitle(paste0("Confirmed Cases in ", ref[[canton]], " Catchment Area")) +
+    labs(x = 'Date' , y=expression("Cases/100 000 residents")) +
+    ggtitle(paste0("Confirmed Cases per 100 000 residents in ", ref[[canton]], "'s Catchment Area")) +
     theme_minimal() +
     theme(strip.text = element_text(size=20),
           axis.text= element_text(size=17),
@@ -68,19 +68,28 @@ case_plotter <- function(data = case_data, canton) {
 }
 
 raw_plotter <- function(data, canton) {
+  n <- ww_data %>% filter(region==canton) %>% 
+    group_by(quantification_flag) %>% tally() %>% nrow()
+  
+  
+  
   date_range <- range((ww_data %>% filter(region == canton) %>% select(date))[["date"]])
   ref <- c("ZH"="Zurich" ,  "VD"="Lausanne",
             "SG"="Altenrhein", "GR"="Chur",
            "FR"="Laupen", "TI"="Lugano")
   data %>% filter(region == canton) %>% mutate(n1 = n1/10^13) %>%
     ggplot( ) +
-    geom_point(aes(x=date, y = n1, colour = name_orig)) +
+    geom_point(aes(x=date, y = n1, colour = quantification_flag)) +
     scale_x_date(limits = c(date_range[1], Sys.Date()), 
                  date_breaks = "months", date_labels = "%b") +
-    scale_colour_manual(values = c(viridis(4)[1], "grey"), #'lightseagreen'
-                        labels = c('N1', 'Imputed'),
-                        breaks = c('N1', 'Imputed'),
+    scale_colour_manual(values = c(viridis(4)[1], 'darkgrey', 'firebrick', viridis(5)[5]), #'lightseagreen'
+                        labels = c('> LOQ', 'Imputed', '> LOD', '< LOD'),
+                        breaks = c('> LOQ', 'Imputed', '> LOD', '< LOD'),
                         name = 'Reading') +
+    #scale_shape_manual(values = c(1, 19, 10, 19), #'lightseagreen'
+    #                    labels = c('> LOD', 'Imputed', '< LOD', '> LOQ'),
+    #                    breaks = c('D', 'Imputed', 'N', 'Q'),
+    #                    name = 'Quantification') +
     geom_line(data = data %>% filter(region == canton) %>% filter(orig_data)  %>% mutate(n1 = n1/10^13), 
               aes(x=date, y= n1,colour = name_orig), linetype = 'dashed', colour = "black") +
     labs(x = 'Date' , y=expression("Gene copies ("%*%"10"^13*")")) +
@@ -128,7 +137,7 @@ re_plotter <- function(source, canton) {
     labs( x = 'Date', y = expression("Estimated R"["e"]),
           colour = 'Source', fill = 'Source') +
     guides(color = guide_legend(override.aes = list(size=5))) + 
-    ggtitle(expression("Estimated R"["e"]*" using different data sources")) + 
+    ggtitle(expression("Estimated R"["e"]*" using Different Data Sources")) + 
     theme_minimal() +
     theme(strip.text = element_text(size=20),
           axis.text= element_text(size=17),

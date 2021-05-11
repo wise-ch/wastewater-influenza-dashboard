@@ -11,7 +11,8 @@ navbarPage("Covid-19: Wastewater Re",
              sidebarLayout(
                  sidebarPanel(
                      selectInput(inputId = "region", label = "Select wastewater treatment plant:",
-                                choices = c("Zurich" = "ZH", "Lausanne" = "VD",
+                                choices = c("Zurich" = "ZH", 
+                                            #"Lausanne" = "VD",
                                             "Altenrhein" = "SG", "Chur" = "GR",
                                             "Laupen" = "FR", "Lugano" = "TI"
                                             ), # ask about these two cantonal catchments

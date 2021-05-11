@@ -25,7 +25,10 @@ ww_read_in <- function(data_url, region) {
     mutate(across(where(is.numeric), ~ zoo::na.approx(.x, na.rm = F) )) %>%
     mutate(region = region) %>% 
     mutate(norm_n1 = n1/min(n1)) %>%# normalise! 
-    mutate(name_orig = ifelse(!is.na(orig_data), 'N1', 'Imputed')) %>% select(-cases, -cases_smooth)
+    mutate(name_orig = ifelse(!is.na(orig_data), 'N1', 'Imputed')) %>% 
+    select(-cases, -cases_smooth) %>%
+    mutate(quantification_flag = replace_na(quantification_flag, "Imputed")) %>%
+    mutate(quantification_flag = recode(quantification_flag, Q = '> LOQ', D = '> LOD', N = '< LOD'))
   
   list(ww = new_ww_data, case = new_case_data)
 }
