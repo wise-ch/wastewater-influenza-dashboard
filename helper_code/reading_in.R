@@ -53,7 +53,7 @@ all_data <- ww_read_in(GR_url, "GR")
 ww_data <- bind_rows(ww_data, all_data[["ww"]])
 case_data <- bind_rows(case_data, all_data[["case"]])
 
-FR_url = "https://sensors-eawag.ch/sars/__data__/processed_normed_data_chur.csv"
+FR_url = "https://sensors-eawag.ch/sars/__data__/processed_normed_data_laupen.csv"
 all_data <- ww_read_in(FR_url,  "FR")
 ww_data <- bind_rows(ww_data, all_data[["ww"]])
 case_data <- bind_rows(case_data, all_data[["case"]])

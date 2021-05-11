@@ -3,7 +3,6 @@ library(plotly)
 library(shinycssloaders)
 source("helper_code/plot_maker.R")
 
-#### Define UI ####
 navbarPage("Covid-19: Wastewater Re",
     # a page with a navigation bar
     # HOME ####
