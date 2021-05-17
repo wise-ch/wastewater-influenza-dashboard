@@ -92,7 +92,56 @@ function(input, output) {
                           "<b> R<sub>e</sub>: </b>", round(point$median_R_mean, 2), 
                           " (", round(point$median_R_lowHPD, 2),", ", round(point$median_R_highHPD, 2), ")",
                           "<br/>",
-                          "(", point$data_type, ")")))
+                          "<i>(", point$data_type, ")</i>")))
         )
+    })
+    
+    # plotting all Rww ---------
+    # Plotting Rww+Re for other sources --------
+    output$rww_plots <- renderPlot(
+        {
+            rww <- rww_plotter(canton = input$canton)
+            rww
+        }
+    )
+    
+    output$hover_info_rww <- renderUI({
+        ref <- c("ZH"="Zurich" ,  "VD"="Lausanne",
+                 "SG"="Altenrhein", "GR"="Chur",
+                 "FR"="Laupen", "TI"="Lugano")
+        hover <- input$plot_hover
+        point <- nearPoints(plotData %>% filter(region %in% input$canton) %>%
+                                filter(data_type %in% input$data_type), hover, threshold = 5, maxpoints = 1, addDist = TRUE)
+        if (nrow(point) == 0) return(NULL)
+        
+        left_px <- hover$coords_css$x
+        top_px <- hover$coords_css$y
+        
+        style <- paste0("position:absolute; z-index:100; background-color: rgba(245, 245, 245, 0.9); ",
+                        "left:", left_px+2, "px; top:", top_px+2, "px;")
+        
+        # actual tooltip created as wellPanel
+        wellPanel(
+            style = style,
+            p(HTML(paste0("<i>", point$date, "</i>", "<br/>",
+                          "<b> R<sub>e</sub>: </b>", round(point$median_R_mean, 2), 
+                          " (", round(point$median_R_lowHPD, 2),", ", round(point$median_R_highHPD, 2), ")",
+                          "<br/>",
+                          "<i>(", ref[[point$region]], ")</i>")))
+        )
+    })
+    
+    # text: link to respective EAWAG page
+    output$link <- renderUI({
+        str1 <- p("The raw measurements of SARS-CoV-2 in wastewater are available ",
+                  a(href = paste0("https://sensors-eawag.ch/sars/",tolower(ref[[input$region]]),".html"), "here", .noWS = "outside"),
+                  ".",
+                  .noWS = c("after-begin", "before-end"))
+        
+        str2 <- p('*The estimated R',tags$sub('e'), ' for confirmed cases in the catchment area for Chur is 
+                            currently not shown due to a potential data quality issue.')
+
+        if (input$region == 'GR') HTML(paste(str1, str2, sep = ""))
+        else str1
     })
 }

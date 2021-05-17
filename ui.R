@@ -1,12 +1,12 @@
 library(shiny)
-library(plotly)
+#library(plotly)
 library(shinycssloaders)
 source("helper_code/plot_maker.R")
 
 navbarPage("Covid-19: Wastewater Re",
     # a page with a navigation bar
     # HOME ####
-    tabPanel("Home",
+    tabPanel("Cantonal",
              # in the sidebar dropdown, you can pick region
              sidebarLayout(
                  sidebarPanel(
@@ -24,37 +24,66 @@ navbarPage("Covid-19: Wastewater Re",
                                           "Confirmed cases" = "Confirmed cases",
                                           "Deaths" = "Deaths",
                                           "Hospitalized patients"= "Hospitalized patients"),
-                                        selected = "Wastewater")
+                                        selected = "Wastewater"),
+                     width = 3
                  ),
                  # Home: main panel ####
                  mainPanel(
                         fluidRow( 
                          div(
                              style = "position:relative",
-                             plotOutput("case_plots", height = "300px", width = "800px",
+                             plotOutput("case_plots", height = "260px", width = "900px",
                                         hover = hoverOpts("plot_hover_case", delay = 10))%>% 
                                  withSpinner(color="#0dc5c1"),
                              uiOutput("hover_info_case")
                          ),
                          div(
                              style = "position:relative",
-                             plotOutput("raw_plots", height = "300px", width = "800px",
+                             plotOutput("raw_plots", height = "270px", width = "900px",
                                         hover = hoverOpts("plot_hover_raw", delay = 10))%>% 
                                  withSpinner(color="#0dc5c1"),
                              uiOutput("hover_info_raw")
                          ),
                          div(
                              style = "position:relative",
-                             plotOutput("re_plots", height = "300px", width = "800px",
+                             plotOutput("re_plots", height = "270px", width = "900px",
                                         hover = hoverOpts("plot_hover_re", delay = 10))%>% 
                                  withSpinner(color="#0dc5c1"),
                              uiOutput("hover_info_re")
-                         )
+                         ),
+                         htmlOutput("link")
                          
                      ) # fluid row
                  ) # main panel
              ) # Sidebar layout
     ), # Home panel
+    tabPanel("Switzerland",
+             sidebarLayout(
+                 sidebarPanel( 
+                     checkboxGroupInput(inputId = "canton", 
+                                        label = "Canton (select to compare):",
+                                        choices = c("Zurich" = "ZH", 
+                                                    #"Lausanne" = "VD",
+                                                    "Altenrhein" = "SG", "Chur" = "GR",
+                                                    "Laupen" = "FR", "Lugano" = "TI"),
+                                        selected = c('ZH', 'SG', 'GR',
+                                                     'FR', 'TI')),
+                     width = 3
+                 ),
+             mainPanel(
+                 fluidRow( 
+                     div(
+                         style = "position:relative",
+                         plotOutput("rww_plots", height = "400px", width = "980px",
+                                    hover = hoverOpts("plot_hover", delay = 10))%>%
+                             withSpinner(color="#0dc5c1"),
+                         uiOutput("hover_info_rww")
+                     )
+                 ) # fluid row
+             )
+        )     
+        
+    ),
     # About ####
     tabPanel("About",
              fluidRow(column(
