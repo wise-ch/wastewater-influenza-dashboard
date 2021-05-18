@@ -97,7 +97,7 @@ function(input, output) {
                 filter(data_type == "Confirmed (Canton)") %>%
                 mutate(data_type = recode_factor(data_type, 'Confirmed (Canton)' = 'Confirmed (Fribourg)'))
             
-            new_data <- plotData %>% filter(region %in% canton) %>%
+            new_data <- plotData %>% filter(region %in% c("BE", "FR")) %>%
                 filter(data_type %in% source_without_canton)
             
             if (length(source_canton)>0) {

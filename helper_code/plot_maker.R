@@ -168,7 +168,7 @@ re_plotter <- function(source, canton) {
              label = disc, 
              x = summary(date_range)[['3rd Qu.']], y = 0.1, hjust = 0.5, vjust = 1, size = 4)
 }
-
+# special plot for Chur - 2 cantons ------
 re_plotter2 <- function(source, canton) {
   date_range <- range((ww_data %>% filter(region %in% canton) %>% select(date))[["date"]])
   canton <- c("BE", "FR")
