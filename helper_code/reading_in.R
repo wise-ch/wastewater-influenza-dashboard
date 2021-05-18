@@ -30,6 +30,11 @@ ww_read_in <- function(data_url, region) {
     mutate(quantification_flag = replace_na(quantification_flag, "Imputed")) %>%
     mutate(quantification_flag = recode(quantification_flag, Q = '> LOQ', D = '> LOD', N = '< LOD'))
   
+  if (region == "TI" | region == "GR") {
+    new_ww_data <- new_ww_data %>%
+      filter(date >= as.Date('2021-03-08'))
+  }
+  
   list(ww = new_ww_data, case = new_case_data)
 }
 

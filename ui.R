@@ -1,5 +1,5 @@
 library(shiny)
-#library(plotly)
+library(shinyjs)
 library(shinycssloaders)
 source("helper_code/plot_maker.R")
 
@@ -7,7 +7,7 @@ navbarPage("Covid-19: Wastewater Re",
     # a page with a navigation bar
     # HOME ####
     tabPanel("Cantonal",
-             # in the sidebar dropdown, you can pick region
+             # in the sidebar dropdown --------
              sidebarLayout(
                  sidebarPanel(
                      selectInput(inputId = "region", label = "Select wastewater treatment plant:",
@@ -17,14 +17,25 @@ navbarPage("Covid-19: Wastewater Re",
                                             "Laupen" = "FR", "Lugano" = "TI"
                                             ), # ask about these two cantonal catchments
                                 ),
+                     shinyjs::useShinyjs(),
                      checkboxGroupInput(inputId = "data_type", 
                                         label = "Data Source (select to compare):",
                                         choices = c("Wastewater" = "Wastewater",
                                           "Confirmed cases (in catchment area)" = "Confirmed (Catchment)",
-                                          "Confirmed cases (in canton)" = "Confirmed (Canton)",
-                                          "Deaths" = "Deaths",
-                                          "Hospitalized patients"= "Hospitalized patients"),
+                                          "Confirmed cases (in canton)" = "Confirmed (Canton)"),
+                                          #"Deaths" = "Deaths",
+                                          #"Hospitalized patients"= "Hospitalized patients"),
                                         selected = "Wastewater"),
+                     # if we would like deaths and hospitalised patients, comment out next chunk and 
+                     # include back in checkboxGroupInput
+                     disabled(checkboxGroupInput(inputId = "data_type_disabled",
+                                                 label = NULL,
+                                                 choices = c("Deaths*" = "Deaths",
+                                                             "Hospitalized patients*"= 
+                                                                 "Hospitalized patients"))),
+                     p(HTML(paste0('*The R',tags$sub('e'),' for hospitalised patients and deaths are 
+                                   currently not displayed due to low incidence resulting in 
+                                   large confidence intervals and reducing usefulness.'))),
                      p(HTML(paste0(strong('NB: '),"The R",tags$sub('e'), " for wastewater is based on data for the 
                                    sewer shed and R",tags$sub('e')," based on confirmed cases 
                                    from the catchment area reflects this. All other R",tags$sub('e')," 
@@ -52,7 +63,7 @@ navbarPage("Covid-19: Wastewater Re",
                          ),
                          div(
                              style = "position:relative",
-                             plotOutput("re_plots", height = "255px", width = "900px",
+                             plotOutput("re_plots", height = "260px", width = "900px",
                                         hover = hoverOpts("plot_hover_re", delay = 10))%>% 
                                  withSpinner(color="#0dc5c1"),
                              uiOutput("hover_info_re")
