@@ -20,11 +20,17 @@ navbarPage("Covid-19: Wastewater Re",
                      checkboxGroupInput(inputId = "data_type", 
                                         label = "Data Source (select to compare):",
                                         choices = c("Wastewater" = "Wastewater",
-                                          "Confirmed (Catchment)" = "Confirmed (Catchment)",
-                                          "Confirmed cases" = "Confirmed cases",
+                                          "Confirmed cases (in catchment area)" = "Confirmed (Catchment)",
+                                          "Confirmed cases (in canton)" = "Confirmed (Canton)",
                                           "Deaths" = "Deaths",
                                           "Hospitalized patients"= "Hospitalized patients"),
                                         selected = "Wastewater"),
+                     p(HTML(paste0(strong('NB: '),"The R",tags$sub('e'), " for wastewater is based on data for the 
+                                   sewer shed and R",tags$sub('e')," based on confirmed cases 
+                                   from the catchment area reflects this. All other R",tags$sub('e')," 
+                                   traces show the cantonal results, so there may be some dissonance. 
+                                   For instance, Zurich canton is about 3.4 times the size of its sewer shed, 
+                                   Werdhölzli."))), 
                      width = 3
                  ),
                  # Home: main panel ####
@@ -32,21 +38,21 @@ navbarPage("Covid-19: Wastewater Re",
                         fluidRow( 
                          div(
                              style = "position:relative",
-                             plotOutput("case_plots", height = "260px", width = "900px",
+                             plotOutput("case_plots", height = "250px", width = "900px",
                                         hover = hoverOpts("plot_hover_case", delay = 10))%>% 
                                  withSpinner(color="#0dc5c1"),
                              uiOutput("hover_info_case")
                          ),
                          div(
                              style = "position:relative",
-                             plotOutput("raw_plots", height = "270px", width = "900px",
+                             plotOutput("raw_plots", height = "255px", width = "900px",
                                         hover = hoverOpts("plot_hover_raw", delay = 10))%>% 
                                  withSpinner(color="#0dc5c1"),
                              uiOutput("hover_info_raw")
                          ),
                          div(
                              style = "position:relative",
-                             plotOutput("re_plots", height = "270px", width = "900px",
+                             plotOutput("re_plots", height = "255px", width = "900px",
                                         hover = hoverOpts("plot_hover_re", delay = 10))%>% 
                                  withSpinner(color="#0dc5c1"),
                              uiOutput("hover_info_re")

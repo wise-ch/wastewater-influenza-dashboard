@@ -131,17 +131,20 @@ function(input, output) {
         )
     })
     
-    # text: link to respective EAWAG page
+    # text: link to respective EAWAG page---------
     output$link <- renderUI({
         str1 <- p("The raw measurements of SARS-CoV-2 in wastewater are available ",
                   a(href = paste0("https://sensors-eawag.ch/sars/",tolower(ref[[input$region]]),".html"), "here", .noWS = "outside"),
                   ".",
-                  .noWS = c("after-begin", "before-end"))
+                  .noWS = c("after-begin", "before-end"), style="margin-bottom:0;")
         
         str2 <- p('*The estimated R',tags$sub('e'), ' for confirmed cases in the catchment area for Chur is 
-                            currently not shown due to a potential data quality issue.')
+                            currently not available due to a potential data quality issue.')
 
+        str3 <- p('*The Laupen catchment area consists of areas from both Bern and Fribourg (13 communities from Bern and 12 from Fribourg).')
+        
         if (input$region == 'GR') HTML(paste(str1, str2, sep = ""))
+        else if (input$region == 'FR') HTML(paste(str1, str3, sep = ""))
         else str1
     })
 }

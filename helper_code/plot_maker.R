@@ -18,12 +18,13 @@ Restimates_canton <- read_csv(Restimates_url,
                                             'median_R_highHPD','median_R_lowHPD',
                                             'countryIso3'),
                               col_types = cols(date = col_date(format = '')),
-                              skip = 1) 
+                              skip = 1)
 
 Restimates_canton <- Restimates_canton %>% filter(estimate_type == 'Cori_slidingWindow',
                                                   data_type != 'Confirmed cases / tests',
                                                   date >= as_date("2020-10-01")) %>%
-  dplyr::select(-estimate_type, -countryIso3, -country, -source)
+  dplyr::select(-estimate_type, -countryIso3, -country, -source) %>%
+  mutate(data_type = recode_factor(data_type, 'Confirmed cases' = 'Confirmed (Canton)'))
 
 
 
@@ -42,10 +43,16 @@ plotData <- plotData %>%
   bind_rows(Re_cc_needed) %>% mutate(data_type = factor(data_type)) %>% # the rww binded
   mutate(data_type = recode_factor(data_type, "infection_cases" = "Confirmed (Catchment)"))
 
+
+
 # reference:
 ref <- c("ZH"="Zurich" ,  "VD"="Lausanne",
          "SG"="Altenrhein", "GR"="Chur",
          "FR"="Laupen", "TI"="Lugano")
+
+ref_size <- c("ZH"="450'000" ,  "VD"="240'000",
+              "SG"="64'000", "GR"="55'000",
+              "FR"="62'000", "TI"="124'000")
 
 # Raw plots ####
 
@@ -57,7 +64,7 @@ case_plotter <- function(data = case_data, canton) {
     scale_x_date(limits = c(date_range[1], Sys.Date()), 
                  date_breaks = "months", date_labels = "%b") +
     labs(x = 'Date' , y=expression("Cases per 100'000 residents")) +
-    ggtitle(bquote(.(ref[[canton]])*"'s Catchment Area: Confirmed Cases, SARS-CoV RNA Copies in Wastewater, Estimated R"['e'])) +
+    ggtitle(bquote(.(ref[[canton]])*"'s Catchment Area ("*.(ref_size[[canton]])*"): Cases, SARS-CoV RNA Gene in Wastewater, Estimated R"['e'])) +
     theme_minimal() +
     theme(strip.text = element_text(size=18),
           axis.text= element_text(size=15),
@@ -111,11 +118,11 @@ re_plotter <- function(source, canton) {
   date_range <- range((ww_data %>% filter(region == canton) %>% select(date))[["date"]])
   # For CHUR: leave out confirmed catchment case Re for now (as lots of missing data) ---------
   if (canton == "GR") {
-    source<- source[! source %in% 'Confirmed (Catchment)']
+    source <- source[! source %in% 'Confirmed (Catchment)']
   }
   # For LAUPEN: have both Bern and Fribourg shown for traces -------
-  if (canton == "BE") {
-    special <- c("BE", "FR") # deal with it....
+  if (canton == "FR") {
+    canton2 <- c("BE", "FR") # deal with it....
   }
   
   plotData %>% filter(region %in% canton) %>%
@@ -128,14 +135,14 @@ re_plotter <- function(source, canton) {
                 alpha = 0.2, show.legend = F) +
     geom_hline(yintercept = 1) +
     scale_colour_manual(values = viridis(5)[c(1, 4, 5, 3, 2)], #'lightseagreen'
-                        labels = c('Wastewater', 'Confirmed (Catchment)', 'Confirmed cases', 
+                        labels = c('Wastewater', 'Confirmed (Catchment)', 'Confirmed (Canton)', 
                                    'Deaths', 'Hospitalized patients'),
-                        breaks = c('Wastewater', 'Confirmed (Catchment)','Confirmed cases', 
+                        breaks = c('Wastewater', 'Confirmed (Catchment)','Confirmed (Canton)', 
                                    'Deaths', 'Hospitalized patients')) +
     scale_fill_manual(values = viridis(5)[c(1, 4, 5, 3, 2)], #'lightseagreen'
-                       labels = c('Wastewater', 'Confirmed (Catchment)', 'Confirmed cases', 
+                       labels = c('Wastewater', 'Confirmed (Catchment)', 'Confirmed (Canton)', 
                                   'Deaths', 'Hospitalized patients'),
-                       breaks = c('Wastewater', 'Confirmed (Catchment)', 'Confirmed cases', 
+                       breaks = c('Wastewater', 'Confirmed (Catchment)', 'Confirmed (Canton)', 
                                   'Deaths', 'Hospitalized patients')) +
     scale_x_date(limits = c(date_range[1], Sys.Date()), 
                  date_breaks = "months", date_labels = "%b") +
