@@ -123,7 +123,7 @@ re_plotter <- function(source, canton) {
     source <- source[! source %in% 'Confirmed (Catchment)']
   }
   new_data <- plotData %>% filter(region %in% canton) %>%
-    filter(data_type %in% source) 
+    filter(data_type %in% source) %>% filter(date >= date_range[1])
   
   data_ends <- new_data %>% group_by(data_type) %>% filter(row_number()==n())
   disc <- "*This is the most recent possible Re estimate due to delays between infection being observed."
@@ -186,7 +186,7 @@ re_plotter2 <- function(source, canton) {
     mutate(data_type = recode_factor(data_type, 'Confirmed (Canton)' = 'Confirmed (Fribourg)'))
   
   new_data <- plotData %>% filter(region %in% canton) %>%
-    filter(data_type %in% source_without_canton)
+    filter(data_type %in% source_without_canton) %>% filter(date >= date_range[1])
   
   if (length(source_canton)>0) {
     new_data <- new_data %>% bind_rows(bern_confirmed) %>% bind_rows(fribourg_confirmed)

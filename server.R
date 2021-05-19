@@ -80,6 +80,8 @@ function(input, output, session) {
     
     output$hover_info_re <- renderUI({
         hover <- input$plot_hover_re
+        date_range <- range((ww_data %>% filter(region == input$region) %>% select(date))[["date"]]) # only look at valid region.
+        # NB as some places have chunks cut out... Chur and Lugano.
         # special treatment: Laupen - has both Fribourg and Bern! ------
         if (input$region == "FR") {
             source <- input$data_type
@@ -95,7 +97,7 @@ function(input, output, session) {
                 mutate(data_type = recode_factor(data_type, 'Confirmed (Canton)' = 'Confirmed (Fribourg)'))
             
             new_data <- plotData %>% filter(region %in% c("BE", "FR")) %>%
-                filter(data_type %in% source_without_canton)
+                filter(data_type %in% source_without_canton) %>% filter(date >= date_range[1])
             
             if (length(source_canton)>0) {
                 new_data <- new_data %>% bind_rows(bern_confirmed) %>% bind_rows(fribourg_confirmed)
@@ -105,8 +107,9 @@ function(input, output, session) {
                                 hover, threshold = 5, maxpoints = 1, addDist = TRUE)
         }
         else {
+            
             point <- nearPoints(plotData %>% filter(region == input$region) %>%
-                                    filter(data_type %in% input$data_type), 
+                                    filter(data_type %in% input$data_type) %>% filter(date >= date_range[1]), 
                                 hover, threshold = 5, maxpoints = 1, addDist = TRUE)
         }
         
