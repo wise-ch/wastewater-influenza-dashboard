@@ -99,7 +99,11 @@ navbarPage("Covid-19: Wastewater Re",
                                     hover = hoverOpts("plot_hover", delay = 10))%>%
                              withSpinner(color="#0dc5c1"),
                          uiOutput("hover_info_rww")
-                     )
+                     ),
+                     p("The raw measurements of SARS-CoV-2 in wastewater and associated catchment cases are displayed on ",
+                       a(href = "https://sensors-eawag.ch/sars/overview.html", "EAWAG's overview page", .noWS = "outside"),
+                       " with links to individual plant measurements.",
+                       .noWS = c("after-begin", "before-end"))
                  ) # fluid row
              )
         )     
