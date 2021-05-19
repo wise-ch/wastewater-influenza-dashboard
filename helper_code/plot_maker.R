@@ -72,7 +72,7 @@ case_plotter <- function(data = case_data, canton) {
           axis.title =  element_text(size=18),
           legend.text= element_text(size=15),
           legend.title= element_text(size=18),
-          plot.title = element_text(size = 18),
+          plot.title = element_text(size = 17),
           panel.spacing.y = unit(2, "lines"),
           legend.position = 'bottom',
           axis.title.x=element_blank(),
@@ -94,7 +94,7 @@ raw_plotter <- function(data, canton) {
     scale_colour_manual(values = c(viridis(4)[1], 'darkgrey', 'firebrick', viridis(5)[5]), #'lightseagreen'
                         labels = c('> LOQ', 'Imputed', '> LOD', '< LOD'),
                         breaks = c('> LOQ', 'Imputed', '> LOD', '< LOD'),
-                        name = 'Reading', 
+                        name = 'Quantification flag**', 
                         guide = guide_legend(override.aes = list(size = 3) )) + # to increase size of point in legend
     geom_line(data = data %>% filter(region == canton) %>% filter(orig_data)  %>% mutate(n1 = n1/10^13), 
               aes(x=date, y= n1,colour = name_orig), linetype = 'dashed', colour = "black") +

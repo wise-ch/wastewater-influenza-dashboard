@@ -1,13 +1,10 @@
 library(shiny)
 
-function(input, output) {
+function(input, output, session) {
     
     # keeps track of reactivity - re-computes when input changes
     # use input values when you make your output. Access with $ and Id
     # this value changes as the input bar/slider/button changes. Reactive.
-    observeEvent(input$btn, {
-        shinyjs::disable(selector = "#variable input[value='Deaths']")
-    })
     # Plotting cases -------
     output$case_plots <- renderPlot(
         {
@@ -167,20 +164,32 @@ function(input, output) {
         )
     })
     
-    # text: link to respective EAWAG page---------
+    # text below plot for more info ---------
     output$link <- renderUI({
-        str1 <- p("The raw measurements of SARS-CoV-2 in wastewater are available ",
+        link <- p("The raw measurements of SARS-CoV-2 in wastewater are available ",
                   a(href = paste0("https://sensors-eawag.ch/sars/",tolower(ref[[input$region]]),".html"), "here", .noWS = "outside"),
                   ".",
-                  .noWS = c("after-begin", "before-end"), style="margin-bottom:0;")
+                  .noWS = c("after-begin", "before-end"), style="margin-bottom:0;font-size: 95%;")
+        lod_loq <- p('**<LOD are values below the limit of detection making these values unreliable as quantity of the gene copies is 
+                    very low. >LOD represents values below the limit of quantification, but 
+                     above limits of detection. >LOQ are reliable values which are above limits of quantification. 
+                     The way in which the sample is processed and the reliability of the values depends on these quantification flags.' , 
+                     style = 'margin-bottom:0;font-size: 95%;')
         
-        str2 <- p(tags$sup('†'),'The estimated R',tags$sub('e'), ' for confirmed cases in the catchment area for Chur is 
-                            currently not available due to a potential data quality issue.')
+        chur_catchment <- p(tags$sup('†'),'The estimated R',tags$sub('e'), ' for confirmed cases in the catchment area for Chur is 
+                            currently not available due to a potential data quality issue.', style="margin-bottom:0;font-size: 95%;")
+        
+        exclude_lod <- p(tags$sup('†'),'Wastewater measurements from 02.2021 to 07.03.2021 for ', ref[[input$region]], 
+                         ' have been excluded due to multiple consecutive measurements falling below levels of quantification and/or detection, 
+                         which affects the quality of the raw measurements and the wastewater R',tags$sub('e'), ' estimates.', 
+                         style="margin-bottom:0;font-size: 95%;")
 
-        str3 <- p(tags$sup('†'),'The Laupen catchment area consists of areas from both Bern and Fribourg (13 communities from Bern and 12 from Fribourg).')
+        laupen_2cantons <- p(tags$sup('†'),'The Laupen catchment area consists of areas from both Bern and Fribourg 
+                             (13 communities from Bern and 12 from Fribourg).', style="margin-bottom:0;font-size: 95%;")
         
-        if (input$region == 'GR') HTML(paste(str1, str2, sep = ""))
-        else if (input$region == 'FR') HTML(paste(str1, str3, sep = ""))
-        else str1
+        if (input$region == 'GR') HTML(paste(link, lod_loq, chur_catchment, exclude_lod, sep = ""))
+        else if (input$region == 'FR') HTML(paste(link, lod_loq, laupen_2cantons, sep = ""))
+        else if (input$region == 'TI') HTML(paste(link, lod_loq, exclude_lod, sep = ""))
+        else HTML(paste(link, lod_loq, sep = ""))
     })
 }

@@ -1,13 +1,15 @@
 library(shiny)
 library(shinyjs)
+library(shinyBS)
 library(shinycssloaders)
+
 source("helper_code/plot_maker.R")
 
 navbarPage("Covid-19: Wastewater Re",
     # a page with a navigation bar
     # HOME ####
     tabPanel("Cantonal",
-             # in the sidebar dropdown --------
+             # Sidepanel - options + info  --------
              sidebarLayout(
                  sidebarPanel(
                      selectInput(inputId = "region", label = "Select wastewater treatment plant:",
@@ -41,10 +43,11 @@ navbarPage("Covid-19: Wastewater Re",
                                    from the catchment area reflects this. All other R",tags$sub('e')," 
                                    traces show the cantonal results, so there may be some dissonance. 
                                    For instance, Zurich canton is about 3.4 times the size of its sewer shed, 
-                                   Werdhölzli."))), 
+                                   Werdhölzli."))),
+                     
                      width = 3
                  ),
-                 # Home: main panel ####
+             # Home: main panel - all plotting and further info -------
                  mainPanel(
                         fluidRow( 
                          div(
@@ -74,6 +77,7 @@ navbarPage("Covid-19: Wastewater Re",
                  ) # main panel
              ) # Sidebar layout
     ), # Home panel
+    # Switzerland  - rww comparison ----------
     tabPanel("Switzerland",
              sidebarLayout(
                  sidebarPanel( 
@@ -101,8 +105,9 @@ navbarPage("Covid-19: Wastewater Re",
         )     
         
     ),
-    # About ####
+    # About ---------
     tabPanel("About",
+            
              fluidRow(column(
                           h3("What is our aim?"), 
                           p(HTML(paste0("We provide estimates of the effective reproductive number, R",tags$sub("e"),", based on longitudinal measurements of SARS-CoV-2 RNA in wastewater.
@@ -148,8 +153,12 @@ navbarPage("Covid-19: Wastewater Re",
                             " and the code is available ", 
                             a(href = "https://github.com/covid-19-Re/shiny-dailyRe", "here", .noWS = "outside"), ".",
                             HTML("<br>"),
-                            "The raw measurements of SARS-CoV-2 in wastewater are publicly available on ",
-                            a(href = "https://www.eawag.ch/en/department/sww/projects/sars-cov2-in-wastewater/", "the respective EAWAG pages", .noWS = "outside"),
+                            "The raw measurements of SARS-CoV-2 in wastewater are displayed on ",
+                            a(href = "https://sensors-eawag.ch/sars/overview.html", "EAWAG's overview page", .noWS = "outside"),
+                            " with links to individual plant measurements.",
+                            HTML("<br>"),
+                            "For more information on the wastewater sampling process, visit ",
+                            a(href = "https://www.eawag.ch/en/department/sww/projects/sars-cov2-in-wastewater/", "EAWAG's SARS-CoV-2 project page", .noWS = "outside"),
                             ".",
                             .noWS = c("after-begin", "before-end"),
                             style="text-align:justify;color:black;padding:15px;border-radius:10px"),
