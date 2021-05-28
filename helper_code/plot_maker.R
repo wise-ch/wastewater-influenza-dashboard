@@ -67,11 +67,11 @@ case_plotter <- function(data = case_data, canton) {
     labs(x = 'Date' , y=expression("Cases per 100'000 residents")) +
     ggtitle(bquote(.(ref[[canton]])*"'s Catchment Area ("*.(ref_size[[canton]])*" residents): Cases, SARS-CoV Gene copies in Wastewater, Estimated R"['e'])) +
     theme_minimal() +
-    theme(strip.text = element_text(size=18),
-          axis.text= element_text(size=15),
-          axis.title =  element_text(size=18),
-          legend.text= element_text(size=15),
-          legend.title= element_text(size=18),
+    theme(strip.text = element_text(size=17),
+          axis.text= element_text(size=14),
+          axis.title =  element_text(size=16),
+          legend.text= element_text(size=14),
+          legend.title= element_text(size=17),
           plot.title = element_text(size = 17),
           panel.spacing.y = unit(2, "lines"),
           legend.position = 'bottom',
@@ -101,11 +101,11 @@ raw_plotter <- function(data, canton) {
     labs(x = 'Date' , y=expression("Gene copies ("%*%"10"^13*")")) +
     #ggtitle(paste0("SARS-CoV2-RNA copies in Wastewater in ", ref[[canton]])) +
     theme_minimal() +
-    theme(strip.text = element_text(size=18),
+    theme(strip.text = element_text(size=17),
           axis.text= element_text(size=14),
-          axis.title =  element_text(size=17.5),
-          legend.text= element_text(size=15),
-          legend.title= element_text(size=18),
+          axis.title =  element_text(size=16.5),
+          legend.text= element_text(size=14),
+          legend.title= element_text(size=17),
           plot.title = element_text(size = 18),
           panel.spacing.y = unit(2, "lines"),
           legend.position = 'bottom',
@@ -156,11 +156,11 @@ re_plotter <- function(source, canton) {
     guides(color = guide_legend(override.aes = list(size=5, shape = 0))) + 
     #ggtitle(expression("Estimated R"["e"]*" using Different Data Sources")) + 
     theme_minimal() +
-    theme(strip.text = element_text(size=18),
-          axis.text= element_text(size=15),
-          axis.title =  element_text(size=18),
-          legend.text= element_text(size=15),
-          legend.title= element_text(size=18),
+    theme(strip.text = element_text(size=17),
+          axis.text= element_text(size=14),
+          axis.title =  element_text(size=16),
+          legend.text= element_text(size=14),
+          legend.title= element_text(size=17),
           plot.title = element_text(size = 18),
           panel.spacing.y = unit(2, "lines"),
           legend.position = 'bottom') +
@@ -225,11 +225,11 @@ re_plotter2 <- function(source, canton) {
     guides(color = guide_legend(override.aes = list(size=5, shape = 0))) + 
     #ggtitle(expression("Estimated R"["e"]*" using Different Data Sources")) + 
     theme_minimal() +
-    theme(strip.text = element_text(size=18),
-          axis.text= element_text(size=15),
-          axis.title =  element_text(size=18),
-          legend.text= element_text(size=15),
-          legend.title= element_text(size=18),
+    theme(strip.text = element_text(size=17),
+          axis.text= element_text(size=14),
+          axis.title =  element_text(size=16),
+          legend.text= element_text(size=14),
+          legend.title= element_text(size=17),
           plot.title = element_text(size = 18),
           panel.spacing.y = unit(2, "lines"),
           legend.position = 'bottom') +
@@ -250,7 +250,7 @@ rww_plotter <- function(source = "Wastewater", canton) {
     filter(data_type %in% source) %>%
     ggplot() +
     geom_line(aes(x = date, y = median_R_mean, colour = region), 
-              alpha = 0.7) +
+              alpha = 0.7, lwd = 0.8) +
     geom_ribbon(aes(x = date, ymin = median_R_lowHPD,
                     ymax = median_R_highHPD, fill = region),
                 alpha = 0.2, show.legend = F) +
@@ -273,11 +273,11 @@ rww_plotter <- function(source = "Wastewater", canton) {
     guides(color = guide_legend(override.aes = list(size=5))) + 
     ggtitle(expression("Estimated Wastewater R"["e"]*" for different cantons")) + 
     theme_minimal() +
-    theme(strip.text = element_text(size=18),
-          axis.text= element_text(size=15),
-          axis.title =  element_text(size=18),
-          legend.text= element_text(size=15),
-          legend.title= element_text(size=18),
+    theme(strip.text = element_text(size=17),
+          axis.text= element_text(size=14),
+          axis.title =  element_text(size=16),
+          legend.text= element_text(size=14),
+          legend.title= element_text(size=17),
           plot.title = element_text(size = 18),
           panel.spacing.y = unit(2, "lines"),
           legend.position = 'bottom')

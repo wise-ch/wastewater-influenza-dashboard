@@ -52,25 +52,26 @@ navbarPage("Covid-19: Wastewater Re",
                         fluidRow( 
                          div(
                              style = "position:relative",
-                             plotOutput("case_plots", height = "250px", width = "900px",
+                             plotOutput("case_plots", height = "245px", width = "900px",
                                         hover = hoverOpts("plot_hover_case", delay = 10))%>% 
                                  withSpinner(color="#0dc5c1"),
                              uiOutput("hover_info_case")
                          ),
                          div(
                              style = "position:relative",
-                             plotOutput("raw_plots", height = "255px", width = "900px",
+                             plotOutput("raw_plots", height = "250px", width = "900px",
                                         hover = hoverOpts("plot_hover_raw", delay = 10))%>% 
                                  withSpinner(color="#0dc5c1"),
                              uiOutput("hover_info_raw")
                          ),
                          div(
                              style = "position:relative",
-                             plotOutput("re_plots", height = "260px", width = "900px",
+                             plotOutput("re_plots", height = "255px", width = "900px",
                                         hover = hoverOpts("plot_hover_re", delay = 10))%>% 
                                  withSpinner(color="#0dc5c1"),
                              uiOutput("hover_info_re")
                          ),
+                         downloadButton('downloadPlot', ' '),
                          htmlOutput("link")
                          
                      ) # fluid row

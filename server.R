@@ -1,5 +1,5 @@
 library(shiny)
-
+library(patchwork)
 function(input, output, session) {
     
     # keeps track of reactivity - re-computes when input changes
@@ -195,4 +195,31 @@ function(input, output, session) {
         else if (input$region == 'TI') HTML(paste(link, lod_loq, exclude_lod, sep = ""))
         else HTML(paste(link, lod_loq, sep = ""))
     })
+    
+    # download the plot ------
+    output$downloadPlot <- downloadHandler(
+        filename =  function() {
+            paste0("Catchment_", input$region, ".pdf")
+        },
+        # content is a function with argument file. content writes the plot to the device
+        content = function(file) {
+            case <- case_plotter(case_data, input$region)
+            raw <- raw_plotter(ww_data, input$region)
+            if (input$region == "FR") {
+                re <- re_plotter2(input$data_type, input$region) # call plotter 2: 2 cantons!
+            } else {
+                re <- re_plotter(input$data_type, input$region)
+            }
+            p <- patchwork::wrap_plots(case,raw,re, nrow = 3)+
+                plot_annotation(caption = paste0('Generated on: ',Sys.Date(), 
+                                                 ' (by: ibz-shiny.ethz.ch/wastewater_re)'))
+            cairo_pdf(filename = file,
+                      width = 16, height = 12, pointsize = 12, family = "sans", bg = "transparent",
+                      antialias = "subpixel",fallback_resolution = 300)
+            plot(p)
+            dev.off()  # turn the device off
+            
+        } 
+    )
+    
 }
