@@ -73,7 +73,7 @@ case_plotter <- function(data = case_data, canton) {
           axis.title =  element_text(size=16),
           legend.text= element_text(size=14),
           legend.title= element_text(size=17),
-          plot.title = element_text(size = 18),
+          plot.title = element_text(size = 16),
           panel.spacing.y = unit(2, "lines"),
           legend.position = 'bottom')
 }
