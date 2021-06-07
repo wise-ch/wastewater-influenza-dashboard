@@ -199,7 +199,7 @@ function(input, output, session) {
     # download the plot ------
     output$downloadPlot <- downloadHandler(
         filename =  function() {
-            paste0("Catchment_", input$region, ".pdf")
+            paste0("Catchment_", ref[[input$region]], ".pdf")
         },
         # content is a function with argument file. content writes the plot to the device
         content = function(file) {

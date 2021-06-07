@@ -64,6 +64,7 @@ case_plotter <- function(data = case_data, canton) {
     geom_bar(stat="identity", colour = viridis(5)[4], fill = viridis(5)[4], alpha = 0.7) +
     scale_x_date(limits = c(date_range[1], Sys.Date()), 
                  date_breaks = "months", date_labels = "%b") +
+    scale_y_continuous(labels = function(label) sprintf('%5.1f', label)) +
     labs(x = 'Date' , y=expression("Cases per 100'000 residents")) +
     ggtitle(bquote(.(ref[[canton]])*"'s Catchment Area ("*.(ref_size[[canton]])*" residents): Cases, SARS-CoV Gene copies in Wastewater, Estimated R"['e'])) +
     theme_minimal() +
@@ -72,12 +73,9 @@ case_plotter <- function(data = case_data, canton) {
           axis.title =  element_text(size=16),
           legend.text= element_text(size=14),
           legend.title= element_text(size=17),
-          plot.title = element_text(size = 17),
+          plot.title = element_text(size = 18),
           panel.spacing.y = unit(2, "lines"),
-          legend.position = 'bottom',
-          axis.title.x=element_blank(),
-          axis.text.x=element_blank(),
-          axis.ticks.x=element_blank())
+          legend.position = 'bottom')
 }
 
 raw_plotter <- function(data, canton) {
@@ -91,6 +89,7 @@ raw_plotter <- function(data, canton) {
     geom_point(aes(x=date, y = n1, colour = quantification_flag)) +
     scale_x_date(limits = c(date_range[1], Sys.Date()), 
                  date_breaks = "months", date_labels = "%b") +
+    scale_y_continuous(labels = function(label) sprintf('%5.1f', label)) +
     scale_colour_manual(values = c(viridis(4)[1], 'darkgrey', 'firebrick', viridis(5)[5]), #'lightseagreen'
                         labels = c('> LOQ', 'Imputed', '> LOD', '< LOD'),
                         breaks = c('> LOQ', 'Imputed', '> LOD', '< LOD'),
@@ -103,15 +102,12 @@ raw_plotter <- function(data, canton) {
     theme_minimal() +
     theme(strip.text = element_text(size=17),
           axis.text= element_text(size=14),
-          axis.title =  element_text(size=16.5),
+          axis.title =  element_text(size=16),
           legend.text= element_text(size=14),
           legend.title= element_text(size=17),
           plot.title = element_text(size = 18),
           panel.spacing.y = unit(2, "lines"),
-          legend.position = 'bottom',
-          axis.title.x=element_blank(),
-          axis.text.x=element_blank(),
-          axis.ticks.x=element_blank())
+          legend.position = 'bottom')
 }
 
 # Re plots ####
@@ -150,6 +146,7 @@ re_plotter <- function(source, canton) {
                                   'Deaths', 'Hospitalized patients')) +
     scale_x_date(limits = c(date_range[1], Sys.Date()), 
                  date_breaks = "months", date_labels = "%b") +
+    scale_y_continuous(labels = function(label) sprintf('%6.1f', label)) +
     coord_cartesian(ylim = c(0, 2)) +
     labs( x = 'Date', y = bquote("Estimated R"['e']~" (95% CI)"),
           colour = 'Source', fill = 'Source') +
@@ -219,20 +216,21 @@ re_plotter2 <- function(source, canton) {
                                  'Confirmed (Bern)')) +
     scale_x_date(limits = c(date_range[1], Sys.Date()), 
                  date_breaks = "months", date_labels = "%b") +
+    scale_y_continuous(labels = function(label) sprintf('%6.1f', label)) +
     coord_cartesian(ylim = c(0, 2)) +
     labs( x = 'Date', y = bquote("Estimated R"['e']~" (95% CI)"),
           colour = 'Source', fill = 'Source') +
     guides(color = guide_legend(override.aes = list(size=5, shape = 0))) + 
     #ggtitle(expression("Estimated R"["e"]*" using Different Data Sources")) + 
     theme_minimal() +
-    theme(strip.text = element_text(size=17),
-          axis.text= element_text(size=14),
-          axis.title =  element_text(size=16),
-          legend.text= element_text(size=14),
-          legend.title= element_text(size=17),
-          plot.title = element_text(size = 18),
-          panel.spacing.y = unit(2, "lines"),
-          legend.position = 'bottom') +
+     theme(strip.text = element_text(size=17),
+           axis.text= element_text(size=14),
+           axis.title =  element_text(size=16),
+           legend.text= element_text(size=14),
+           legend.title= element_text(size=17),
+           plot.title = element_text(size = 18),
+           panel.spacing.y = unit(2, "lines"),
+           legend.position = 'bottom') +
      annotate(geom = 'text', 
               label = disc, 
               x = summary(date_range)[['3rd Qu.']], y = 0.1, hjust = 0.5, vjust = 1, size = 4)
