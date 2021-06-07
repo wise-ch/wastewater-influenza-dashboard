@@ -12,7 +12,7 @@ The methods used in estimating the R<sub>e</sub> estimation are described *[here
 
 Core scripts:  
 * `server.R`: Links the user interface with the instructions required to build and run the app.
-* `ui.R`: Defines the user interface for the dashboard.
+* `ui.R`: Defines the user interface for the dashboard.<br>
 Helper scripts:
 * `reading_in.R`: Reads in the raw wastewater and case data for the six catchment areas from the respective *[EAWAG pages](https://sensors-eawag.ch/sars/overview.html)*. 
 * `Rww_estimation.R`: Computes the R<sub>e</sub> for wastewater samples as well as catchment cases. It is run automatically using cron once a day (00:00 CEST). The script makes use of the wastewater R<sub>e</sub> pipeline available *[here](https://github.com/JSHuisman/wastewaterRe)*. These estimates are then written to a csv which is then used when the dashboard is launched.
