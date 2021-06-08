@@ -1,12 +1,12 @@
 # plots ####
 library(tidyverse)
 library(lubridate)
-library(patchwork) 
+library(patchwork)
 library(viridis)
 
 
 # cronjobs to do source work ####
-source("helper_code/reading_in.R") # 
+source("helper_code/reading_in.R") #
 
 # Reading in cantonal Re estimates ####
 
@@ -58,11 +58,11 @@ ref_size <- c("ZH"="450'000" ,  "VD"="240'000",
 
 case_plotter <- function(data = case_data, canton) {
   date_range <- range((ww_data %>% filter(region == canton) %>% select(date))[["date"]])
-  
-  data %>% filter(region == canton) %>% 
+
+  data %>% filter(region == canton) %>%
     ggplot(aes(x=date, y = cases) ) +
     geom_bar(stat="identity", colour = viridis(5)[4], fill = viridis(5)[4], alpha = 0.7) +
-    scale_x_date(limits = c(date_range[1], Sys.Date()), 
+    scale_x_date(limits = c(date_range[1], Sys.Date()),
                  date_breaks = "months", date_labels = "%b") +
     scale_y_continuous(labels = function(label) sprintf('%5.1f', label)) +
     labs(x = 'Date' , y=expression("Cases per 100'000 residents")) +
@@ -79,23 +79,23 @@ case_plotter <- function(data = case_data, canton) {
 }
 
 raw_plotter <- function(data, canton) {
-  n <- ww_data %>% filter(region==canton) %>% 
+  n <- ww_data %>% filter(region==canton) %>%
     group_by(quantification_flag) %>% tally() %>% nrow()
-  
+
   date_range <- range((ww_data %>% filter(region == canton) %>% select(date))[["date"]])
-  
+
   data %>% filter(region == canton) %>% mutate(n1 = n1/10^13) %>%
     ggplot( ) +
     geom_point(aes(x=date, y = n1, colour = quantification_flag)) +
-    scale_x_date(limits = c(date_range[1], Sys.Date()), 
+    scale_x_date(limits = c(date_range[1], Sys.Date()),
                  date_breaks = "months", date_labels = "%b") +
     scale_y_continuous(labels = function(label) sprintf('%5.1f', label)) +
     scale_colour_manual(values = c(viridis(4)[1], 'darkgrey', 'firebrick', viridis(5)[5]), #'lightseagreen'
                         labels = c('> LOQ', 'Imputed', '> LOD', '< LOD'),
                         breaks = c('> LOQ', 'Imputed', '> LOD', '< LOD'),
-                        name = 'Quantification flag**', 
+                        name = 'Quantification flag**',
                         guide = guide_legend(override.aes = list(size = 3) )) + # to increase size of point in legend
-    geom_line(data = data %>% filter(region == canton) %>% filter(orig_data)  %>% mutate(n1 = n1/10^13), 
+    geom_line(data = data %>% filter(region == canton) %>% filter(orig_data)  %>% mutate(n1 = n1/10^13),
               aes(x=date, y= n1,colour = name_orig), linetype = 'dashed', colour = "black") +
     labs(x = 'Date' , y=expression("Gene copies ("%*%"10"^13*")")) +
     #ggtitle(paste0("SARS-CoV2-RNA copies in Wastewater in ", ref[[canton]])) +
@@ -120,38 +120,38 @@ re_plotter <- function(source, canton) {
   }
   new_data <- plotData %>% filter(region %in% canton) %>%
     filter(data_type %in% source) %>% filter(date >= date_range[1])
-  
+
   data_ends <- new_data %>% group_by(data_type) %>% filter(row_number()==n())
-  disc <- "*This is the most recent possible Re estimate due to delays between infection being observed."
-  
+  disc <- "*This is the most recent possible Re estimate due to delays between infection and being observed."
+
   new_data %>%
     ggplot() +
-    geom_line(aes(x = date, y = median_R_mean, colour = data_type), 
+    geom_line(aes(x = date, y = median_R_mean, colour = data_type),
               alpha = 0.7, lwd = 0.8) +
     geom_ribbon(aes(x = date, ymin = median_R_lowHPD,
                     ymax = median_R_highHPD, fill = data_type),
                 alpha = 0.2, show.legend = F) +
     geom_hline(yintercept = 1) +
-    geom_point(aes(x = date, y = median_R_mean, colour = data_type), 
+    geom_point(aes(x = date, y = median_R_mean, colour = data_type),
                data = data_ends, shape = 8) +
     scale_colour_manual(values = viridis(5)[c(1, 4, 5, 3, 2)], #'lightseagreen'
-                        labels = c('Wastewater', 'Confirmed (Catchment)', 'Confirmed (Canton)', 
+                        labels = c('Wastewater', 'Confirmed (Catchment)', 'Confirmed (Canton)',
                                    'Deaths', 'Hospitalized patients'),
-                        breaks = c('Wastewater', 'Confirmed (Catchment)','Confirmed (Canton)', 
+                        breaks = c('Wastewater', 'Confirmed (Catchment)','Confirmed (Canton)',
                                    'Deaths', 'Hospitalized patients')) +
     scale_fill_manual(values = viridis(5)[c(1, 4, 5, 3, 2)], #'lightseagreen'
-                       labels = c('Wastewater', 'Confirmed (Catchment)', 'Confirmed (Canton)', 
+                       labels = c('Wastewater', 'Confirmed (Catchment)', 'Confirmed (Canton)',
                                   'Deaths', 'Hospitalized patients'),
-                       breaks = c('Wastewater', 'Confirmed (Catchment)', 'Confirmed (Canton)', 
+                       breaks = c('Wastewater', 'Confirmed (Catchment)', 'Confirmed (Canton)',
                                   'Deaths', 'Hospitalized patients')) +
-    scale_x_date(limits = c(date_range[1], Sys.Date()), 
+    scale_x_date(limits = c(date_range[1], Sys.Date()),
                  date_breaks = "months", date_labels = "%b") +
     scale_y_continuous(labels = function(label) sprintf('%6.1f', label)) +
     coord_cartesian(ylim = c(0, 2)) +
     labs( x = 'Date', y = bquote("Estimated R"['e']~" (95% CI)"),
           colour = 'Source', fill = 'Source') +
-    guides(color = guide_legend(override.aes = list(size=5, shape = 0))) + 
-    #ggtitle(expression("Estimated R"["e"]*" using Different Data Sources")) + 
+    guides(color = guide_legend(override.aes = list(size=5, shape = 0))) +
+    #ggtitle(expression("Estimated R"["e"]*" using Different Data Sources")) +
     theme_minimal() +
     theme(strip.text = element_text(size=17),
           axis.text= element_text(size=14),
@@ -161,8 +161,8 @@ re_plotter <- function(source, canton) {
           plot.title = element_text(size = 18),
           panel.spacing.y = unit(2, "lines"),
           legend.position = 'bottom') +
-    annotate(geom = 'text', 
-             label = disc, 
+    annotate(geom = 'text',
+             label = disc,
              x = summary(date_range)[['3rd Qu.']], y = 0.1, hjust = 0.5, vjust = 1, size = 4)
 }
 # special plot for Chur - 2 cantons ------
@@ -170,58 +170,58 @@ re_plotter2 <- function(source, canton) {
   date_range <- range((ww_data %>% filter(region %in% canton) %>% select(date))[["date"]])
   canton <- c("BE", "FR")
   # Rww and Rcc for catchment unaffected. Other sources change.
-  
+
   source_canton <- source[source %in% c('Confirmed (Canton)')]
   source_without_canton <- source[! source %in% c('Confirmed (Canton)')]
-  
+
   bern_confirmed <- plotData %>% filter(region == "BE") %>%
     filter(data_type == "Confirmed (Canton)") %>%
     mutate(data_type = recode_factor(data_type, 'Confirmed (Canton)' = 'Confirmed (Bern)'))
-  
+
   fribourg_confirmed <- plotData %>% filter(region == "FR") %>%
     filter(data_type == "Confirmed (Canton)") %>%
     mutate(data_type = recode_factor(data_type, 'Confirmed (Canton)' = 'Confirmed (Fribourg)'))
-  
+
   new_data <- plotData %>% filter(region %in% canton) %>%
     filter(data_type %in% source_without_canton) %>% filter(date >= date_range[1])
-  
+
   if (length(source_canton)>0) {
     new_data <- new_data %>% bind_rows(bern_confirmed) %>% bind_rows(fribourg_confirmed)
   }
-  
+
   # even though two cantons, rww only exists internally for FR! (so BE makes no diff)
   # Must now include plots for BE
-  disc <- "*This is the most recent possible Re estimate due to delays between infection being observed."
+  disc <- "*This is the most recent possible Re estimate due to delays between infection and being observed."
   data_ends <- new_data %>% group_by(data_type) %>% filter(row_number()==n())
-  
+
    new_data %>%
-    ggplot() + 
-    geom_line(aes(x = date, y = median_R_mean, colour = data_type), 
+    ggplot() +
+    geom_line(aes(x = date, y = median_R_mean, colour = data_type),
               alpha = 0.7, lwd = 0.8) +
     geom_ribbon(aes(x = date, ymin = median_R_lowHPD,
                     ymax = median_R_highHPD, fill = data_type),
                 alpha = 0.2, show.legend = F) +
     geom_hline(yintercept = 1) +
-    geom_point(aes(x = date, y = median_R_mean, colour = data_type), 
+    geom_point(aes(x = date, y = median_R_mean, colour = data_type),
                data = data_ends, shape = 8) +
     scale_colour_manual(values = c(viridis(5)[c(1, 4)], '#CFE11CFF', '#2E6E8EFF'), #'lightseagreen'
-                        labels = c('Wastewater', 'Confirmed (Catchment)', 'Confirmed (Fribourg)', 
+                        labels = c('Wastewater', 'Confirmed (Catchment)', 'Confirmed (Fribourg)',
                                    'Confirmed (Bern)'),
-                        breaks = c('Wastewater', 'Confirmed (Catchment)','Confirmed (Fribourg)', 
+                        breaks = c('Wastewater', 'Confirmed (Catchment)','Confirmed (Fribourg)',
                                    'Confirmed (Bern)')) +
     scale_fill_manual(values = c(viridis(5)[c(1, 4)], '#CFE11CFF', '#2E6E8EFF'), #'lightseagreen'
-                      labels = c('Wastewater', 'Confirmed (Catchment)', 'Confirmed (Fribourg)', 
+                      labels = c('Wastewater', 'Confirmed (Catchment)', 'Confirmed (Fribourg)',
                                  'Confirmed (Bern)'),
-                      breaks = c('Wastewater', 'Confirmed (Catchment)','Confirmed (Fribourg)', 
+                      breaks = c('Wastewater', 'Confirmed (Catchment)','Confirmed (Fribourg)',
                                  'Confirmed (Bern)')) +
-    scale_x_date(limits = c(date_range[1], Sys.Date()), 
+    scale_x_date(limits = c(date_range[1], Sys.Date()),
                  date_breaks = "months", date_labels = "%b") +
     scale_y_continuous(labels = function(label) sprintf('%6.1f', label)) +
     coord_cartesian(ylim = c(0, 2)) +
     labs( x = 'Date', y = bquote("Estimated R"['e']~" (95% CI)"),
           colour = 'Source', fill = 'Source') +
-    guides(color = guide_legend(override.aes = list(size=5, shape = 0))) + 
-    #ggtitle(expression("Estimated R"["e"]*" using Different Data Sources")) + 
+    guides(color = guide_legend(override.aes = list(size=5, shape = 0))) +
+    #ggtitle(expression("Estimated R"["e"]*" using Different Data Sources")) +
     theme_minimal() +
      theme(strip.text = element_text(size=17),
            axis.text= element_text(size=14),
@@ -231,8 +231,8 @@ re_plotter2 <- function(source, canton) {
            plot.title = element_text(size = 18),
            panel.spacing.y = unit(2, "lines"),
            legend.position = 'bottom') +
-     annotate(geom = 'text', 
-              label = disc, 
+     annotate(geom = 'text',
+              label = disc,
               x = summary(date_range)[['3rd Qu.']], y = 0.1, hjust = 0.5, vjust = 1, size = 4)
 }
 
@@ -240,36 +240,36 @@ re_plotter2 <- function(source, canton) {
 
 rww_plotter <- function(source = "Wastewater", canton) {
   date_range <- range((ww_data %>% filter(region %in% canton) %>% select(date))[["date"]])
-  # for now, as Zurich is only one from Oct - Jan end. 
+  # for now, as Zurich is only one from Oct - Jan end.
   # After: make into sliding scale
   date_range[1] <- as.Date('2021-02-01')
-  
+
   plotData %>% filter(region %in% canton) %>%
     filter(data_type %in% source) %>%
     ggplot() +
-    geom_line(aes(x = date, y = median_R_mean, colour = region), 
+    geom_line(aes(x = date, y = median_R_mean, colour = region),
               alpha = 0.7, lwd = 0.8) +
     geom_ribbon(aes(x = date, ymin = median_R_lowHPD,
                     ymax = median_R_highHPD, fill = region),
                 alpha = 0.2, show.legend = F) +
     geom_hline(yintercept = 1) +
     scale_colour_manual(values = viridis(6), #'lightseagreen'
-                        labels = c('Zurich', 'Lausanne', 'Altenrhein', 'Chur', 
+                        labels = c('Zurich', 'Lausanne', 'Altenrhein', 'Chur',
                                    'Laupen', 'Lugano'),
-                        breaks = c('ZH', 'VD', 'SG','GR', 
+                        breaks = c('ZH', 'VD', 'SG','GR',
                                    'FR', 'TI')) +
     scale_fill_manual(values = viridis(6), #'lightseagreen'
-                      labels = c('Zurich', 'Lausanne', 'Altenrhein', 'Chur', 
+                      labels = c('Zurich', 'Lausanne', 'Altenrhein', 'Chur',
                                  'Laupen', 'Lugano'),
-                      breaks = c('ZH', 'VD', 'SG','GR', 
+                      breaks = c('ZH', 'VD', 'SG','GR',
                                  'FR', 'TI')) +
-    scale_x_date(limits = c(date_range[1], Sys.Date()), 
+    scale_x_date(limits = c(date_range[1], Sys.Date()),
                  date_breaks = "months", date_labels = "%b") +
     coord_cartesian(ylim = c(0, 2)) +
     labs( x = 'Date', y = bquote("Estimated R"['e']~" (95% CI)"),
           colour = 'Canton', fill = 'Canton') +
-    guides(color = guide_legend(override.aes = list(size=5))) + 
-    ggtitle(expression("Estimated Wastewater R"["e"]*" for different cantons")) + 
+    guides(color = guide_legend(override.aes = list(size=5))) +
+    ggtitle(expression("Estimated Wastewater R"["e"]*" for different cantons")) +
     theme_minimal() +
     theme(strip.text = element_text(size=17),
           axis.text= element_text(size=14),
