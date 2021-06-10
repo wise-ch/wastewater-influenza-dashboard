@@ -1,2 +1,2 @@
-0 0 * * * cd /home/tsinghal/ShinyApps/wastewater_re_shiny; Rscript helper_code/Rww_estimation.R
+0 0 * * * Rscript helper_code/Rww_estimation.R
 
