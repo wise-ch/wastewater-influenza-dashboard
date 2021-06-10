@@ -3,7 +3,7 @@
 # runs for all specified cantons
 library(EpiEstim)
 
-setwd("/home/tsinghal/ShinyApps/wastewater_re_shiny")
+#setwd("/home/tsinghal/ShinyApps/wastewater_re_shiny")
 #setwd("/Users/jana/Documents/PhD/covid/wastewater_re_shiny")
 
 # loading appropriate helper functions ---------
