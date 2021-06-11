@@ -61,7 +61,7 @@ function(input, output, session) {
         wellPanel(
             style = style,
             p(HTML(paste0("<i>", point$date, "</i>", "<br/>",
-                          "<b> Gene copies</b> (x10<sup>13</sup>): ", round(point$n1, 2), "<br/>",
+                          "<b> Gene copies</b> (x10<sup>12</sup>): ", round(point$n1, 2), "<br/>",
                           "<i>(", point$quantification_flag, ")</i>")))
         )
     })
