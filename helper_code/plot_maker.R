@@ -60,12 +60,15 @@ case_plotter <- function(data = case_data, canton) {
   date_range <- range((ww_data %>% filter(region == canton) %>% select(date))[["date"]])
 
   data %>% filter(region == canton) %>%
-    ggplot(aes(x=date, y = cases) ) +
-    geom_bar(stat="identity", colour = viridis(5)[4], fill = viridis(5)[4], alpha = 0.7) +
+    ggplot(aes(x=date, y = cases, fill = region) ) + # filling simply for a legend...
+    geom_bar(stat="identity", colour = viridis(5)[4], alpha = 0.7) +
     scale_x_date(limits = c(date_range[1], Sys.Date()),
                  date_breaks = "months", date_labels = "%b") +
     scale_y_continuous(labels = function(label) sprintf('%5.1f', label)) +
     labs(x = 'Date' , y=expression("Cases per 100'000 residents")) +
+    scale_fill_manual(name = '',values=rep(viridis(5)[4], 6), breaks = c('ZH', 'VD', 'SG','GR',
+                                                          'FR', 'TI'),
+                      labels=rep("Confirmed cases (in catchment area)", 6)) + # legend
     ggtitle(bquote(.(ref[[canton]])*"'s Catchment Area ("*.(ref_size[[canton]])*" residents): Cases, SARS-CoV Gene copies in Wastewater, Estimated R"['e'])) +
     theme_minimal() +
     theme(strip.text = element_text(size=17),
@@ -135,12 +138,12 @@ re_plotter <- function(source, canton) {
     geom_point(aes(x = date, y = median_R_mean, colour = data_type),
                data = data_ends, shape = 8) +
     scale_colour_manual(values = viridis(5)[c(1, 4, 5, 3, 2)], #'lightseagreen'
-                        labels = c('Wastewater', 'Confirmed (Catchment)', 'Confirmed (Canton)',
+                        labels = c('Wastewater', 'Confirmed cases (Catchment)', 'Confirmed cases (Canton)',
                                    'Deaths', 'Hospitalized patients'),
                         breaks = c('Wastewater', 'Confirmed (Catchment)','Confirmed (Canton)',
                                    'Deaths', 'Hospitalized patients')) +
     scale_fill_manual(values = viridis(5)[c(1, 4, 5, 3, 2)], #'lightseagreen'
-                       labels = c('Wastewater', 'Confirmed (Catchment)', 'Confirmed (Canton)',
+                       labels = c('Wastewater', 'Confirmed cases (Catchment)', 'Confirmed cases (Canton)',
                                   'Deaths', 'Hospitalized patients'),
                        breaks = c('Wastewater', 'Confirmed (Catchment)', 'Confirmed (Canton)',
                                   'Deaths', 'Hospitalized patients')) +
@@ -205,13 +208,13 @@ re_plotter2 <- function(source, canton) {
     geom_point(aes(x = date, y = median_R_mean, colour = data_type),
                data = data_ends, shape = 8) +
     scale_colour_manual(values = c(viridis(5)[c(1, 4)], '#CFE11CFF', '#2E6E8EFF'), #'lightseagreen'
-                        labels = c('Wastewater', 'Confirmed (Catchment)', 'Confirmed (Fribourg)',
-                                   'Confirmed (Bern)'),
+                        labels = c('Wastewater', 'Confirmed cases (Catchment)', 'Confirmed cases (Fribourg)',
+                                   'Confirmed cases (Bern)'),
                         breaks = c('Wastewater', 'Confirmed (Catchment)','Confirmed (Fribourg)',
                                    'Confirmed (Bern)')) +
     scale_fill_manual(values = c(viridis(5)[c(1, 4)], '#CFE11CFF', '#2E6E8EFF'), #'lightseagreen'
-                      labels = c('Wastewater', 'Confirmed (Catchment)', 'Confirmed (Fribourg)',
-                                 'Confirmed (Bern)'),
+                      labels = c('Wastewater', 'Confirmed cases (Catchment)', 'Confirmed cases (Fribourg)',
+                                 'Confirmed cases (Bern)'),
                       breaks = c('Wastewater', 'Confirmed (Catchment)','Confirmed (Fribourg)',
                                  'Confirmed (Bern)')) +
     scale_x_date(limits = c(date_range[1], Sys.Date()),
@@ -238,12 +241,12 @@ re_plotter2 <- function(source, canton) {
 
 # Plotting for all plants --------------
 
-rww_plotter <- function(source = "Wastewater", canton) {
+canton_plotter <- function(source, canton) {
   date_range <- range((ww_data %>% filter(region %in% canton) %>% select(date))[["date"]])
   # for now, as Zurich is only one from Oct - Jan end.
   # After: make into sliding scale
   date_range[1] <- as.Date('2021-02-01')
-
+  
   plotData %>% filter(region %in% canton) %>%
     filter(data_type %in% source) %>%
     ggplot() +
@@ -269,7 +272,6 @@ rww_plotter <- function(source = "Wastewater", canton) {
     labs( x = 'Date', y = bquote("Estimated R"['e']~" (95% CI)"),
           colour = 'Canton', fill = 'Canton') +
     guides(color = guide_legend(override.aes = list(size=5))) +
-    ggtitle(expression("Estimated Wastewater R"["e"]*" for different cantons")) +
     theme_minimal() +
     theme(strip.text = element_text(size=17),
           axis.text= element_text(size=14),
@@ -280,3 +282,5 @@ rww_plotter <- function(source = "Wastewater", canton) {
           panel.spacing.y = unit(2, "lines"),
           legend.position = 'bottom')
 }
+
+

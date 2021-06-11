@@ -133,11 +133,11 @@ function(input, output, session) {
     })
 
     # plotting all Rww ---------
-    # Plotting Rww+Re for other sources --------
     output$rww_plots <- renderPlot(
         {
-            rww <- rww_plotter(canton = input$canton)
-            rww
+            rww <- canton_plotter(source = 'Wastewater', canton = input$canton)
+            rww + theme(legend.position = "none") +
+                ggtitle(bquote("Estimated Wastewater R"['e']~" for different catchment areas"))
         }
     )
 
@@ -145,9 +145,9 @@ function(input, output, session) {
         ref <- c("ZH"="Zurich" ,  "VD"="Lausanne",
                  "SG"="Altenrhein", "GR"="Chur",
                  "FR"="Laupen", "TI"="Lugano")
-        hover <- input$plot_hover
+        hover <- input$plot_hover_rww
         point <- nearPoints(plotData %>% filter(region %in% input$canton) %>%
-                                filter(data_type %in% input$data_type), hover, threshold = 5, maxpoints = 1, addDist = TRUE)
+                                filter(data_type =='Wastewater'), hover, threshold = 5, maxpoints = 1, addDist = TRUE)
         if (nrow(point) == 0) return(NULL)
 
         left_px <- hover$coords_css$x
@@ -167,6 +167,40 @@ function(input, output, session) {
         )
     })
 
+    output$rcc_plots <- renderPlot(
+        {
+            rcc <- canton_plotter(canton = input$canton, source = 'Confirmed (Catchment)')
+            rcc + ggtitle(bquote("Estimated R"['e']~" using catchment specific confirmed cases for different catchment areas"))
+                
+        }
+    )
+    
+    output$hover_info_rcc <- renderUI({
+        ref <- c("ZH"="Zurich" ,  "VD"="Lausanne",
+                 "SG"="Altenrhein", "GR"="Chur",
+                 "FR"="Laupen", "TI"="Lugano")
+        hover <- input$plot_hover_rcc
+        point <- nearPoints(plotData %>% filter(region %in% input$canton) %>%
+                                filter(data_type =='Confirmed (Catchment)'), hover, threshold = 5, maxpoints = 1, addDist = TRUE)
+        if (nrow(point) == 0) return(NULL)
+
+        left_px <- hover$coords_css$x
+        top_px <- hover$coords_css$y
+
+        style <- paste0("position:absolute; z-index:100; background-color: rgba(245, 245, 245, 0.9); ",
+                        "left:", left_px+2, "px; top:", top_px+2, "px;")
+
+        # actual tooltip created as wellPanel
+        wellPanel(
+            style = style,
+            p(HTML(paste0("<i>", point$date, "</i>", "<br/>",
+                          "<b> R<sub>e</sub>: </b>", round(point$median_R_mean, 2),
+                          " (", round(point$median_R_lowHPD, 2),", ", round(point$median_R_highHPD, 2), ")",
+                          "<br/>",
+                          "<i>(", ref[[point$region]], ")</i>")))
+        )
+    })
+    
     # text below plot for more info ---------
     output$link <- renderUI({
         link <- p("For this location, the raw measurements of SARS-CoV-2 in wastewater are available ",
@@ -180,18 +214,18 @@ function(input, output, session) {
                     >LOQ indicates reliable values which are above the limit of quantification.' ,
                      style = 'margin-bottom:0;font-size: 95%;')
 
-        chur_catchment <- p(tags$sup('†'),'The estimated R',tags$sub('e'), ' for confirmed cases in the Chur catchment area is
+        chur_catchment <- p(strong('NB: '),'The estimated R',tags$sub('e'), ' for confirmed cases in the Chur catchment area is
                             currently not available due to a potential data quality issue.', style="margin-bottom:0;font-size: 95%;")
 
-        exclude_lod <- p(tags$sup('†'),'Wastewater measurements from 02.2021 to 07.03.2021 for ', ref[[input$region]],
+        exclude_lod <- p(strong('NB: '),'Wastewater measurements from 02.2021 to 07.03.2021 for ', ref[[input$region]],
                          ' have been excluded due to multiple consecutive measurements falling below the limit of quantification and/or detection,
                          which affects the reliability of the raw measurements and the wastewater R',tags$sub('e'), ' estimates.',
                          style="margin-bottom:0;font-size: 95%;")
 
-        laupen_2cantons <- p(tags$sup('†'),'The Laupen catchment area consists of municipalities in both Bern and Fribourg
+        laupen_2cantons <- p(strong('NB: '),'The Laupen catchment area consists of municipalities in both Bern and Fribourg
                              (13 communities from Bern and 12 from Fribourg).', style="margin-bottom:0;font-size: 95%;")
 
-        if (input$region == 'GR') HTML(paste(link, lod_loq, chur_catchment, exclude_lod, sep = ""))
+        if (input$region == 'GR') HTML(paste(link, lod_loq, exclude_lod, chur_catchment, sep = ""))
         else if (input$region == 'FR') HTML(paste(link, lod_loq, laupen_2cantons, sep = ""))
         else if (input$region == 'TI') HTML(paste(link, lod_loq, exclude_lod, sep = ""))
         else HTML(paste(link, lod_loq, sep = ""))
@@ -213,7 +247,7 @@ function(input, output, session) {
             }
             p <- patchwork::wrap_plots(case,raw,re, nrow = 3)+
                 plot_annotation(caption = paste0('Generated on: ',Sys.Date(),
-                                                 ' (by: ibz-shiny.ethz.ch/wastewater_re)'))
+                                                 ' (by: ibz-shiny.ethz.ch/wastewaterRe)'))
             cairo_pdf(filename = file,
                       width = 16, height = 12, pointsize = 12, family = "sans", bg = "transparent",
                       antialias = "subpixel",fallback_resolution = 300)

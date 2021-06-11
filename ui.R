@@ -53,7 +53,7 @@ navbarPage("Covid-19: Wastewater Re",
                         fluidRow(
                          div(
                              style = "position:relative",
-                             plotOutput("case_plots", height = "245px", width = "950px",
+                             plotOutput("case_plots", height = "255px", width = "950px",
                                         hover = hoverOpts("plot_hover_case", delay = 10))%>%
                                  withSpinner(color="#0dc5c1"),
                              uiOutput("hover_info_case")
@@ -97,10 +97,17 @@ navbarPage("Covid-19: Wastewater Re",
                  fluidRow(
                      div(
                          style = "position:relative",
-                         plotOutput("rww_plots", height = "400px", width = "980px",
-                                    hover = hoverOpts("plot_hover", delay = 10))%>%
+                         plotOutput("rww_plots", height = "350px", width = "980px",
+                                    hover = hoverOpts("plot_hover_rww", delay = 10))%>%
                              withSpinner(color="#0dc5c1"),
                          uiOutput("hover_info_rww")
+                     ),
+                     div(
+                         style = "position:relative",
+                         plotOutput("rcc_plots", height = "350px", width = "980px",
+                                    hover = hoverOpts("plot_hover_rcc", delay = 10))%>%
+                             withSpinner(color="#0dc5c1"),
+                         uiOutput("hover_info_rcc")
                      ),
                      p("The raw measurements of SARS-CoV-2 in wastewater and associated catchment cases are displayed on ",
                        a(href = "https://sensors-eawag.ch/sars/overview.html", "EAWAG's overview page", .noWS = "outside"),
