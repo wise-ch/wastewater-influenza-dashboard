@@ -47,7 +47,7 @@ function(input, output, session) {
 
     output$hover_info_raw <- renderUI({
         hover_raw <- input$plot_hover_raw
-        point <- nearPoints(ww_data %>% filter(region == input$region) %>% mutate(n1 = n1/10^13),
+        point <- nearPoints(ww_data %>% filter(region == input$region) %>% mutate(n1 = n1/10^12),
                             hover_raw, threshold = 8, maxpoints = 1, addDist = TRUE)
         if (nrow(point) == 0) return(NULL)
 

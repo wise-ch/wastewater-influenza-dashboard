@@ -87,7 +87,7 @@ raw_plotter <- function(data, canton) {
 
   date_range <- range((ww_data %>% filter(region == canton) %>% select(date))[["date"]])
 
-  data %>% filter(region == canton) %>% mutate(n1 = n1/10^13) %>%
+  data %>% filter(region == canton) %>% mutate(n1 = n1/10^12) %>%
     ggplot( ) +
     geom_point(aes(x=date, y = n1, colour = quantification_flag)) +
     scale_x_date(limits = c(date_range[1], Sys.Date()),
@@ -98,9 +98,9 @@ raw_plotter <- function(data, canton) {
                         breaks = c('> LOQ', 'Imputed', '> LOD', '< LOD'),
                         name = 'Quantification flag**',
                         guide = guide_legend(override.aes = list(size = 3) )) + # to increase size of point in legend
-    geom_line(data = data %>% filter(region == canton) %>% filter(orig_data)  %>% mutate(n1 = n1/10^13),
+    geom_line(data = data %>% filter(region == canton) %>% filter(orig_data)  %>% mutate(n1 = n1/10^12),
               aes(x=date, y= n1,colour = name_orig), linetype = 'dashed', colour = "black") +
-    labs(x = 'Date' , y=expression("Gene copies ("%*%"10"^13*")")) +
+    labs(x = 'Date' , y=expression("Gene copies ("%*%"10"^12*")")) +
     #ggtitle(paste0("SARS-CoV2-RNA copies in Wastewater in ", ref[[canton]])) +
     theme_minimal() +
     theme(strip.text = element_text(size=17),
