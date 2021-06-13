@@ -4,8 +4,6 @@ library(lubridate)
 library(patchwork)
 library(viridis)
 
-
-# cronjobs to do source work ####
 source("helper_code/reading_in.R") #
 
 # Reading in cantonal Re estimates ####
@@ -28,7 +26,7 @@ Restimates_canton <- Restimates_canton %>% filter(estimate_type == 'Cori_sliding
 
 
 
-# Reading in cantonal Rww and catchment Rcc estimates ####
+# Reading in Rww and catchment Rcc estimates ####
 
 Re_ww_needed <- read_csv("rww_data/Rww_cantonal.csv")
 Re_cc_needed <- read_csv("rww_data/Rcc_catchment.csv")
@@ -44,7 +42,6 @@ plotData <- plotData %>%
   mutate(data_type = recode_factor(data_type, "infection_cases" = "Confirmed (Catchment)"))
 
 
-
 # reference:
 ref <- c("ZH"="Zurich" ,  "VD"="Lausanne",
          "SG"="Altenrhein", "GR"="Chur",
@@ -54,15 +51,18 @@ ref_size <- c("ZH"="450'000" ,  "VD"="240'000",
               "SG"="64'000", "GR"="55'000",
               "FR"="62'000", "TI"="124'000")
 
+global_date_range <- range(ww_data$date)
+  
+
 # Raw plots ####
 
-case_plotter <- function(data = case_data, canton) {
-  date_range <- range((ww_data %>% filter(region == canton) %>% select(date))[["date"]])
+case_plotter <- function(data = case_data, canton, date_range) {
+  #date_range <- range((ww_data %>% filter(region == canton) %>% select(date))[["date"]])
 
   data %>% filter(region == canton) %>%
     ggplot(aes(x=date, y = cases, fill = region) ) + # filling simply for a legend...
     geom_bar(stat="identity", colour = viridis(5)[4], alpha = 0.7) +
-    scale_x_date(limits = c(date_range[1], Sys.Date()),
+    scale_x_date(limits = c(date_range[1], date_range[2]),
                  date_breaks = "months", date_labels = "%b") +
     scale_y_continuous(labels = function(label) sprintf('%5.1f', label)) +
     labs(x = 'Date' , y=expression("Cases per 100'000 residents")) +
@@ -81,16 +81,16 @@ case_plotter <- function(data = case_data, canton) {
           legend.position = 'bottom')
 }
 
-raw_plotter <- function(data, canton) {
+raw_plotter <- function(data, canton, date_range) {
   n <- ww_data %>% filter(region==canton) %>%
     group_by(quantification_flag) %>% tally() %>% nrow()
 
-  date_range <- range((ww_data %>% filter(region == canton) %>% select(date))[["date"]])
+  #date_range <- range((ww_data %>% filter(region == canton) %>% select(date))[["date"]])
 
   data %>% filter(region == canton) %>% mutate(n1 = n1/10^12) %>%
     ggplot( ) +
     geom_point(aes(x=date, y = n1, colour = quantification_flag)) +
-    scale_x_date(limits = c(date_range[1], Sys.Date()),
+    scale_x_date(limits = c(date_range[1], date_range[2]),
                  date_breaks = "months", date_labels = "%b") +
     scale_y_continuous(labels = function(label) sprintf('%5.1f', label)) +
     scale_colour_manual(values = c(viridis(4)[1], 'darkgrey', 'firebrick', viridis(5)[5]), #'lightseagreen'
@@ -115,8 +115,8 @@ raw_plotter <- function(data, canton) {
 
 # Re plots ####
 
-re_plotter <- function(source, canton) {
-  date_range <- range((ww_data %>% filter(region == canton) %>% select(date))[["date"]])
+re_plotter <- function(source, canton, date_range) {
+  #date_range <- range((ww_data %>% filter(region == canton) %>% select(date))[["date"]])
   # For CHUR: leave out confirmed catchment case Re for now (as lots of missing data) ---------
   if (canton == "GR") {
     source <- source[! source %in% 'Confirmed (Catchment)']
@@ -147,7 +147,7 @@ re_plotter <- function(source, canton) {
                                   'Deaths', 'Hospitalized patients'),
                        breaks = c('Wastewater', 'Confirmed (Catchment)', 'Confirmed (Canton)',
                                   'Deaths', 'Hospitalized patients')) +
-    scale_x_date(limits = c(date_range[1], Sys.Date()),
+    scale_x_date(limits = c(date_range[1], date_range[2]),
                  date_breaks = "months", date_labels = "%b") +
     scale_y_continuous(labels = function(label) sprintf('%6.1f', label)) +
     coord_cartesian(ylim = c(0, 2)) +
@@ -166,11 +166,11 @@ re_plotter <- function(source, canton) {
           legend.position = 'bottom') +
     annotate(geom = 'text',
              label = disc,
-             x = summary(date_range)[['3rd Qu.']], y = 0.1, hjust = 0.5, vjust = 1, size = 4)
+             x = summary(date_range)[['3rd Qu.']]-2, y = 0.1, hjust = 0.5, vjust = 1, size = 4)
 }
 # special plot for Chur - 2 cantons ------
-re_plotter2 <- function(source, canton) {
-  date_range <- range((ww_data %>% filter(region %in% canton) %>% select(date))[["date"]])
+re_plotter2 <- function(source, canton, date_range) {
+  #date_range <- range((ww_data %>% filter(region %in% canton) %>% select(date))[["date"]])
   canton <- c("BE", "FR")
   # Rww and Rcc for catchment unaffected. Other sources change.
 
@@ -217,7 +217,7 @@ re_plotter2 <- function(source, canton) {
                                  'Confirmed cases (Bern)'),
                       breaks = c('Wastewater', 'Confirmed (Catchment)','Confirmed (Fribourg)',
                                  'Confirmed (Bern)')) +
-    scale_x_date(limits = c(date_range[1], Sys.Date()),
+    scale_x_date(limits = c(date_range[1], date_range[2]),
                  date_breaks = "months", date_labels = "%b") +
     scale_y_continuous(labels = function(label) sprintf('%6.1f', label)) +
     coord_cartesian(ylim = c(0, 2)) +
@@ -241,11 +241,11 @@ re_plotter2 <- function(source, canton) {
 
 # Plotting for all plants --------------
 
-canton_plotter <- function(source, canton) {
-  date_range <- range((ww_data %>% filter(region %in% canton) %>% select(date))[["date"]])
+canton_plotter <- function(source, canton, date_range) {
+  #date_range <- range((ww_data %>% filter(region %in% canton) %>% select(date))[["date"]])
   # for now, as Zurich is only one from Oct - Jan end.
   # After: make into sliding scale
-  date_range[1] <- as.Date('2021-02-01')
+  #date_range[1] <- as.Date('2021-02-01')
   
   plotData %>% filter(region %in% canton) %>%
     filter(data_type %in% source) %>%
@@ -266,7 +266,7 @@ canton_plotter <- function(source, canton) {
                                  'Laupen', 'Lugano'),
                       breaks = c('ZH', 'VD', 'SG','GR',
                                  'FR', 'TI')) +
-    scale_x_date(limits = c(date_range[1], Sys.Date()),
+    scale_x_date(limits = c(date_range[1], date_range[2]),
                  date_breaks = "months", date_labels = "%b") +
     coord_cartesian(ylim = c(0, 2)) +
     labs( x = 'Date', y = bquote("Estimated R"['e']~" (95% CI)"),

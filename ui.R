@@ -2,6 +2,7 @@ library(shiny)
 library(shinyjs)
 library(shinyBS)
 library(shinycssloaders)
+library(shinyWidgets)
 
 source("helper_code/plot_maker.R")
 
@@ -72,6 +73,17 @@ navbarPage("Covid-19: Wastewater Re",
                                  withSpinner(color="#0dc5c1"),
                              uiOutput("hover_info_re")
                          ),
+                         # slider input for date range -----
+                         # idea 1: fix month range
+                         # idea 2: can change both date ranges - current 
+                         chooseSliderSkin("Flat", color = viridis(5)[4]),
+                         #setSliderColor(viridis(5)[4], 1),
+                         sliderInput("slider_dates", label = NULL, width = '950px',
+                                     min = global_date_range[1], max = Sys.Date(), 
+                                     value = c(global_date_range[1], Sys.Date())
+                         ),
+                         p(HTML('<em>The start and end date of the time interval to be displayed can be changed by moving the slider above.</em>'),
+                           style = 'margin-bottom:0;font-size: 90%;'),
                          htmlOutput("link"),
                          downloadButton('downloadPlot', 'Download results')
 
@@ -109,6 +121,14 @@ navbarPage("Covid-19: Wastewater Re",
                              withSpinner(color="#0dc5c1"),
                          uiOutput("hover_info_rcc")
                      ),
+                     chooseSliderSkin("Flat", color = viridis(5)[4]),
+                     #setSliderColor(viridis(5)[4], 1:2), # for some reason, this is not working?
+                     sliderInput("slider_dates_cantonal", label = NULL, width = '950px',
+                                 min = as.Date('2021-02-01'), max = Sys.Date(),
+                                 value = c(as.Date('2021-02-01'), Sys.Date())
+                     ),
+                     p(HTML('<em>The start and end date of the time interval to be displayed can be changed by moving the slider above.</em>'),
+                       style = 'margin-bottom:0;font-size: 90%;'),
                      p("The raw measurements of SARS-CoV-2 in wastewater and associated catchment cases are displayed on ",
                        a(href = "https://sensors-eawag.ch/sars/overview.html", "EAWAG's overview page", .noWS = "outside"),
                        " with links to individual plant measurements.",

@@ -5,19 +5,31 @@ function(input, output, session) {
     # keeps track of reactivity - re-computes when input changes
     # use input values when you make your output. Access with $ and Id
     # this value changes as the input bar/slider/button changes. Reactive.
+    
+    observe({
+        # Control the value, min, max according to region selected
+        # min according to ww data min for catchment area
+        date_range <- c(range((ww_data %>% filter(region == input$region) %>% 
+                                   select(date))[["date"]])[1], 
+                        Sys.Date())
+        updateSliderInput(session, "slider_dates", value = date_range,
+                          min = date_range[1], max = Sys.Date())
+    })
+    
     # Plotting cases -------
     output$case_plots <- renderPlot(
         {
             # from all the case plots, it picks region
             # as per drop down menu
-            case <- case_plotter(case_data, input$region)
+            case <- case_plotter(case_data, input$region, input$slider_dates)
             case
         }
     )
     # Hover info
     output$hover_info_case <- renderUI({
         hover_case <- input$plot_hover_case
-        point <- nearPoints(case_data %>% filter(region == input$region),
+        point <- nearPoints(case_data %>% filter(region == input$region) %>% 
+                                filter(date >= input$slider_dates[1] & date <= input$slider_dates[2]),
                             hover_case, threshold = 4, maxpoints = 1, addDist = TRUE)
         if (nrow(point) == 0) return(NULL)
 
@@ -40,14 +52,15 @@ function(input, output, session) {
     # Plotting raw RNA copies -------
     output$raw_plots <- renderPlot(
         {
-            raw <- raw_plotter(ww_data, input$region)
+            raw <- raw_plotter(ww_data, input$region, input$slider_dates)
             raw
         }
     )
 
     output$hover_info_raw <- renderUI({
         hover_raw <- input$plot_hover_raw
-        point <- nearPoints(ww_data %>% filter(region == input$region) %>% mutate(n1 = n1/10^12),
+        point <- nearPoints(ww_data %>% filter(region == input$region) %>% mutate(n1 = n1/10^12) %>%
+                                filter(date >= input$slider_dates[1] & date <= input$slider_dates[2]),
                             hover_raw, threshold = 8, maxpoints = 1, addDist = TRUE)
         if (nrow(point) == 0) return(NULL)
 
@@ -69,10 +82,10 @@ function(input, output, session) {
     output$re_plots <- renderPlot(
         {
             if (input$region == "FR") {
-                re <- re_plotter2(input$data_type, input$region) # call plotter 2: 2 cantons!
+                re <- re_plotter2(input$data_type, input$region, input$slider_dates) # call plotter 2: 2 cantons!
             }
             else {
-                re <- re_plotter(input$data_type, input$region)
+                re <- re_plotter(input$data_type, input$region, input$slider_dates)
             }
             re
         }
@@ -97,7 +110,8 @@ function(input, output, session) {
                 mutate(data_type = recode_factor(data_type, 'Confirmed (Canton)' = 'Confirmed (Fribourg)'))
 
             new_data <- plotData %>% filter(region %in% c("BE", "FR")) %>%
-                filter(data_type %in% source_without_canton) %>% filter(date >= date_range[1])
+                filter(data_type %in% source_without_canton) %>% 
+                filter(date >= input$slider_dates[1] & date <= input$slider_dates[2])
 
             if (length(source_canton)>0) {
                 new_data <- new_data %>% bind_rows(bern_confirmed) %>% bind_rows(fribourg_confirmed)
@@ -109,7 +123,8 @@ function(input, output, session) {
         else {
 
             point <- nearPoints(plotData %>% filter(region == input$region) %>%
-                                    filter(data_type %in% input$data_type) %>% filter(date >= date_range[1]),
+                                    filter(data_type %in% input$data_type) %>% 
+                                    filter(date >= input$slider_dates[1] & date <= input$slider_dates[2]),
                                 hover, threshold = 5, maxpoints = 1, addDist = TRUE)
         }
 
@@ -135,7 +150,7 @@ function(input, output, session) {
     # plotting all Rww ---------
     output$rww_plots <- renderPlot(
         {
-            rww <- canton_plotter(source = 'Wastewater', canton = input$canton)
+            rww <- canton_plotter(source = 'Wastewater', canton = input$canton, date_range = input$slider_dates_cantonal)
             rww + theme(legend.position = "none") +
                 ggtitle(bquote("Estimated Wastewater R"['e']~" for different catchment areas"))
         }
@@ -169,7 +184,8 @@ function(input, output, session) {
 
     output$rcc_plots <- renderPlot(
         {
-            rcc <- canton_plotter(canton = input$canton, source = 'Confirmed (Catchment)')
+            rcc <- canton_plotter(canton = input$canton, source = 'Confirmed (Catchment)', 
+                                  date_range = input$slider_dates_cantonal)
             rcc + ggtitle(bquote("Estimated R"['e']~" using catchment specific confirmed cases for different catchment areas"))
                 
         }
