@@ -254,12 +254,12 @@ function(input, output, session) {
         },
         # content is a function with argument file. content writes the plot to the device
         content = function(file) {
-            case <- case_plotter(case_data, input$region)
-            raw <- raw_plotter(ww_data, input$region)
+            case <- case_plotter(case_data, input$region, input$slider_dates)
+            raw <- raw_plotter(ww_data, input$region, input$slider_dates)
             if (input$region == "FR") {
-                re <- re_plotter2(input$data_type, input$region) # call plotter 2: 2 cantons!
+                re <- re_plotter2(input$data_type, input$region, input$slider_dates) # call plotter 2: 2 cantons!
             } else {
-                re <- re_plotter(input$data_type, input$region)
+                re <- re_plotter(input$data_type, input$region, input$slider_dates)
             }
             p <- patchwork::wrap_plots(case,raw,re, nrow = 3)+
                 plot_annotation(caption = paste0('Generated on: ',Sys.Date(),
