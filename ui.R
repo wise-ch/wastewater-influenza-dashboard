@@ -9,7 +9,7 @@ source("helper_code/plot_maker.R")
 navbarPage("Covid-19: Wastewater Re",
     # a page with a navigation bar
     # HOME ####
-    tabPanel("Cantonal",
+    tabPanel("Catchments",
              # Sidepanel - options + info  --------
              sidebarLayout(
                  sidebarPanel(
@@ -24,11 +24,13 @@ navbarPage("Covid-19: Wastewater Re",
                      checkboxGroupInput(inputId = "data_type",
                                         label = "Data Source (select to compare):",
                                         choices = c("Wastewater" = "Wastewater",
-                                          "Confirmed cases (in catchment area)" = "Confirmed (Catchment)",
                                           "Confirmed cases (in canton)" = "Confirmed (Canton)"),
                                           #"Deaths" = "Deaths",
                                           #"Hospitalized patients"= "Hospitalized patients"),
                                         selected = "Wastewater"),
+                     checkboxGroupInput(inputId = 'catchment_selection',
+                                        label = NULL,
+                                        choices = c("Confirmed cases (in catchment area)" = "Confirmed (Catchment)")),
                      # if we would like deaths and hospitalised patients, comment out next chunk and
                      # include back in checkboxGroupInput
                      disabled(checkboxGroupInput(inputId = "data_type_disabled",
@@ -38,14 +40,23 @@ navbarPage("Covid-19: Wastewater Re",
                                                                  "Hospitalized patients"))),
                      p(HTML(paste0('*The R',tags$sub('e'),' for hospitalised patients and deaths are
                                    currently not displayed because the low case incidence results in
-                                   large confidence intervals and low usefulness.'))),
-                     p(HTML(paste0(strong('NB: '),"The R",tags$sub('e'), " for wastewater is informed by
+                                   large confidence intervals and low usefulness.')), style="font-size: 95%;"),
+                     conditionalPanel(
+                         condition = "input.region == 'GR'",
+                         uiOutput('chur_catchment_disc')
+                         
+                     ),
+                     p(
+                         tags$ul(style="padding-left:10px;font-size: 95%;",
+                            tags$li(HTML(paste0("The R",tags$sub('e'), " for wastewater is informed by
                                     infections in the catchment area, and will correspond best to
                                    the R",tags$sub('e')," based on confirmed cases
                                    from that area. All other R",tags$sub('e'),"
                                    traces show the cantonal results, so there may be some dissonance.
                                    For instance, canton Zurich is about 3.4x the size of the catchment area served by the
                                    Werdhölzli wastewater treatment plant."))),
+                            tags$li('While Lausanne is also one of the catchment areas being monitored, 
+                                           we have not included it in the dashboard due to data quality issues.') ) ),
 
                      width = 3
                  ),
@@ -150,7 +161,6 @@ navbarPage("Covid-19: Wastewater Re",
                           estimates from wastewater for the wastewater treatment plants that are part of the AbwasSARS-CoV-2 project in Switzerland.
                           These estimates are shown together with existing R",tags$sub("e")," estimates from clinical data sources (for the corresponding cantons).")),
                             style="text-align:justify;color:black;padding:15px;border-radius:10px"),
-                          #br(),
                           h3("How do we do it?"),
                           p(HTML(paste0("The effective reproductive number, R",tags$sub("e"),", quantifies the expected number of people an infected individual will infect over time.
                           Since infected individuals excrete substantial amounts of SARS-CoV-2 RNA into the sewer system (via saliva, feces, and/or sputum),
@@ -167,14 +177,14 @@ navbarPage("Covid-19: Wastewater Re",
                                         "Currently, these methods are applied to measurements of the ", strong("SARS-CoV-2 N1 gene"), "."
                                         )),
                             style="text-align:justify;color:black;padding:15px;border-radius:10px"),
-                          #br(),
                           h3("Who is involved?"),
-                          p(HTML(paste0("This dashboard is developed by Taru Singhal, supervised by Jana Huisman and Tanja Stadler (cEvo group, ETH Zurich).", "<br>",
+                          p(HTML(paste0("This dashboard is developed by Taru Singhal, supervised by Jana Huisman and Tanja Stadler (")),
+                            a(href = "https://bsse.ethz.ch/cevo", "Computational Evolution group", .noWS = "outside"),
+                            HTML(paste0(", ETH Zurich).", "<br>",
                           "The underlying wastewater measurements are collected by teams at the Swiss Federal Institute of Aquatic Science and Technology (EAWAG) and EPFL,
                           supervised by Tim Julian, Christoph Ort, and Tamar Kohn.", "<br>",
                          "Funding for this project stems from the Swiss Federal Office of Public Health.")),
                             style="text-align:justify;color:black;padding:15px;border-radius:10px"),
-                          #br(),
                           h3("Links and further reading"),
                           p(HTML(paste0("The method to estimate R",tags$sub("e"), " from wastewater is described ")),
                             a(href = "https://www.medrxiv.org/content/10.1101/2021.04.29.21255961v1", "here", .noWS = "outside"),
@@ -195,7 +205,11 @@ navbarPage("Covid-19: Wastewater Re",
                             ".",
                             .noWS = c("after-begin", "before-end"),
                             style="text-align:justify;color:black;padding:15px;border-radius:10px"),
-                          br(),
+                         h3("Contact us"),
+                         p(HTML(paste0('For general inquiries, feedback or suggestions for improvements, please contact Taru Singhal (',
+                         a(href='mailto:tsinghal@student.ethz.ch', 'tsinghal@student.ethz.ch'), ') or Jana Huisman (', 
+                         a(href='mailto:jana.huisman@env.ethz.ch', 'jana.huisman@env.ethz.ch'), ').')), 
+                           style="text-align:justify;color:black;padding:15px;border-radius:10px"),
                           width=10),
 
 

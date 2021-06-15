@@ -5,6 +5,10 @@ function(input, output, session) {
     # keeps track of reactivity - re-computes when input changes
     # use input values when you make your output. Access with $ and Id
     # this value changes as the input bar/slider/button changes. Reactive.
+    #initialize reactive values (will use to store selected boxes to identify newest selection)
+    rv <- reactiveValues()
+    #initialize selected boxes to NULL
+    rv$selectedBoxes <- NULL 
     
     observe({
         # Control the value, min, max according to region selected
@@ -16,6 +20,14 @@ function(input, output, session) {
                           min = date_range[1], max = Sys.Date())
     })
     
+    observeEvent(input$region, {
+        if(input$region == 'GR'){
+            shinyjs::disable("catchment_selection")
+        }else{
+            shinyjs::enable("catchment_selection")
+        }
+    })
+
     # Plotting cases -------
     output$case_plots <- renderPlot(
         {
@@ -82,10 +94,10 @@ function(input, output, session) {
     output$re_plots <- renderPlot(
         {
             if (input$region == "FR") {
-                re <- re_plotter2(input$data_type, input$region, input$slider_dates) # call plotter 2: 2 cantons!
+                re <- re_plotter2(c(input$data_type, input$catchment_selection), input$region, input$slider_dates) # call plotter 2: 2 cantons!
             }
             else {
-                re <- re_plotter(input$data_type, input$region, input$slider_dates)
+                re <- re_plotter(c(input$data_type, input$catchment_selection), input$region, input$slider_dates)
             }
             re
         }
@@ -97,7 +109,7 @@ function(input, output, session) {
         # NB as some places have chunks cut out... Chur and Lugano.
         # special treatment: Laupen - has both Fribourg and Bern! ------
         if (input$region == "FR") {
-            source <- input$data_type
+            source <- c(input$data_type, input$catchment_selection)
             source_canton <- source[source %in% c('Confirmed (Canton)')]
             source_without_canton <- source[! source %in% c('Confirmed (Canton)')]
 
@@ -123,7 +135,7 @@ function(input, output, session) {
         else {
 
             point <- nearPoints(plotData %>% filter(region == input$region) %>%
-                                    filter(data_type %in% input$data_type) %>% 
+                                    filter(data_type %in% c(input$data_type, input$catchment_selection)) %>% 
                                     filter(date >= input$slider_dates[1] & date <= input$slider_dates[2]),
                                 hover, threshold = 5, maxpoints = 1, addDist = TRUE)
         }
@@ -216,6 +228,11 @@ function(input, output, session) {
                           "<i>(", ref[[point$region]], ")</i>")))
         )
     })
+
+    output$chur_catchment_disc <- renderUI({
+        p(HTML(paste0(strong('NB: '),'The estimated R',tags$sub('e'), ' for confirmed cases in the Chur catchment area is
+                            currently not available due to a potential data quality issue.')),style="font-size: 95%;")
+    })
     
     # text below plot for more info ---------
     output$link <- renderUI({
@@ -230,18 +247,18 @@ function(input, output, session) {
                     >LOQ indicates reliable values which are above the limit of quantification.' ,
                      style = 'margin-bottom:0;font-size: 95%;')
 
-        chur_catchment <- p(strong('NB: '),'The estimated R',tags$sub('e'), ' for confirmed cases in the Chur catchment area is
-                            currently not available due to a potential data quality issue.', style="margin-bottom:0;font-size: 95%;")
+        #chur_catchment <- p(strong('NB: '),'The estimated R',tags$sub('e'), ' for confirmed cases in the Chur catchment area is
+        #                    currently not available due to a potential data quality issue.', style="margin-bottom:0;font-size: 95%;")
 
-        exclude_lod <- p(strong('NB: '),'Wastewater measurements from 02.2021 to 07.03.2021 for ', ref[[input$region]],
+        exclude_lod <- p(HTML(paste0(strong('NB: '),'Wastewater measurements from 02.2021 to 07.03.2021 for ', ref[[input$region]],
                          ' have been excluded due to multiple consecutive measurements falling below the limit of quantification and/or detection,
-                         which affects the reliability of the raw measurements and the wastewater R',tags$sub('e'), ' estimates.',
+                         which affects the reliability of the raw measurements and the wastewater R',tags$sub('e'), ' estimates.')),
                          style="margin-bottom:0;font-size: 95%;")
 
         laupen_2cantons <- p(strong('NB: '),'The Laupen catchment area consists of municipalities in both Bern and Fribourg
                              (13 communities from Bern and 12 from Fribourg).', style="margin-bottom:0;font-size: 95%;")
 
-        if (input$region == 'GR') HTML(paste(link, lod_loq, exclude_lod, chur_catchment, sep = ""))
+        if (input$region == 'GR') HTML(paste(link, lod_loq, exclude_lod, sep = ""))
         else if (input$region == 'FR') HTML(paste(link, lod_loq, laupen_2cantons, sep = ""))
         else if (input$region == 'TI') HTML(paste(link, lod_loq, exclude_lod, sep = ""))
         else HTML(paste(link, lod_loq, sep = ""))
@@ -257,9 +274,9 @@ function(input, output, session) {
             case <- case_plotter(case_data, input$region, input$slider_dates)
             raw <- raw_plotter(ww_data, input$region, input$slider_dates)
             if (input$region == "FR") {
-                re <- re_plotter2(input$data_type, input$region, input$slider_dates) # call plotter 2: 2 cantons!
+                re <- re_plotter2(c(input$data_type, input$catchment_selection), input$region, input$slider_dates) # call plotter 2: 2 cantons!
             } else {
-                re <- re_plotter(input$data_type, input$region, input$slider_dates)
+                re <- re_plotter(c(input$data_type, input$catchment_selection), input$region, input$slider_dates)
             }
             p <- patchwork::wrap_plots(case,raw,re, nrow = 3)+
                 plot_annotation(caption = paste0('Generated on: ',Sys.Date(),
