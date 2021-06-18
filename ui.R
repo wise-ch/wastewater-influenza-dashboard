@@ -107,7 +107,7 @@ navbarPage("Covid-19: Wastewater Re",
              sidebarLayout(
                  sidebarPanel(
                      checkboxGroupInput(inputId = "canton",
-                                        label = "Canton (select to compare):",
+                                        label = "Catchment (select to compare):",
                                         choices = c("Zurich" = "ZH",
                                                     #"Lausanne" = "VD",
                                                     "Altenrhein" = "SG", "Chur" = "GR",
