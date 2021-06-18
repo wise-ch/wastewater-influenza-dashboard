@@ -270,7 +270,7 @@ canton_plotter <- function(source, canton, date_range) {
                  date_breaks = "months", date_labels = "%b") +
     coord_cartesian(ylim = c(0, 2)) +
     labs( x = 'Date', y = bquote("Estimated R"['e']~" (95% CI)"),
-          colour = 'Canton', fill = 'Canton') +
+          colour = 'Catchment', fill = 'Catchment') +
     guides(color = guide_legend(override.aes = list(size=5))) +
     theme_minimal() +
     theme(strip.text = element_text(size=17),
