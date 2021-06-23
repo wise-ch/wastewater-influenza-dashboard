@@ -42,33 +42,15 @@ ww_read_in <- function(data_url, region) {
 
 #### New raw data format: Read in --------
 
-ZH_url = "https://sensors-eawag.ch/sars/__data__/processed_normed_data_zurich.csv"
-all_data <- ww_read_in(ZH_url, "ZH") # what's different? The rna values seem different
-ww_data <- bind_rows(ww_data, all_data[["ww"]])
-case_data <- bind_rows(case_data, all_data[["case"]])
+regions <- c('ZH', 'VD','SG', 'GR', 'FR','TI')
 
-VD_url = "https://sensors-eawag.ch/sars/__data__/processed_normed_data_lausanne.csv"
-all_data <- ww_read_in(VD_url, "VD")
-ww_data <- bind_rows(ww_data, all_data[["ww"]])
-case_data <- bind_rows(case_data, all_data[["case"]])
+ref <- c("ZH"="Zurich" ,  "VD"="Lausanne",
+         "SG"="Altenrhein", "GR"="Chur",
+         "FR"="Laupen", "TI"="Lugano")
 
-SG_url = "https://sensors-eawag.ch/sars/__data__/processed_normed_data_altenrhein.csv"
-all_data <- ww_read_in(SG_url, "SG")
-ww_data <- bind_rows(ww_data, all_data[["ww"]])
-case_data <- bind_rows(case_data, all_data[["case"]])
-
-GR_url = "https://sensors-eawag.ch/sars/__data__/processed_normed_data_chur.csv"
-all_data <- ww_read_in(GR_url, "GR")
-ww_data <- bind_rows(ww_data, all_data[["ww"]])
-case_data <- bind_rows(case_data, all_data[["case"]])
-
-FR_url = "https://sensors-eawag.ch/sars/__data__/processed_normed_data_laupen.csv"
-all_data <- ww_read_in(FR_url,  "FR")
-ww_data <- bind_rows(ww_data, all_data[["ww"]])
-case_data <- bind_rows(case_data, all_data[["case"]])
-
-TI_url = "https://sensors-eawag.ch/sars/__data__/processed_normed_data_lugano.csv"
-all_data <- ww_read_in(TI_url,"TI")
-ww_data <- bind_rows(ww_data, all_data[["ww"]])
-case_data <- bind_rows(case_data, all_data[["case"]])
-
+for (i in regions) {
+  url = paste0("https://sensors-eawag.ch/sars/__data__/processed_normed_data_",tolower(ref[[i]]),".csv")
+  all_data <- ww_read_in(url, i)
+  ww_data <- bind_rows(ww_data, all_data[["ww"]])
+  case_data <- bind_rows(case_data, all_data[["case"]])
+}
