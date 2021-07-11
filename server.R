@@ -240,11 +240,11 @@ function(input, output, session) {
                   a(href = paste0("https://sensors-eawag.ch/sars/",tolower(ref[[input$region]]),".html"), "here", .noWS = "outside"),
                   ".",
                   .noWS = c("after-begin", "before-end"), style="margin-bottom:0;font-size: 95%;")
-        lod_loq <- p('**<LOD indicates values below the limit of detection.\n
-                    >LOD represents values below the limit of quantification, but
-                     above the limit of detection. These values have higher uncertainty, as the number of gene copies is
-                    very low.\n
-                    >LOQ indicates reliable values which are above the limit of quantification.' ,
+        lod_loq <- p('**Limit of detection (LOD) represents concentration levels at which SARS-CoV-2 can be reliably detected, 
+                    while limit of quantification (LOQ) represents concentration levels with prespecified precision.
+                    <LOD indicates values below the LOD; >LOD represents values below the LOQ, but
+                    above the LOD. These values have higher uncertainty, as the number of gene copies is
+                    very low. >LOQ indicates reliable values which are above the LOQ.' ,
                      style = 'margin-bottom:0;font-size: 95%;')
 
         #chur_catchment <- p(strong('NB: '),'The estimated R',tags$sub('e'), ' for confirmed cases in the Chur catchment area is
