@@ -30,7 +30,7 @@ ww_read_in <- function(data_url, region) {
     select(-cases, -cases_smooth) %>%
     mutate(quantification_flag = replace_na(quantification_flag, "Imputed")) %>%
     mutate(quantification_flag = recode(quantification_flag, Q = '> LOQ', D = '> LOD', N = '< LOD'))
-  
+  # skip a week as many consecutive ww readings were below LOD
   if (region == "TI" | region == "GR") {
     new_ww_data <- new_ww_data %>%
       filter(date >= as.Date('2021-03-08'))

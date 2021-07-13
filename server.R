@@ -241,7 +241,7 @@ function(input, output, session) {
                   ".",
                   .noWS = c("after-begin", "before-end"), style="margin-bottom:0;font-size: 95%;")
         lod_loq <- p('**Limit of detection (LOD) represents concentration levels at which SARS-CoV-2 can be reliably detected, 
-                    while limit of quantification (LOQ) represents concentration levels with prespecified precision.
+                    while limit of quantification (LOQ) represents concentration levels detected with prespecified precision.
                     <LOD indicates values below the LOD; >LOD represents values below the LOQ, but
                     above the LOD. These values have higher uncertainty, as the number of gene copies is
                     very low. >LOQ indicates reliable values which are above the LOQ.' ,
