@@ -9,7 +9,7 @@
     {
       "en-gb": "*The R<sub>e</sub> for hospitalised patients and deaths are currently not displayed because the low case incidence results in large confidence intervals and low usefulness.",
       "it-ch": "TBT",
-      "fr-ch": "TBT",
+      "fr-ch": "*Les R<sub>e</sub> pour les patients hospitalisés et les décès ne sont actuellement pas indiqués, car la faible incidence des cas entraîne d’importants intervalles de confiance – ce qui n’est donc pas d’une grande utilité.",
       "de-ch": "*R<sub>e</sub> für hospitalisierte Patienten und Todesfälle werden derzeit nicht angezeigt, da die geringe Fallinzidenz zu grossen Konfidenzintervallen und geringer Nützlichkeit führt."
     },
     {
@@ -20,16 +20,16 @@
     },
     {"en-gb": "The R<sub>e</sub> for wastewater is informed by infections in the catchment area, and will correspond best to the R<sub>e</sub> based on confirmed cases from that area. All other R<sub>e</sub> traces show the cantonal results, so there may be some dissonance. For instance, canton Zurich is about 3.4x the size of the catchment area served by the Werdhölzli wastewater treatment plant.",
     "it-ch": "TBT",
-    "fr-ch": "TBT",
+    "fr-ch": "Le R<sub>e</sub> pour les eaux usées est basé sur les infections dans la zone de captage et correspondra au mieux au R<sub>e</sub> basé sur les cas confirmés dans cette zone. Tous les autres tracements de R<sub>e</sub> montrent les résultats cantonaux, raison pour laquelle une certaine dissonance est possible. Par exemple, le canton de Zurich est 3,4 fois plus grand que la zone du bassin versant desservie par la STEP de Werdhölzli.",
     "de-ch": "R<sub>e</sub> für Abwasser basiert auf den Infektionen im Einzugsgebiet und entspricht am besten dem R<sub>e</sub>, welches auf bestätigten Fällen aus diesem Gebiet basiert. Alle anderen R<sub>e</sub>-Spuren zeigen die kantonalen Ergebnisse, so dass es zu einer gewissen Dissonanz kommen kann. Zum Beispiel ist der Kanton Zürich etwa 3,4x so groß wie das Einzugsgebiet, das von der Kläranlage Werdhölzli bedient wird."},
     {"en-gb": "While Lausanne is also one of the catchment areas being monitored, we have not included it in the dashboard due to data quality issues.",
     "it-ch": "TBT",
-    "fr-ch": "TBT",
+    "fr-ch": "Bien que Lausanne soit également l’un des bassins versants surveillés, nous ne l’avons pas inclus dans le tableau de bord en raison de problèmes de qualité des données.",
     "de-ch": "Obwohl Lausanne auch zu den überwachten Einzugsgebieten gehört, haben wir es aufgrund von Problemen mit der Datenqualität nicht in das Dashboard aufgenommen."},
     {
       "en-gb": "**Limit of detection (LOD) represents concentration levels at which SARS-CoV-2 can be reliably detected, while limit of quantification (LOQ) represents concentration levels with prespecified precision of detection. <LOD indicates values below the LOD; >LOD represents values below the LOQ, but above the LOD. These values have higher uncertainty, as the number of gene copies is very low. >LOQ indicates reliable values which are above the LOQ.",
       "it-ch": "TBT",
-      "fr-ch": "TBT",
+      "fr-ch": "**La limite de détection (« Limit of Detection » - LOD) représente les valeurs de concentration auxquelles le SARS-CoV-2 peut être détecté de manière fiable, tandis que la limite de quantification (« Limit of quantification » - LOQ) représente les valeurs de concentration avec une précision spécifiée. <LOD indique des valeurs inférieures à la LOD ; >LOD représente des valeurs inférieures à la LOQ mais supérieures à la LOD. Ces valeurs présentent une plus grande incertitude, car le nombre de copies de gènes est très faible. >LOQ indique les valeurs fiables qui sont supérieures à la LOQ.",
       "de-ch": "**Die Nachweisgrenze (limit of detection, LOD) stellt Konzentrationswerte dar, bei denen SARS-CoV-2 zuverlässig nachgewiesen werden kann, während die Bestimmungsgrenze (limit of quantification, LOQ) Konzentrationswerte mit vorgegebener Präzision darstellt. <LOD zeigt Werte unterhalb der LOD an; >LOD steht für Werte unterhalb der LOQ, aber oberhalb der LOD. Diese Werte haben eine höhere Unsicherheit, da die Anzahl der Genkopien sehr gering ist. >LOQ kennzeichnet zuverlässige Werte, die oberhalb der LOQ liegen."
     },
     {
@@ -47,7 +47,7 @@
     {
       "en-gb": "Wastewater",
       "it-ch": "TBT",
-      "fr-ch": "TBT",
+      "fr-ch": "Les eaux usées",
       "de-ch": "Abwasser"
     },
     {
@@ -95,43 +95,43 @@
     {
       "en-gb": "(The start and end date of the time interval to be displayed can be changed by moving the slider above.)",
       "it-ch": "TBT",
-      "fr-ch": "TBT",
+      "fr-ch": "(Les dates de début et de fin de l’intervalle de temps à afficher peuvent être modifiées en déplaçant le curseur ci-dessus.)",
       "de-ch": "(Das Start- und Enddatum des anzuzeigenden Zeitintervalls kann durch Verschieben des Schiebereglers oben verändert werden.)"
     },
     {
       "en-gb": "For this location, available ",
       "it-ch": "TBT",
-      "fr-ch": "TBT",
+      "fr-ch": "Pour ce site sont disponibles ",
       "de-ch": "Für diesen Standort sind "
     },
     {
       "en-gb": " are the raw measurements of SARS-CoV-2 in wastewater.",
       "it-ch": "TBT",
-      "fr-ch": "TBT",
+      "fr-ch": " les données de mesures brutes du SARS-CoV-2 dans les eaux usées.",
       "de-ch": " die Rohmessungen von SARS-CoV-2 im Abwasser verfügbar."
     },
     {
       "en-gb": "The raw measurements of SARS-CoV-2 in wastewater and associated catchment cases are displayed on ",
       "it-ch": "TBT",
-      "fr-ch": "TBT",
+      "fr-ch": "Les données de mesures brutes du SARS-CoV-2 dans les eaux usées et les caissons de captage correspondants sont affichés sur la",
       "de-ch": "Die Rohmessungen von SARS-CoV-2 im Abwasser und zugehörige Einzugsfälle werden auf der "
     },
     {
       "en-gb": "EAWAG's overview page",
       "it-ch": "TBT",
-      "fr-ch": "TBT",
+      "fr-ch": "page d’aperçu",
       "de-ch": "Übersichtsseite"
     },
     {
       "en-gb": " with links to individual plant measurements.",
       "it-ch": "TBT",
-      "fr-ch": "TBT",
+      "fr-ch": " de l’EAWAG avec des liens vers les mesures de chaque installation.",
       "de-ch": " der EAWAG mit Links zu den einzelnen Anlagenmessungen angezeigt."
     },
     {
       "en-gb": "here",
       "it-ch": "TBT",
-      "fr-ch": "TBT",
+      "fr-ch": "ici",
       "de-ch": "hier"
     },
     {

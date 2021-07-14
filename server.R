@@ -19,9 +19,9 @@ function(input, output, session) {
     
     # control slider dates --------
     #initialize reactive values (will use to store selected boxes to identify newest selection)
-    rv <- reactiveValues()
+    #rv <- reactiveValues()
     #initialize selected boxes to NULL
-    rv$selectedBoxes <- NULL 
+    #rv$selectedBoxes <- NULL 
     
     observe({
         # Control the value, min, max according to region selected
@@ -50,7 +50,8 @@ function(input, output, session) {
         names(options_catchment) <- i18n$t("Confirmed cases (in catchment area)")
         updateCheckboxGroupInput(session, "catchment_selection",
                                  label = NULL,
-                                 choices = options_catchment)
+                                 choices = options_catchment,
+                                 selected = input$catchment_selection)
         if (input$region== 'GR') {
             shinyjs::delay(5, disable(id = "catchment_selection"))
         }

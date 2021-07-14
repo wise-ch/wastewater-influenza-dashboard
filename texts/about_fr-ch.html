@@ -1,0 +1,23 @@
+<h3>Quel est notre objectif ?</h3>
+<p style="text-align:justify;color:black;padding:15px;border-radius:10px">Nous fournissons des estimations du nombre effectif de reproduction, R<sub>e</sub>, basées sur des mesures longitudinales de l’ARN du SARS-CoV-2 dans les eaux usées. Ces estimations fournissent une représentation indépendante de la dynamique de la transmission du COVID-19 et complètent les estimations existantes de R<sub>e</sub> basées sur des données cliniques telles que les cas confirmés, les hospitalisations et/ou les décès. 
+<br>Le but de ce dashboard est de visualiser les R<sub>e</sub> estimés des eaux usées pour les STEP qui font partie du projet AbwasSARS-CoV-2 en Suisse. Ces estimations sont présentées avec les estimations existantes de R<sub>e</sub> à partir de sources de données cliniques (pour les cantons correspondants).
+<p/>
+<h3>Comment procédons-nous ?</h3>
+<p style="text-align:justify;color:black;padding:15px;border-radius:10px">R<sub>e</sub>, soit le nombre de reproduction effectif, quantifie le nombre attendu d’individus qu’une personne infectée contaminera au fil du temps. Étant donné que les personnes infectées excrètent des quantités importantes d’ARN du SARS-CoV-2 dans le système des eaux usées (par la salive, les fèces et/ou les expectorations), les échantillons d’eaux usées reflètent le nombre de personnes infectées par le COVID-19 dans un bassin versant donné. Ces mesures longitudinales de l’ARN du SARS-CoV-2 dans les eaux usées sont ensuite utilisées pour estimer le R<sub>e</sub>.
+<br>Comme décrit dans <a href="https://www.medrxiv.org/content/10.1101/2021.04.29.21255961v1">Huisman et al.</a>, nous utilisons un pipeline précédemment développé pour estimer le Re à partir de sources de données cliniques (<a href="https://www.medrxiv.org/content/10.1101/2020.11.26.20239368v1.article-info">Huisman, Scire et al.</a>) et l’avons adapté pour l’utiliser dans les mesures de captages. La principale différence entre les deux méthodes réside dans la manière dont l’on déduit de l’observation des eaux usées  les séries de données chronologiques relatives aux données d’événements d’infection: dans les cas cliniques, on suit un décalage de temps entre l’infection et la confirmation du cas, tandis que pour les mesures effectuées dans les eaux usées, on suit le décalage entre l’infection et l’excrétion du virus. 
+<br>Actuellement, ces méthodes sont appliquées aux mesures du <b>gène N1 du SARS-CoV-2</b>.
+<p/>
+<h3>Qui participe à ces opérations ?</h3>
+<p style="text-align:justify;color:black;padding:15px;border-radius:10px">Ce dashboard est développé par Taru Singhal, supervisé par Jana Huisman et Tanja Stadler (<a href="https://bsse.ethz.ch/cevo">Computational Evolution group</a>, ETH Zurich).
+<br>Les mesures sous-jacentes des eaux usées sont effectuées par des équipes de l’Institut fédéral suisse des sciences et technologies de l’eau (EAWAG) et de l’EPFL, dirigées par Tim Julian, Christoph Ort et Tamar Kohn.
+<br>Le projet est financé par l’Office fédéral de la santé publique (OFSP).
+<p/>
+<h3>Liens et documentation</h3>
+<p style="text-align:justify;color:black;padding:15px;border-radius:10px">Vous trouverez <a href="https://www.medrxiv.org/content/10.1101/2021.04.29.21255961v1">ici</a> une description de la méthode d’estimation de R<sub>e</sub> à partir des eaux usées, dont le code est disponible  <a href="https://github.com/JSHuisman/wastewaterRe">ici</a>.
+<br>Vous trouverez <a href="https://www.medrxiv.org/content/10.1101/2020.11.26.20239368v1.article-info">ici</a> le pipeline général pour l’estimation de R<sub>e</sub>, dont le code est disponible <a href="https://github.com/covid-19-Re/shiny-dailyRe">ici</a>.
+<br>Les mesures brutes du SARS-CoV-2 dans les eaux usées sont présentées sur la  <a href="https://sensors-eawag.ch/sars/overview.html">page d’aperçu</a> de l’EAWAG, avec des liens vers les mesures effectuées dans les différentes stations de traitement des eaux usées. 
+<br>De plus amples informations sur l’échantillonnage des eaux usées sont disponibles sur la <a href="https://www.eawag.ch/en/department/sww/projects/sars-cov2-in-wastewater/">page du projet SARS-CoV-2</a> de l’EAWAG.
+<p/>
+<h3>Nous contacter</h3>
+<p style="text-align:justify;color:black;padding:15px;border-radius:10px">Pour toute question d’ordre général, ou si vous avez des commentaires ou des suggestions d’amélioration à nous communiquer, veuillez contacter Taru Singhal  (<a href='mailto:tsinghal@student.ethz.ch'>tsinghal@student.ethz.ch</a>) ou Jana Huisman (<a href='mailto:jana.huisman@env.ethz.ch'>jana.huisman@env.ethz.ch</a>).
+</p>
