@@ -12,6 +12,8 @@ function(input, output, session) {
         # Here is where we update language in session
         shiny.i18n::update_lang(session, input$lang)
         #i18n_r()$set_translation_language(input$lang)
+        shinyjs::disable(id = "data_type_disabled")
+        
     })
     
     
@@ -32,28 +34,25 @@ function(input, output, session) {
         
         # update all choices according to language
         options_disabled <- c('Deaths', 'Hospitalized patients')
-        names(options_disabled) <- i18n$t(options_disabled)
+        names(options_disabled) <- i18n$t(c('Deaths*', 'Hospitalized patients*'))
         updateCheckboxGroupInput(session, "data_type_disabled", 
                                  label = NULL,
                                  choices = options_disabled)
-        shinyjs::disable("data_type_disabled")
+        shinyjs::delay(5, disable("data_type_disabled")) 
         
         options_enabled <- c('Wastewater', 'Confirmed (Canton)')
         names(options_enabled) <- i18n$t(c('Wastewater', 'Confirmed cases (in canton)'))
         updateCheckboxGroupInput(session, "data_type", 
                                  label = i18n$t("Data Source (select to compare):"),
                                  choices = options_enabled,
-                                 selected = 'Wastewater')
-        
+                                 selected = input$data_type)
         options_catchment<- c('Confirmed (Catchment)')
         names(options_catchment) <- i18n$t("Confirmed cases (in catchment area)")
-        updateCheckboxGroupInput(session, "catchment_selection", 
+        updateCheckboxGroupInput(session, "catchment_selection",
                                  label = NULL,
                                  choices = options_catchment)
-        if(input$region == 'GR'){
-            shinyjs::disable("catchment_selection")
-        }else{
-            shinyjs::enable("catchment_selection")
+        if (input$region== 'GR') {
+            shinyjs::delay(5, disable(id = "catchment_selection"))
         }
 
     })
@@ -61,9 +60,9 @@ function(input, output, session) {
     # for Chur, no catchment selection ------
     observeEvent(input$region, {
         if(input$region == 'GR'){
-            shinyjs::disable("catchment_selection")
+            shinyjs::disable(id = "catchment_selection")
         }else{
-            shinyjs::enable("catchment_selection")
+            shinyjs::enable(id = "catchment_selection")
         }
     })
     

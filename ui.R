@@ -39,11 +39,11 @@ navbarPage("Covid-19: Wastewater Re",
                                                choices = c("Confirmed cases (in catchment area)" = "Confirmed (Catchment)")),
                             # if we would like deaths and hospitalised patients, comment out next chunk and
                             # include back in checkboxGroupInput
-                            disabled(checkboxGroupInput(inputId = "data_type_disabled",
+                            checkboxGroupInput(inputId = "data_type_disabled",
                                                         label = NULL,
                                                         choices = c("Deaths*" = "Deaths",
                                                                     "Hospitalized patients*"=
-                                                                        "Hospitalized patients"))),
+                                                                        "Hospitalized patients")),
                             uiOutput('death_hosp_info'),
                             
                             conditionalPanel(
