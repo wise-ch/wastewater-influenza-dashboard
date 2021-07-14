@@ -3,17 +3,26 @@ library(shinyjs)
 library(shinyBS)
 library(shinycssloaders)
 library(shinyWidgets)
+library(shiny.i18n)
 
 source("helper_code/plot_maker.R")
+i18n <- Translator$new(translation_json_path = "texts/translations.json")
+i18n$set_translation_language("en-gb") # here you select the default translation to display
 
 navbarPage("Covid-19: Wastewater Re",
     # a page with a navigation bar
     # HOME ####
+<<<<<<< Updated upstream
     tabPanel("Cantonal",
+=======
+    tabPanel(i18n$t("Catchments"),
+             shiny.i18n::usei18n(i18n),
+             
+>>>>>>> Stashed changes
              # Sidepanel - options + info  --------
              sidebarLayout(
                  sidebarPanel(
-                     selectInput(inputId = "region", label = "Select wastewater treatment plant:",
+                     selectInput(inputId = "region", label = i18n$t("Select wastewater treatment plant:"),
                                 choices = c("Zurich" = "ZH",
                                             #"Lausanne" = "VD",
                                             "Altenrhein" = "SG", "Chur" = "GR",
@@ -22,7 +31,7 @@ navbarPage("Covid-19: Wastewater Re",
                                 ),
                      shinyjs::useShinyjs(),
                      checkboxGroupInput(inputId = "data_type",
-                                        label = "Data Source (select to compare):",
+                                        label = i18n$t("Data Source (select to compare):"),
                                         choices = c("Wastewater" = "Wastewater",
                                           "Confirmed cases (in catchment area)" = "Confirmed (Catchment)",
                                           "Confirmed cases (in canton)" = "Confirmed (Canton)"),
@@ -36,6 +45,7 @@ navbarPage("Covid-19: Wastewater Re",
                                                  choices = c("Deaths*" = "Deaths",
                                                              "Hospitalized patients*"=
                                                                  "Hospitalized patients"))),
+<<<<<<< Updated upstream
                      p(HTML(paste0('*The R',tags$sub('e'),' for hospitalised patients and deaths are
                                    currently not displayed because the low case incidence results in
                                    large confidence intervals and low usefulness.'))),
@@ -46,9 +56,30 @@ navbarPage("Covid-19: Wastewater Re",
                                    traces show the cantonal results, so there may be some dissonance.
                                    For instance, canton Zurich is about 3.4x the size of the catchment area served by the
                                    Werdhölzli wastewater treatment plant."))),
+=======
+                     uiOutput('death_hosp_info'),
+                     
+                     conditionalPanel(
+                         condition = "input.region == 'GR'",
+                         uiOutput('chur_catchment_disc')
+                         
+                     ),
+                     
+                     uiOutput('other_disclaimers'),
+                     
+                     selectInput(inputId = "lang", label = i18n$t("Language:"),
+                                 choices = c("EN" = "en-gb",
+                                             #"Lausanne" = "VD",
+                                             "DE (in progress)" = "de-ch", 
+                                             "FR (in progress)" = "fr-ch", 
+                                             "IT (in progress)" = "it-ch"
+                                 ), # ask about these two cantonal catchments
+                     ),
+>>>>>>> Stashed changes
 
                      width = 3
                  ),
+                 
              # Home: main panel - all plotting and further info -------
                  mainPanel(
                         fluidRow(
@@ -82,7 +113,7 @@ navbarPage("Covid-19: Wastewater Re",
                                      min = global_date_range[1], max = Sys.Date(), 
                                      value = c(global_date_range[1], Sys.Date())
                          ),
-                         p(HTML('<em>The start and end date of the time interval to be displayed can be changed by moving the slider above.</em>'),
+                         p(HTML(paste0('<em>', i18n$t('(The start and end date of the time interval to be displayed can be changed by moving the slider above.)'),'</em>')),
                            style = 'margin-bottom:0;font-size: 90%;'),
                          htmlOutput("link"),
                          downloadButton('downloadPlot', 'Download results')
@@ -92,11 +123,15 @@ navbarPage("Covid-19: Wastewater Re",
              ) # Sidebar layout
     ), # Home panel
     # Switzerland  - rww comparison ----------
-    tabPanel("Switzerland",
+    tabPanel(i18n$t("Switzerland"),
              sidebarLayout(
                  sidebarPanel(
                      checkboxGroupInput(inputId = "canton",
+<<<<<<< Updated upstream
                                         label = "Canton (select to compare):",
+=======
+                                        label = i18n$t("Catchment (select to compare):"),
+>>>>>>> Stashed changes
                                         choices = c("Zurich" = "ZH",
                                                     #"Lausanne" = "VD",
                                                     "Altenrhein" = "SG", "Chur" = "GR",
@@ -127,11 +162,11 @@ navbarPage("Covid-19: Wastewater Re",
                                  min = as.Date('2021-02-01'), max = Sys.Date(),
                                  value = c(as.Date('2021-02-01'), Sys.Date())
                      ),
-                     p(HTML('<em>The start and end date of the time interval to be displayed can be changed by moving the slider above.</em>'),
+                     p(HTML(paste0('<em>', i18n$t('(The start and end date of the time interval to be displayed can be changed by moving the slider above.)'),'</em>')),
                        style = 'margin-bottom:0;font-size: 90%;'),
-                     p("The raw measurements of SARS-CoV-2 in wastewater and associated catchment cases are displayed on ",
-                       a(href = "https://sensors-eawag.ch/sars/overview.html", "EAWAG's overview page", .noWS = "outside"),
-                       " with links to individual plant measurements.",
+                     p(i18n$t("The raw measurements of SARS-CoV-2 in wastewater and associated catchment cases are displayed on "),
+                       a(href = "https://sensors-eawag.ch/sars/overview.html", i18n$t("EAWAG's overview page"), .noWS = "outside"),
+                       i18n$t(" with links to individual plant measurements."),
                        .noWS = c("after-begin", "before-end"))
                  ) # fluid row
              )
@@ -139,9 +174,9 @@ navbarPage("Covid-19: Wastewater Re",
 
     ),
     # About ---------
-    tabPanel("About",
-
+    tabPanel(i18n$t("About"),
              fluidRow(column(
+<<<<<<< Updated upstream
                           h3("What is our aim?"),
                           p(HTML(paste0("We provide estimates of the effective reproductive number, R",tags$sub("e"),", based on longitudinal measurements of SARS-CoV-2 RNA in wastewater.
                           These estimates provide an independent account of COVID-19 transmission dynamics, complementing existing R",tags$sub("e"),
@@ -200,6 +235,11 @@ navbarPage("Covid-19: Wastewater Re",
 
 
              hr()
+=======
+                         htmlOutput('about_page'),
+                         width = 10),
+                         hr()
+>>>>>>> Stashed changes
 
         )
     )

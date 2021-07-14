@@ -1,0 +1,170 @@
+{
+  "languages": [
+    "en-gb",
+    "it-ch",
+    "fr-ch",
+    "de-ch"
+  ],
+  "translation": [
+    {
+      "en-gb": "*The R<sub>e</sub> for hospitalised patients and deaths are currently not displayed because the low case incidence results in large confidence intervals and low usefulness.",
+      "it-ch": "TBT",
+      "fr-ch": "TBT",
+      "de-ch": "*R<sub>e</sub> für hospitalisierte Patienten und Todesfälle werden derzeit nicht angezeigt, da die geringe Fallinzidenz zu grossen Konfidenzintervallen und geringer Nützlichkeit führt."
+    },
+    {
+      "en-gb": "The estimated R<sub>e</sub> for confirmed cases in the Chur catchment area is currently not available due to a potential data quality issue.",
+      "it-ch": "TBT",
+      "fr-ch": "TBT",
+      "de-ch": "TBT"
+    },
+    {"en-gb": "The R<sub>e</sub> for wastewater is informed by infections in the catchment area, and will correspond best to the R<sub>e</sub> based on confirmed cases from that area. All other R<sub>e</sub> traces show the cantonal results, so there may be some dissonance. For instance, canton Zurich is about 3.4x the size of the catchment area served by the Werdhölzli wastewater treatment plant.",
+    "it-ch": "TBT",
+    "fr-ch": "TBT",
+    "de-ch": "R<sub>e</sub> für Abwasser basiert auf den Infektionen im Einzugsgebiet und entspricht am besten dem R<sub>e</sub>, welches auf bestätigten Fällen aus diesem Gebiet basiert. Alle anderen R<sub>e</sub>-Spuren zeigen die kantonalen Ergebnisse, so dass es zu einer gewissen Dissonanz kommen kann. Zum Beispiel ist der Kanton Zürich etwa 3,4x so groß wie das Einzugsgebiet, das von der Kläranlage Werdhölzli bedient wird."},
+    {"en-gb": "While Lausanne is also one of the catchment areas being monitored, we have not included it in the dashboard due to data quality issues.",
+    "it-ch": "TBT",
+    "fr-ch": "TBT",
+    "de-ch": "Obwohl Lausanne auch zu den überwachten Einzugsgebieten gehört, haben wir es aufgrund von Problemen mit der Datenqualität nicht in das Dashboard aufgenommen."},
+    {
+      "en-gb": "**Limit of detection (LOD) represents concentration levels at which SARS-CoV-2 can be reliably detected, while limit of quantification (LOQ) represents concentration levels with prespecified precision of detection. <LOD indicates values below the LOD; >LOD represents values below the LOQ, but above the LOD. These values have higher uncertainty, as the number of gene copies is very low. >LOQ indicates reliable values which are above the LOQ.",
+      "it-ch": "TBT",
+      "fr-ch": "TBT",
+      "de-ch": "**Die Nachweisgrenze (limit of detection, LOD) stellt Konzentrationswerte dar, bei denen SARS-CoV-2 zuverlässig nachgewiesen werden kann, während die Bestimmungsgrenze (limit of quantification, LOQ) Konzentrationswerte mit vorgegebener Präzision darstellt. <LOD zeigt Werte unterhalb der LOD an; >LOD steht für Werte unterhalb der LOQ, aber oberhalb der LOD. Diese Werte haben eine höhere Unsicherheit, da die Anzahl der Genkopien sehr gering ist. >LOQ kennzeichnet zuverlässige Werte, die oberhalb der LOQ liegen."
+    },
+    {
+      "en-gb": "Select wastewater treatment plant:",
+      "it-ch": "TBT",
+      "fr-ch": "TBT",
+      "de-ch": "TBT"
+    },
+    {
+      "en-gb": "Data Source (select to compare):",
+      "it-ch": "TBT",
+      "fr-ch": "TBT",
+      "de-ch": "TBT"
+    },
+    {
+      "en-gb": "Wastewater",
+      "it-ch": "TBT",
+      "fr-ch": "TBT",
+      "de-ch": "Abwasser"
+    },
+    {
+      "en-gb": "Confirmed cases (in canton)",
+      "it-ch": "TBT",
+      "fr-ch": "TBT",
+      "de-ch": "TBT"
+    },
+    {
+      "en-gb": "Confirmed cases (in catchment area)",
+      "it-ch": "TBT",
+      "fr-ch": "TBT",
+      "de-ch": "TBT"
+    },
+    {
+      "en-gb": "Hospitalized patients*",
+      "de-ch": "Hospitalisierte Patienten*",
+      "fr-ch": "Patients hospitalisés*",
+      "it-ch": "Pazienti ospedalizzati*"
+    },
+    {
+      "en-gb": "Deaths*",
+      "de-ch": "Todesfälle*",
+      "fr-ch": "Décès*",
+      "it-ch": "Decessi*"
+    },
+    {
+      "en-gb": "Catchments",
+      "it-ch": "TBT",
+      "fr-ch": "TBT",
+      "de-ch": "Einzugsgebiet"
+    },
+    {
+      "en-gb": "Switzerland",
+      "de-ch": "Schweiz",
+      "fr-ch": "Suisse",
+      "it-ch": "Svizzera"
+    },
+    {
+      "en-gb": "About",
+      "it-ch": "TBT",
+      "fr-ch": "TBT",
+      "de-ch": "Über uns"
+    },
+    {
+      "en-gb": "(The start and end date of the time interval to be displayed can be changed by moving the slider above.)",
+      "it-ch": "TBT",
+      "fr-ch": "TBT",
+      "de-ch": "(Das Start- und Enddatum des anzuzeigenden Zeitintervalls kann durch Verschieben des Schiebereglers oben verändert werden.)"
+    },
+    {
+      "en-gb": "For this location, available ",
+      "it-ch": "TBT",
+      "fr-ch": "TBT",
+      "de-ch": "Für diesen Standort sind "
+    },
+    {
+      "en-gb": " are the raw measurements of SARS-CoV-2 in wastewater.",
+      "it-ch": "TBT",
+      "fr-ch": "TBT",
+      "de-ch": " die Rohmessungen von SARS-CoV-2 im Abwasser verfügbar."
+    },
+    {
+      "en-gb": "The raw measurements of SARS-CoV-2 in wastewater and associated catchment cases are displayed on ",
+      "it-ch": "TBT",
+      "fr-ch": "TBT",
+      "de-ch": "Die Rohmessungen von SARS-CoV-2 im Abwasser und zugehörige Einzugsfälle werden auf der "
+    },
+    {
+      "en-gb": "EAWAG's overview page",
+      "it-ch": "TBT",
+      "fr-ch": "TBT",
+      "de-ch": "Übersichtsseite"
+    },
+    {
+      "en-gb": " with links to individual plant measurements.",
+      "it-ch": "TBT",
+      "fr-ch": "TBT",
+      "de-ch": " der EAWAG mit Links zu den einzelnen Anlagenmessungen angezeigt."
+    },
+    {
+      "en-gb": "here",
+      "it-ch": "TBT",
+      "fr-ch": "TBT",
+      "de-ch": "hier"
+    },
+    {
+      "en-gb": "Language:",
+      "it-ch": "Lingua:",
+      "fr-ch": "Langue:",
+      "de-ch": "Sprache:"
+    },
+    {
+      "en-gb": "Catchment (select to compare):",
+      "it-ch": "TBT",
+      "fr-ch": "TBT",
+      "de-ch": "TBT"
+    },
+    {
+      "en-gb": "Wastewater measurements from 02.2021 to 07.03.2021 for ",
+      "it-ch": "TBT",
+      "fr-ch": "TBT",
+      "de-ch": "TBT"
+    },
+    {
+      "en-gb": " have been excluded due to multiple consecutive measurements falling below the limit of quantification and/or detection, which affects the reliability of the raw measurements and the wastewater R<sub>e</e> estimates.",
+      "it-ch": "TBT",
+      "fr-ch": "TBT",
+      "de-ch": "TBT"
+    },    
+    {
+      "en-gb": "The Laupen catchment area consists of municipalities in both Bern and Fribourg (13 communities from Bern and 12 from Fribourg).",
+      "it-ch": "TBT",
+      "fr-ch": "TBT",
+      "de-ch": "TBT"
+    }
+
+  ]
+}
+

@@ -1,10 +1,47 @@
 library(shiny)
 library(patchwork)
+
+
+# it needs to be defined for both ui and server?
+i18n <- Translator$new(translation_json_path = "texts/translations.json")
+i18n$set_translation_language("en-gb") # here you select the default translation to display
+
 function(input, output, session) {
 
     # keeps track of reactivity - re-computes when input changes
     # use input values when you make your output. Access with $ and Id
     # this value changes as the input bar/slider/button changes. Reactive.
+<<<<<<< Updated upstream
+=======
+    
+    # language ----------
+    # record state on language change
+    # looks like this is only for server changes. We want server AND UI changes.
+    # i18n <- reactive({
+    #     selected <- input$lang
+    #     if (length(selected) > 0 && selected %in% translator$get_languages()) {
+    #         translator$set_translation_language(selected)
+    #     }
+    #     translator
+    # })
+    # 
+    # i18n_r <- reactive({
+    #     i18n
+    # })
+    
+    observeEvent(input$lang, {
+        # Here is where we update language in session
+        shiny.i18n::update_lang(session, input$lang)
+        #i18n_r()$set_translation_language(input$lang)
+    })
+    
+    
+    # control slider dates --------
+    #initialize reactive values (will use to store selected boxes to identify newest selection)
+    rv <- reactiveValues()
+    #initialize selected boxes to NULL
+    rv$selectedBoxes <- NULL 
+>>>>>>> Stashed changes
     
     observe({
         # Control the value, min, max according to region selected
@@ -14,8 +51,40 @@ function(input, output, session) {
                         Sys.Date())
         updateSliderInput(session, "slider_dates", value = date_range,
                           min = date_range[1], max = Sys.Date())
+        # update all choices according to language
+        options_disabled <- c('Deaths', 'Hospitalized patients')
+        names(options_disabled) <- i18n$t(options_disabled)
+        updateCheckboxGroupInput(session, "data_type_disabled", 
+                          label = NULL,
+                          choices = options_disabled)
+        
+        options_enabled <- c('Wastewater', 'Confirmed (Canton)')
+        names(options_enabled) <- i18n$t(c('Wastewater', 'Confirmed cases (in canton)'))
+        updateCheckboxGroupInput(session, "data_type", 
+                                 label = i18n$t("Data Source (select to compare):"),
+                                 choices = options_enabled,
+                                 selected = 'Wastewater')
+        
+        options_catchment<- c('Confirmed (Catchment)')
+        names(options_catchment) <- i18n$t("Confirmed cases (in catchment area)")
+        updateCheckboxGroupInput(session, "catchment_selection", 
+                                 label = NULL,
+                                 choices = options_catchment)
+        
     })
     
+<<<<<<< Updated upstream
+=======
+    # for Chur, no catchment selection ------
+    observeEvent(input$region, {
+        if(input$region == 'GR'){
+            shinyjs::disable("catchment_selection")
+        }else{
+            shinyjs::enable("catchment_selection")
+        }
+    })
+
+>>>>>>> Stashed changes
     # Plotting cases -------
     output$case_plots <- renderPlot(
         {
@@ -216,30 +285,64 @@ function(input, output, session) {
                           "<i>(", ref[[point$region]], ")</i>")))
         )
     })
+<<<<<<< Updated upstream
+=======
+
+    output$chur_catchment_disc <- renderUI({
+        p(HTML(paste0(strong('NB: '),
+                      i18n$t('The estimated R<sub>e</sub> for confirmed cases in the Chur catchment area is currently not available due to a potential data quality issue.'))),
+          style="font-size: 95%;")
+    })
+    
+    output$death_hosp_info <- renderUI({
+        p(HTML(i18n$t('*The R<sub>e</sub> for hospitalised patients and deaths are currently not displayed because the low case incidence results in large confidence intervals and low usefulness.')), 
+          style="font-size: 95%;")
+    })
+    
+    output$other_disclaimers <- renderUI({
+        p(
+            tags$ul(style="padding-left:10px;font-size: 95%;",
+                    tags$li(HTML(paste0(i18n$t("The R<sub>e</sub> for wastewater is informed by infections in the catchment area, and will correspond best to the R<sub>e</sub> based on confirmed cases from that area. All other R<sub>e</sub> traces show the cantonal results, so there may be some dissonance. For instance, canton Zurich is about 3.4x the size of the catchment area served by the Werdhölzli wastewater treatment plant.")))),
+                    tags$li(i18n$t('While Lausanne is also one of the catchment areas being monitored, we have not included it in the dashboard due to data quality issues.') ) ) )
+    })
+>>>>>>> Stashed changes
     
     # text below plot for more info ---------
     output$link <- renderUI({
-        link <- p("For this location, the raw measurements of SARS-CoV-2 in wastewater are available ",
-                  a(href = paste0("https://sensors-eawag.ch/sars/",tolower(ref[[input$region]]),".html"), "here", .noWS = "outside"),
-                  ".",
+        link <- p(i18n$t("For this location, available "),
+                  a(href = paste0("https://sensors-eawag.ch/sars/",tolower(ref[[input$region]]),".html"), i18n$t("here"), .noWS = "outside"),
+                  i18n$t(" are the raw measurements of SARS-CoV-2 in wastewater."),
                   .noWS = c("after-begin", "before-end"), style="margin-bottom:0;font-size: 95%;")
+<<<<<<< Updated upstream
         lod_loq <- p('**<LOD indicates values below the limit of detection.\n
                     >LOD represents values below the limit of quantification, but
                      above the limit of detection. These values have higher uncertainty, as the number of gene copies is
                     very low.\n
                     >LOQ indicates reliable values which are above the limit of quantification.' ,
+=======
+        lod_loq <- p(i18n$t("**Limit of detection (LOD) represents concentration levels at which SARS-CoV-2 can be reliably detected, while limit of quantification (LOQ) represents concentration levels with prespecified precision of detection. <LOD indicates values below the LOD; >LOD represents values below the LOQ, but above the LOD. These values have higher uncertainty, as the number of gene copies is very low. >LOQ indicates reliable values which are above the LOQ."),
+>>>>>>> Stashed changes
                      style = 'margin-bottom:0;font-size: 95%;')
+        
 
+<<<<<<< Updated upstream
         chur_catchment <- p(strong('NB: '),'The estimated R',tags$sub('e'), ' for confirmed cases in the Chur catchment area is
                             currently not available due to a potential data quality issue.', style="margin-bottom:0;font-size: 95%;")
 
         exclude_lod <- p(strong('NB: '),'Wastewater measurements from 02.2021 to 07.03.2021 for ', ref[[input$region]],
                          ' have been excluded due to multiple consecutive measurements falling below the limit of quantification and/or detection,
                          which affects the reliability of the raw measurements and the wastewater R',tags$sub('e'), ' estimates.',
+=======
+        #chur_catchment <- p(strong('NB: '),'The estimated R<sub>e</e> for confirmed cases in the Chur catchment area is
+        #                    currently not available due to a potential data quality issue.', style="margin-bottom:0;font-size: 95%;")
+
+        exclude_lod <- p(HTML(paste0(strong('NB: '),i18n$t('Wastewater measurements from 02.2021 to 07.03.2021 for '), ref[[input$region]],
+                         i18n$t(' have been excluded due to multiple consecutive measurements falling below the limit of quantification and/or detection, which affects the reliability of the raw measurements and the wastewater R<sub>e</e> estimates.'))),
+>>>>>>> Stashed changes
                          style="margin-bottom:0;font-size: 95%;")
 
-        laupen_2cantons <- p(strong('NB: '),'The Laupen catchment area consists of municipalities in both Bern and Fribourg
-                             (13 communities from Bern and 12 from Fribourg).', style="margin-bottom:0;font-size: 95%;")
+        laupen_2cantons <- p(strong('NB: '),i18n$t('The Laupen catchment area consists of municipalities in both Bern and Fribourg (13 communities from Bern and 12 from Fribourg).'), 
+                             style="margin-bottom:0;font-size: 95%;")
 
         if (input$region == 'GR') HTML(paste(link, lod_loq, exclude_lod, chur_catchment, sep = ""))
         else if (input$region == 'FR') HTML(paste(link, lod_loq, laupen_2cantons, sep = ""))
@@ -272,5 +375,10 @@ function(input, output, session) {
 
         }
     )
-
+    # add the about page --------
+    output$about_page <- renderUI({
+        # different for the different languages
+        name <- paste0('texts/about_',input$lang,'.html')
+        includeHTML(path = name)
+   })
 }

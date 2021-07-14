@@ -1,0 +1,23 @@
+<h3>Was ist unser Ziel?</h3>
+<p style="text-align:justify;color:black;padding:15px;border-radius:10px">Wir liefern Schätzungen der effektiven Reproduktionszahl, R<sub>e</sub>, basierend auf longitudinalen Messungen von SARS-CoV-2-RNA im Abwasser. Diese Schätzungen liefern eine unabhängige Darstellung der COVID-19-Übertragungsdynamik und ergänzen die bestehenden R<sub>e</sub>-Schätzungen, die auf klinischen Daten wie bestätigten Fällen, Krankenhausaufenthalten und/oder Todesfällen basieren.
+<br>Der Zweck dieses Dashboards ist die Visualisierung der R<sub>e</sub>-Schätzungen aus Abwasser für die Kläranlagen, die Teil des AbwasSARS-CoV-2-Projekts in der Schweiz sind. Diese Schätzungen werden zusammen mit bestehenden R<sub>e</sub>e-Schätzungen aus klinischen Datenquellen (für die entsprechenden Kantone) dargestellt.
+<p/>
+<h3>Wie wird das gemacht?</h3>
+<p style="text-align:justify;color:black;padding:15px;border-radius:10px">Die effektive Reproduktionszahl, R<sub>e</sub>, quantifiziert die erwartete Anzahl von Personen, die ein infiziertes Individuum im Laufe der Zeit ansteckt. Da infizierte Personen erhebliche Mengen an SARS-CoV-2-RNA in das Abwassersystem ausscheiden (über Speichel, Fäkalien und/oder Sputum), spiegeln Abwasserproben die Anzahl der mit COVID-19 infizierten Personen in einem bestimmten Einzugsgebiet wider. Diese Längsschnittmessungen von SARS-CoV-2-RNA im Abwasser werden dann zur Abschätzung von R<sub>e</sub> verwendet.
+<br>Wie in <a href="https://www.medrxiv.org/content/10.1101/2021.04.29.21255961v1">Huisman et al.</a>, beschrieben, verwenden wir eine Pipeline, die zuvor zur Schätzung von Re aus klinischen Datenquellen entwickelt wurde (<a href="https://www.medrxiv.org/content/10.1101/2020.11.26.20239368v1.article-info">Huisman, Scire et al.</a>) und haben sie für die Verwendung mit Abwassermessungen angepasst. Der Hauptunterschied zwischen beiden Methoden besteht darin, wie die zugrundeliegende Zeitreihe der Infektionsereignisse aus den Eingabebeobachtungen abgeleitet wird: Klinische Fälle folgen einer Verzögerungsverteilung von der Infektion bis zur Fallbestätigung, während Abwassermessungen einer Shedding-Load-Verteilung von der Infektion bis zum Virus-Shedding folgen.
+<br>Derzeit werden diese Methoden auf Messungen des <b>SARS-CoV-2 N1-Gens</b> angewendet.
+<p/>
+<h3>Wer ist daran beteiligt?</h3>
+<p style="text-align:justify;color:black;padding:15px;border-radius:10px">Dieses Dashboard wird von Taru Singhal entwickelt, betreut von Jana Huisman und Tanja Stadler (<a href="https://bsse.ethz.ch/cevo">Computational Evolution group</a>, ETH Zürich).
+<br>Die zugrundeliegenden Abwassermessungen werden von Teams an der Eidgenössischen Anstalt für Wasserversorgung, Abwasserreinigung und Gewässerschutz (EAWAG) und der EPFL unter der Leitung von Tim Julian, Christoph Ort und Tamar Kohn durchgeführt.
+<br>Finanziert wird das Projekt vom Schweizer Bundesamt für Gesundheit.
+<p/>
+<h3>Links und weiterführende Literatur</h3>
+<p style="text-align:justify;color:black;padding:15px;border-radius:10px">Die Methode zur Abschätzung von R<sub>e</sub> aus Abwasser ist <a href="https://www.medrxiv.org/content/10.1101/2021.04.29.21255961v1">hier</a> beschrieben und der Code ist <a href="https://github.com/JSHuisman/wastewaterRe">hier</a> verfügbar.
+<br>Die allgemeine Pipeline zur R<sub>e</sub>-Schätzung ist <a href="https://www.medrxiv.org/content/10.1101/2020.11.26.20239368v1.article-info">hier</a> beschrieben und der Code ist <a href="https://github.com/covid-19-Re/shiny-dailyRe">hier</a> verfügbar.
+<br>Die Rohmessungen von SARS-CoV-2 im Abwasser sind auf der <a href="https://sensors-eawag.ch/sars/overview.html">Übersichtsseite</a> der EAWAG mit Links zu den Messungen an einzelnen Kläranlagen dargestellt.
+<br>Weitere Informationen zur Abwasserbeprobung finden Sie auf der <a href="https://www.eawag.ch/en/department/sww/projects/sars-cov2-in-wastewater/">SARS-CoV-2-Projektseite</a> der EAWAG.
+<p/>
+<h3>Kontaktieren Sie uns</h3>
+<p style="text-align:justify;color:black;padding:15px;border-radius:10px">Für allgemeine Anfragen, Feedback oder Verbesserungsvorschläge kontaktieren Sie bitte Taru Singhal (<a href='mailto:tsinghal@student.ethz.ch'>tsinghal@student.ethz.ch</a>) oder Jana Huisman (<a href='mailto:jana.huisman@env.ethz.ch'>jana.huisman@env.ethz.ch</a>).
+</p>
