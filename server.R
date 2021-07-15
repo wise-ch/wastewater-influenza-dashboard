@@ -8,6 +8,8 @@ i18n$set_translation_language("en-gb") # here you select the default translation
 
 function(input, output, session) {
     
+
+    
     observeEvent(input$lang, {
         # Here is where we update language in session
         shiny.i18n::update_lang(session, input$lang)
@@ -16,6 +18,9 @@ function(input, output, session) {
         
     })
     
+    output$title_panel = renderText({
+        i18n$t('Catchments')
+    })
     
     # control slider dates --------
     #initialize reactive values (will use to store selected boxes to identify newest selection)

@@ -9,10 +9,18 @@ source("helper_code/plot_maker.R")
 i18n <- Translator$new(translation_json_path = "texts/translations.json")
 i18n$set_translation_language("en-gb") # here you select the default translation to display
 
-navbarPage("Covid-19: Wastewater Re",
+navbarPageWithInputs <- function(..., inputs) {
+  navbar <- navbarPage(...)
+  form <- tags$form(class = "navbar-form", inputs)
+  navbar[[3]][[1]]$children[[1]] <- htmltools::tagAppendChild(
+    navbar[[3]][[1]]$children[[1]], form)
+  navbar
+}
+
+navbarPageWithInputs("Covid-19: Wastewater Re",
            # a page with a navigation bar
            # HOME ####
-           tabPanel(i18n$t("Catchments"),
+           tabPanel(title = uiOutput("title_panel"),
                     shiny.i18n::usei18n(i18n),
                     
                     # Sidepanel - options + info  --------
@@ -54,14 +62,14 @@ navbarPage("Covid-19: Wastewater Re",
                             
                             uiOutput('other_disclaimers'),
                             
-                            selectInput(inputId = "lang", label = i18n$t("Language:"),
-                                        choices = c("EN" = "en-gb",
-                                                    #"Lausanne" = "VD",
-                                                    "DE (in progress)" = "de-ch", 
-                                                    "FR (in progress)" = "fr-ch", 
-                                                    "IT (in progress)" = "it-ch"
-                                        ), # ask about these two cantonal catchments
-                            ),
+                            # selectInput(inputId = "lang", label = i18n$t("Language:"),
+                            #             choices = c("EN" = "en-gb",
+                            #                         #"Lausanne" = "VD",
+                            #                         "DE (in progress)" = "de-ch", 
+                            #                         "FR (in progress)" = "fr-ch", 
+                            #                         "IT (in progress)" = "it-ch"
+                            #             ), # ask about these two cantonal catchments
+                            # ),
                             
                             width = 3
                         ),
@@ -102,7 +110,7 @@ navbarPage("Covid-19: Wastewater Re",
                                 p(HTML(paste0('<em>', i18n$t('(The start and end date of the time interval to be displayed can be changed by moving the slider above.)'),'</em>')),
                                   style = 'margin-bottom:0;font-size: 90%;'),
                                 htmlOutput("link"),
-                                downloadButton('downloadPlot', 'Download results')
+                                downloadButton('downloadPlot', i18n$t('Download results'))
                                 
                             ) # fluid row
                         ) # main panel
@@ -163,6 +171,13 @@ navbarPage("Covid-19: Wastewater Re",
                         hr()
                         
                     )
-           )
+           ),
+           inputs = selectInput(inputId = "lang", label = NULL,
+                                choices = c("EN" = "en-gb",
+                                            "DE (in progress)" = "de-ch", 
+                                            "FR (in progress)" = "fr-ch", 
+                                            "IT (in progress)" = "it-ch"
+                                ))
+           
 )
 

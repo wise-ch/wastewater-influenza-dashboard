@@ -77,7 +77,7 @@
     {
       "en-gb": "Catchments",
       "it-ch": "TBT",
-      "fr-ch": "TBT",
+      "fr-ch": "Zone de captage",
       "de-ch": "Einzugsgebiet"
     },
     {
@@ -89,7 +89,7 @@
     {
       "en-gb": "About",
       "it-ch": "TBT",
-      "fr-ch": "TBT",
+      "fr-ch": "Nous contacter",
       "de-ch": "Über uns"
     },
     {
@@ -160,6 +160,12 @@
     },    
     {
       "en-gb": "The Laupen catchment area consists of municipalities in both Bern and Fribourg (13 communities from Bern and 12 from Fribourg).",
+      "it-ch": "TBT",
+      "fr-ch": "TBT",
+      "de-ch": "TBT"
+    },
+    {
+      "en-gb": "Download results",
       "it-ch": "TBT",
       "fr-ch": "TBT",
       "de-ch": "TBT"
