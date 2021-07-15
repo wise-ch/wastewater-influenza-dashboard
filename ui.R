@@ -11,7 +11,7 @@ i18n$set_translation_language("en-gb") # here you select the default translation
 
 navbarPageWithInputs <- function(..., inputs) {
   navbar <- navbarPage(...)
-  form <- tags$form(class = "navbar-form", inputs)
+  form <- tags$form(class = "navbar-form navbar-right", inputs)
   navbar[[3]][[1]]$children[[1]] <- htmltools::tagAppendChild(
     navbar[[3]][[1]]$children[[1]], form)
   navbar
@@ -177,7 +177,7 @@ navbarPageWithInputs("Covid-19: Wastewater Re",
                                             "DE (in progress)" = "de-ch", 
                                             "FR (in progress)" = "fr-ch", 
                                             "IT (in progress)" = "it-ch"
-                                ))
-           
+                                ), width = '80px')
 )
+
 

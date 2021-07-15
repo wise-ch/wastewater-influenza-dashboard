@@ -56,20 +56,23 @@ global_date_range <- range(ww_data$date)
 
 # Raw plots ####
 
-case_plotter <- function(data = case_data, canton, date_range) {
+case_plotter <- function(data = case_data, canton, date_range, i18n = NA) {
   #date_range <- range((ww_data %>% filter(region == canton) %>% select(date))[["date"]])
-
+  p1 <- i18n$t("Catchment Area")
+  p2 <- i18n$t(" residents): Cases, SARS-CoV Gene copies in Wastewater, Estimated R")
+  main_title <-bquote(.(ref[[canton]])*" "*.(p1)*" ("*.(ref_size[[canton]])*.(p2)['e'])
+  
   data %>% filter(region == canton) %>%
     ggplot(aes(x=date, y = cases, fill = region) ) + # filling simply for a legend...
     geom_bar(stat="identity", colour = viridis(5)[4], alpha = 0.7) +
     scale_x_date(limits = c(date_range[1], date_range[2]),
                  date_breaks = "months", date_labels = "%b") +
     scale_y_continuous(labels = function(label) sprintf('%5.1f', label)) +
-    labs(x = 'Date' , y=expression("Cases per 100'000 residents")) +
+    labs(x = i18n$t("Date") , y=i18n$t("Cases per 100'000 residents")) +
     scale_fill_manual(name = '',values=rep(viridis(5)[4], 6), breaks = c('ZH', 'VD', 'SG','GR',
                                                           'FR', 'TI'),
-                      labels=rep("Confirmed cases (in catchment area)", 6)) + # legend
-    ggtitle(bquote(.(ref[[canton]])*"'s Catchment Area ("*.(ref_size[[canton]])*" residents): Cases, SARS-CoV Gene copies in Wastewater, Estimated R"['e'])) +
+                      labels=rep(i18n$t("Confirmed cases (in catchment area)"), 6)) + # legend
+    ggtitle(main_title) +
     theme_minimal() +
     theme(strip.text = element_text(size=17),
           axis.text= element_text(size=14),
@@ -81,12 +84,13 @@ case_plotter <- function(data = case_data, canton, date_range) {
           legend.position = 'bottom')
 }
 
-raw_plotter <- function(data, canton, date_range) {
+raw_plotter <- function(data, canton, date_range, i18n = NA) {
   n <- ww_data %>% filter(region==canton) %>%
     group_by(quantification_flag) %>% tally() %>% nrow()
 
   #date_range <- range((ww_data %>% filter(region == canton) %>% select(date))[["date"]])
-
+  p1 <- i18n$t("Gene copies")
+  ylabel <- bquote(.(p1)*" ("%*%"10"^12*")")
   data %>% filter(region == canton) %>% mutate(n1 = n1/10^12) %>%
     ggplot( ) +
     geom_point(aes(x=date, y = n1, colour = quantification_flag)) +
@@ -94,13 +98,13 @@ raw_plotter <- function(data, canton, date_range) {
                  date_breaks = "months", date_labels = "%b") +
     scale_y_continuous(labels = function(label) sprintf('%5.1f', label)) +
     scale_colour_manual(values = c(viridis(4)[1], 'darkgrey', 'firebrick', viridis(5)[5]), #'lightseagreen'
-                        labels = c('> LOQ', 'Imputed', '> LOD', '< LOD'),
+                        labels = c('> LOQ', i18n$t('Imputed'), '> LOD', '< LOD'),
                         breaks = c('> LOQ', 'Imputed', '> LOD', '< LOD'),
-                        name = 'Quantification flag**',
+                        name = i18n$t('Quantification flag**'),
                         guide = guide_legend(override.aes = list(size = 3) )) + # to increase size of point in legend
     geom_line(data = data %>% filter(region == canton) %>% filter(orig_data)  %>% mutate(n1 = n1/10^12),
               aes(x=date, y= n1,colour = name_orig), linetype = 'dashed', colour = "black") +
-    labs(x = 'Date' , y=expression("Gene copies ("%*%"10"^12*")")) +
+    labs(x = i18n$t("Date") , y=ylabel) +
     #ggtitle(paste0("SARS-CoV2-RNA copies in Wastewater in ", ref[[canton]])) +
     theme_minimal() +
     theme(strip.text = element_text(size=17),
@@ -115,7 +119,7 @@ raw_plotter <- function(data, canton, date_range) {
 
 # Re plots ####
 
-re_plotter <- function(source, canton, date_range) {
+re_plotter <- function(source, canton, date_range, i18n = NA) {
   #date_range <- range((ww_data %>% filter(region == canton) %>% select(date))[["date"]])
   # For CHUR: leave out confirmed catchment case Re for now (as lots of missing data) ---------
   if (canton == "GR") {
@@ -126,7 +130,10 @@ re_plotter <- function(source, canton, date_range) {
 
   data_ends <- new_data %>% group_by(data_type) %>% filter(row_number()==n())
   disc <- "*This is the most recent possible Re estimate due to delays between infection and being observed."
-
+  
+  p1 <- i18n$t("Estimated R")
+  ylabel <- bquote(.(p1)['e']~" (95% CI)")
+  
   new_data %>%
     ggplot() +
     geom_line(aes(x = date, y = median_R_mean, colour = data_type),
@@ -138,21 +145,21 @@ re_plotter <- function(source, canton, date_range) {
     geom_point(aes(x = date, y = median_R_mean, colour = data_type),
                data = data_ends, shape = 8) +
     scale_colour_manual(values = viridis(5)[c(1, 4, 5, 3, 2)], #'lightseagreen'
-                        labels = c('Wastewater', 'Confirmed cases (Catchment)', 'Confirmed cases (Canton)',
-                                   'Deaths', 'Hospitalized patients'),
+                        labels = i18n$t(c('Wastewater', 'Confirmed cases (Catchment)', 'Confirmed cases (Canton)',
+                                   'Deaths', 'Hospitalized patients')),
                         breaks = c('Wastewater', 'Confirmed (Catchment)','Confirmed (Canton)',
                                    'Deaths', 'Hospitalized patients')) +
     scale_fill_manual(values = viridis(5)[c(1, 4, 5, 3, 2)], #'lightseagreen'
-                       labels = c('Wastewater', 'Confirmed cases (Catchment)', 'Confirmed cases (Canton)',
-                                  'Deaths', 'Hospitalized patients'),
+                       labels = i18n$t(c('Wastewater', 'Confirmed cases (Catchment)', 'Confirmed cases (Canton)',
+                                  'Deaths', 'Hospitalized patients')),
                        breaks = c('Wastewater', 'Confirmed (Catchment)', 'Confirmed (Canton)',
                                   'Deaths', 'Hospitalized patients')) +
     scale_x_date(limits = c(date_range[1], date_range[2]),
                  date_breaks = "months", date_labels = "%b") +
     scale_y_continuous(labels = function(label) sprintf('%6.1f', label)) +
     coord_cartesian(ylim = c(0, 2)) +
-    labs( x = 'Date', y = bquote("Estimated R"['e']~" (95% CI)"),
-          colour = 'Source', fill = 'Source') +
+    labs( x = i18n$t("Date"), y = ylabel,
+          colour = i18n$t('Source'), fill = i18n$t('Source')) +
     guides(color = guide_legend(override.aes = list(size=5, shape = 0))) +
     #ggtitle(expression("Estimated R"["e"]*" using Different Data Sources")) +
     theme_minimal() +
@@ -169,7 +176,7 @@ re_plotter <- function(source, canton, date_range) {
              x = summary(date_range)[['3rd Qu.']]-2, y = 0.1, hjust = 0.5, vjust = 1, size = 4)
 }
 # special plot for Chur - 2 cantons ------
-re_plotter2 <- function(source, canton, date_range) {
+re_plotter2 <- function(source, canton, date_range, i18n = NA) {
   #date_range <- range((ww_data %>% filter(region %in% canton) %>% select(date))[["date"]])
   canton <- c("BE", "FR")
   # Rww and Rcc for catchment unaffected. Other sources change.
@@ -196,7 +203,10 @@ re_plotter2 <- function(source, canton, date_range) {
   # Must now include plots for BE
   disc <- "*This is the most recent possible Re estimate due to delays between infection and being observed."
   data_ends <- new_data %>% group_by(data_type) %>% filter(row_number()==n())
-
+  
+  p1 <- i18n$t("Estimated R")
+  ylabel <- bquote(.(p1)['e']~" (95% CI)")
+  
    new_data %>%
     ggplot() +
     geom_line(aes(x = date, y = median_R_mean, colour = data_type),
@@ -208,20 +218,20 @@ re_plotter2 <- function(source, canton, date_range) {
     geom_point(aes(x = date, y = median_R_mean, colour = data_type),
                data = data_ends, shape = 8) +
     scale_colour_manual(values = c(viridis(5)[c(1, 4)], '#CFE11CFF', '#2E6E8EFF'), #'lightseagreen'
-                        labels = c('Wastewater', 'Confirmed cases (Catchment)', 'Confirmed cases (Fribourg)',
-                                   'Confirmed cases (Bern)'),
+                        labels = c('Wastewater', 'Confirmed cases (Catchment)', paste0(i18n$t('Confirmed cases'), ' (Fribourg)'),
+                                   paste0(i18n$t('Confirmed cases'), ' (Bern)')),
                         breaks = c('Wastewater', 'Confirmed (Catchment)','Confirmed (Fribourg)',
                                    'Confirmed (Bern)')) +
     scale_fill_manual(values = c(viridis(5)[c(1, 4)], '#CFE11CFF', '#2E6E8EFF'), #'lightseagreen'
-                      labels = c('Wastewater', 'Confirmed cases (Catchment)', 'Confirmed cases (Fribourg)',
-                                 'Confirmed cases (Bern)'),
+                      labels = c('Wastewater', 'Confirmed cases (Catchment)', paste0(i18n$t('Confirmed cases'), ' (Fribourg)'),
+                                 paste0(i18n$t('Confirmed cases'), ' (Bern)')),
                       breaks = c('Wastewater', 'Confirmed (Catchment)','Confirmed (Fribourg)',
                                  'Confirmed (Bern)')) +
     scale_x_date(limits = c(date_range[1], date_range[2]),
                  date_breaks = "months", date_labels = "%b") +
     scale_y_continuous(labels = function(label) sprintf('%6.1f', label)) +
     coord_cartesian(ylim = c(0, 2)) +
-    labs( x = 'Date', y = bquote("Estimated R"['e']~" (95% CI)"),
+    labs( x = i18n$t("Date"), y = ylabel,
           colour = 'Source', fill = 'Source') +
     guides(color = guide_legend(override.aes = list(size=5, shape = 0))) +
     #ggtitle(expression("Estimated R"["e"]*" using Different Data Sources")) +
@@ -241,11 +251,13 @@ re_plotter2 <- function(source, canton, date_range) {
 
 # Plotting for all plants --------------
 
-canton_plotter <- function(source, canton, date_range) {
+canton_plotter <- function(source, canton, date_range, i18n = NA) {
   #date_range <- range((ww_data %>% filter(region %in% canton) %>% select(date))[["date"]])
   # for now, as Zurich is only one from Oct - Jan end.
   # After: make into sliding scale
   #date_range[1] <- as.Date('2021-02-01')
+  p1 <- i18n$t("Estimated R")
+  ylabel <- bquote(.(p1)['e']~" (95% CI)")
   
   plotData %>% filter(region %in% canton) %>%
     filter(data_type %in% source) %>%
@@ -269,8 +281,8 @@ canton_plotter <- function(source, canton, date_range) {
     scale_x_date(limits = c(date_range[1], date_range[2]),
                  date_breaks = "months", date_labels = "%b") +
     coord_cartesian(ylim = c(0, 2)) +
-    labs( x = 'Date', y = bquote("Estimated R"['e']~" (95% CI)"),
-          colour = 'Canton', fill = 'Canton') +
+    labs( x = i18n$t('Date'), y = ylabel,
+          colour = i18n$t('Canton'), fill = i18n$t('Canton')) +
     guides(color = guide_legend(override.aes = list(size=5))) +
     theme_minimal() +
     theme(strip.text = element_text(size=17),

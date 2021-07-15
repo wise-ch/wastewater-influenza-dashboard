@@ -81,6 +81,12 @@
       "de-ch": "Einzugsgebiet"
     },
     {
+      "en-gb": "Catchment area",
+      "it-ch": "TBT",
+      "fr-ch": "Zone de captage",
+      "de-ch": "Einzugsgebiet"
+    },
+    {
       "en-gb": "Switzerland",
       "de-ch": "Schweiz",
       "fr-ch": "Suisse",
@@ -166,6 +172,96 @@
     },
     {
       "en-gb": "Download results",
+      "it-ch": "TBT",
+      "fr-ch": "TBT",
+      "de-ch": "TBT"
+    },
+    {
+      "en-gb": "Estimated Wastewater R",
+      "it-ch": "TBT",
+      "fr-ch": "TBT",
+      "de-ch": "TBT"
+    },    
+    {
+      "en-gb": " using catchment specific confirmed cases for different catchment areas",
+      "it-ch": "TBT",
+      "fr-ch": "TBT",
+      "de-ch": "TBT"
+    },    
+    {
+      "en-gb": " for different catchment areas",
+      "it-ch": "TBT",
+      "fr-ch": "TBT",
+      "de-ch": "TBT"
+    },    
+    {
+      "en-gb": "Estimated R",
+      "it-ch": "TBT",
+      "fr-ch": "TBT",
+      "de-ch": "TBT"
+    },    
+    {
+      "en-gb": "Date",
+      "it-ch": "TBT",
+      "fr-ch": "TBT",
+      "de-ch": "TBT"
+    },    
+    {
+      "en-gb": "Quantification flag**",
+      "it-ch": "TBT",
+      "fr-ch": "TBT",
+      "de-ch": "TBT"
+    },    
+    {
+      "en-gb": "Gene copies",
+      "it-ch": "TBT",
+      "fr-ch": "TBT",
+      "de-ch": "TBT"
+    },    
+    {
+      "en-gb": "Canton",
+      "de-ch": "Kanton",
+      "fr-ch": "Canton",
+      "it-ch": "Canton"
+    },
+    {
+      "en-gb": "Imputed",
+      "it-ch": "TBT",
+      "fr-ch": "TBT",
+      "de-ch": "TBT"
+    }, 
+    {
+      "en-gb": "Source",
+      "it-ch": "TBT",
+      "fr-ch": "TBT",
+      "de-ch": "TBT"
+    }, 
+    {
+      "en-gb": "Cases per 100'000 residents",
+      "it-ch": "TBT",
+      "fr-ch": "TBT",
+      "de-ch": "TBT"
+    }, 
+    {
+      "en-gb": "Confirmed cases (Catchment)",
+      "it-ch": "TBT",
+      "fr-ch": "TBT",
+      "de-ch": "TBT"
+    }, 
+    {
+      "en-gb": "Confirmed cases (Canton)",
+      "it-ch": "TBT",
+      "fr-ch": "TBT",
+      "de-ch": "TBT"
+    }, 
+    {
+      "en-gb": "Confirmed cases",
+      "it-ch": "TBT",
+      "fr-ch": "TBT",
+      "de-ch": "TBT"
+    }, 
+    {
+      "en-gb": " residents): Cases, SARS-CoV Gene copies in Wastewater, Estimated R",
       "it-ch": "TBT",
       "fr-ch": "TBT",
       "de-ch": "TBT"

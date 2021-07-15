@@ -78,7 +78,7 @@ function(input, output, session) {
         {
             # from all the case plots, it picks region
             # as per drop down menu
-            case <- case_plotter(case_data, input$region, input$slider_dates)
+            case <- case_plotter(case_data, input$region, input$slider_dates, i18n)
             case
         }
     )
@@ -109,7 +109,7 @@ function(input, output, session) {
     # Plotting raw RNA copies -------
     output$raw_plots <- renderPlot(
         {
-            raw <- raw_plotter(ww_data, input$region, input$slider_dates)
+            raw <- raw_plotter(ww_data, input$region, input$slider_dates, i18n)
             raw
         }
     )
@@ -139,10 +139,10 @@ function(input, output, session) {
     output$re_plots <- renderPlot(
         {
             if (input$region == "FR") {
-                re <- re_plotter2(c(input$data_type, input$catchment_selection), input$region, input$slider_dates) # call plotter 2: 2 cantons!
+                re <- re_plotter2(c(input$data_type, input$catchment_selection), input$region, input$slider_dates, i18n) # call plotter 2: 2 cantons!
             }
             else {
-                re <- re_plotter(c(input$data_type, input$catchment_selection), input$region, input$slider_dates)
+                re <- re_plotter(c(input$data_type, input$catchment_selection), input$region, input$slider_dates, i18n)
             }
             re
         }
@@ -207,9 +207,12 @@ function(input, output, session) {
     # plotting all Rww ---------
     output$rww_plots <- renderPlot(
         {
-            rww <- canton_plotter(source = 'Wastewater', canton = input$canton, date_range = input$slider_dates_cantonal)
+            rww <- canton_plotter(source = 'Wastewater', canton = input$canton, date_range = input$slider_dates_cantonal, i18n)
+            title_p1 <- i18n$t("Estimated Wastewater R")
+            title_p2 <- i18n$t(" for different catchment areas")
+            
             rww + theme(legend.position = "none") +
-                ggtitle(bquote("Estimated Wastewater R"['e']~" for different catchment areas"))
+                ggtitle(bquote(.(title_p1)['e']~.(title_p2)))
         }
     )
     
@@ -242,8 +245,10 @@ function(input, output, session) {
     output$rcc_plots <- renderPlot(
         {
             rcc <- canton_plotter(canton = input$canton, source = 'Confirmed (Catchment)', 
-                                  date_range = input$slider_dates_cantonal)
-            rcc + ggtitle(bquote("Estimated R"['e']~" using catchment specific confirmed cases for different catchment areas"))
+                                  date_range = input$slider_dates_cantonal, i18n = i18n)
+            title_p1 <- i18n$t("Estimated R")
+            title_p2 <- i18n$t(" using catchment specific confirmed cases for different catchment areas")
+            rcc + ggtitle(bquote(.(title_p1)['e']~.(title_p2)))
             
         }
     )
@@ -325,12 +330,12 @@ function(input, output, session) {
         },
         # content is a function with argument file. content writes the plot to the device
         content = function(file) {
-            case <- case_plotter(case_data, input$region, input$slider_dates)
-            raw <- raw_plotter(ww_data, input$region, input$slider_dates)
+            case <- case_plotter(case_data, input$region, input$slider_dates, i18n)
+            raw <- raw_plotter(ww_data, input$region, input$slider_dates, i18n)
             if (input$region == "FR") {
-                re <- re_plotter2(c(input$data_type, input$catchment_selection), input$region, input$slider_dates) # call plotter 2: 2 cantons!
+                re <- re_plotter2(c(input$data_type, input$catchment_selection), input$region, input$slider_dates, i18n) # call plotter 2: 2 cantons!
             } else {
-                re <- re_plotter(c(input$data_type, input$catchment_selection), input$region, input$slider_dates)
+                re <- re_plotter(c(input$data_type, input$catchment_selection), input$region, input$slider_dates, i18n)
             }
             p <- patchwork::wrap_plots(case,raw,re, nrow = 3)+
                 plot_annotation(caption = paste0('Generated on: ',Sys.Date(),
