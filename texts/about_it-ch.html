@@ -1,0 +1,23 @@
+<h3>Qual è il nostro obiettivo?</h3>
+<p style="text-align:justify;color:black;padding:15px;border-radius:10px">Forniamo stime del numero di riproduzione effettivo, R<sub>e</sub>, basato su misurazioni longitudinali di SARS-CoV-2-RNA nelle acque reflue. Tali stime forniscono una rappresentazione indipendente delle dinamiche di trasmissione del COVID-19 e completano le stime R<sub>e</sub> già esistenti basate su dati clinici come casi confermati, ospedalizzazioni e/o decessi. 
+Lo scopo di questa dashboard è visualizzare le stime del tasso R<sub>e</sub> tratte dalle acque reflue per gli impianti di depurazione che fanno parte del progetto AbwasSARS-CoV-2 in Svizzera. Queste stime sono presentate insieme alle stime del tasso R<sub>e</sub> esistenti derivanti da fonti di dati clinici (per i cantoni interessati).
+<p/>
+<h3>Come avviene tutto questo?</h3>
+<p style="text-align:justify;color:black;padding:15px;border-radius:10px">Il numero di riproduzione effettivo, R<sub>e</sub>, quantifica il numero previsto di persone che un individuo infetto contagerà nel tempo. Poiché le persone infette espellono quantità significative di SARS-CoV-2-RNA nel sistema fognario (tramite saliva, feci e/o espettorato), i campioni delle acque reflue rispecchiano il numero di persone infette da COVID-19 in un determinato bacino idrografico. Queste misurazioni longitudinali del SARS-CoV-2 RNA nelle acque reflue sono poi utilizzate per stimare il tasso R<sub>e</sub>.
+<br>Come descritto in <a href="https://www.medrxiv.org/content/10.1101/2021.04.29.21255961v1">Huisman et al.</a>, utilizziamo una pipeline precedentemente sviluppata per stimare il tasso R<sub>e</sub> da fonti di dati clinici  (<a href="https://www.medrxiv.org/content/10.1101/2020.11.26.20239368v1.article-info">Huisman, Scire et al.</a>) che abbiamo adattato per l’uso nelle misurazioni delle acque reflue. La principale differenza tra i due metodi sta nel modo in cui la serie temporale sottostante degli eventi di infezione viene dedotta dalle osservazioni di input: i casi clinici seguono una distribuzione del ritardo dall’infezione alla conferma del caso, mentre le misurazioni delle acque reflue seguono una distribuzione della portata di diffusione dall’infezione alla diffusione del virus. 
+<br>Attualmente, questi metodi vengono applicati alle misurazioni <b>del gene SARS-CoV-2 N1</b>.
+<p/>
+<h3>Chi è coinvolto in questo progetto?</h3>
+<p style="text-align:justify;color:black;padding:15px;border-radius:10px">La dashboard è stata sviluppata da Taru Singhal, sotto la supervisione di Jana Huisman e Tanja Stadler (<a href="https://bsse.ethz.ch/cevo">Computational Evolution group</a>, ETH Zurigo).
+<br>Le misurazioni delle acque reflue vengono eseguite da squadre dell’Istituto federale per l’approvvigionamento, la depurazione e la protezione delle acque (EAWAG) e dell’EPFL sotto la direzione di Tim Julian, Christoph Ort e Tamar Kohn.
+<br>Il progetto è finanziato dall’Ufficio federale della sanità pubblica.
+<p/>
+<h3>Link e altra bibliografia</h3>
+<p style="text-align:justify;color:black;padding:15px;border-radius:10px">Il metodo per la valutazione del tasso R<sub>e</sub> delle acque reflue è descritto <a href="https://www.medrxiv.org/content/10.1101/2021.04.29.21255961v1">qui</a> e il codice è disponibile <a href="https://github.com/JSHuisman/wastewaterRe">qui</a>.
+<br>La pipeline generale per la valutazione del tasso R<sub>e</sub> è descritta <a href="https://www.medrxiv.org/content/10.1101/2020.11.26.20239368v1.article-info">qui</a> e il codice è disponibile <a href="https://github.com/covid-19-Re/shiny-dailyRe">qui</a>.
+<br>Le misurazioni grezze di SARS-CoV-2 nelle acque reflue sono presentate nella pagina <a href="https://sensors-eawag.ch/sars/overview.html">overview</a> dell’istituto EAWAG con link alle misurazioni dei singoli impianti di depurazione. 
+<br>Ulteriori informazioni sul campionamento delle acque reflue possono essere trovate sulla <a href="https://www.eawag.ch/en/department/sww/projects/sars-cov2-in-wastewater/">pagina del progetto SARS-CoV-2</a> dell’EAWAG.
+<p/>
+<h3>Contattateci</h3>
+<p style="text-align:justify;color:black;padding:15px;border-radius:10px">Per richieste generali, feedback o suggerimenti si prega di contattare Taru Singhal (<a href='mailto:tsinghal@student.ethz.ch'>tsinghal@student.ethz.ch</a>) oppure Jana Huisman (<a href='mailto:jana.huisman@env.ethz.ch'>jana.huisman@env.ethz.ch</a>).
+</p>
