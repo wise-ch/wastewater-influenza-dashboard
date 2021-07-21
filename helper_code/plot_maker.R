@@ -58,7 +58,7 @@ global_date_range <- range(ww_data$date)
 
 case_plotter <- function(data = case_data, canton, date_range, i18n = NA) {
   #date_range <- range((ww_data %>% filter(region == canton) %>% select(date))[["date"]])
-  p1 <- i18n$t("Catchment Area")
+  p1 <- i18n$t("Catchment area")
   p2 <- i18n$t(" residents): Cases, SARS-CoV Gene copies in Wastewater, Estimated R")
   main_title <-bquote(.(ref[[canton]])*" "*.(p1)*" ("*.(ref_size[[canton]])*.(p2)['e'])
   
