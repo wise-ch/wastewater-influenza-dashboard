@@ -129,7 +129,7 @@ re_plotter <- function(source, canton, date_range, i18n = NA) {
     filter(data_type %in% source) %>% filter(date >= date_range[1])
 
   data_ends <- new_data %>% group_by(data_type) %>% filter(row_number()==n())
-  disc <- "*This is the most recent possible Re estimate due to delays between infection and being observed."
+  disc <- i18n$t("*This is the most recent possible Re estimate due to delays between infection and being observed.")
   
   p1 <- i18n$t("Estimated R")
   ylabel <- bquote(.(p1)['e']~" (95% CI)")

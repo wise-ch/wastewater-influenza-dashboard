@@ -9,8 +9,8 @@
     {
       "en-gb": "*The R<sub>e</sub> for hospitalised patients and deaths are currently not displayed because the low case incidence results in large confidence intervals and low usefulness.",
       "it-ch": "*L’R<sub>e</sub> per i pazienti ospedalizzati e i decessi non è al momento visualizzato in quanto la bassa incidenza di casi comporta un ampio intervallo di confidenza e una scarsa utilità.",
-      "fr-ch": "*Les R<sub>e</sub> pour les patients hospitalisés et les décès ne sont actuellement pas indiqués, car la faible incidence des cas entraîne d’importants intervalles de confiance – ce qui n’est donc pas d’une grande utilité.",
-      "de-ch": "*R<sub>e</sub> für hospitalisierte Patienten und Todesfälle werden derzeit nicht angezeigt, da die geringe Fallinzidenz zu grossen Konfidenzintervallen und geringer Nützlichkeit führt."
+      "fr-ch": "*Les R<sub>e</sub> pour les patients hospitalisés et les décès ne sont actuellement pas indiqués, car la faible incidence des cas à pour conséquence des intervalles de confiance très larges – ce qui n’est donc pas d’une grande utilité.",
+      "de-ch": "*Für hospitalisierte Patienten oder Todesfälle wird R<sub>e</sub> derzeit nicht angezeigt, da die geringe Fallinzidenz zu grossen Konfidenzintervallen und geringer Nützlichkeit führt."
     },
     {
       "en-gb": "The estimated R<sub>e</sub> for confirmed cases in the Chur catchment area is currently not available due to a potential data quality issue.",
@@ -19,17 +19,17 @@
       "de-ch": "Die geschätzte R<sub>e</sub> für bestätigte Fälle im Einzugsgebiet von Chur ist aufgrund eines möglichen Datenqualitätsproblems derzeit nicht verfügbar."
     },
     {"en-gb": "The R<sub>e</sub> for wastewater is informed by infections in the catchment area, and will correspond best to the R<sub>e</sub> based on confirmed cases from that area. All other R<sub>e</sub> traces show the cantonal results, so there may be some dissonance. For instance, canton Zurich is about 3.4x the size of the catchment area served by the Werdhölzli wastewater treatment plant.",
-    "it-ch": " The R<sub>e</sub> for wastewater is informed by infections in the catchment area, and will correspond best to the R<sub>e</sub> based on confirmed cases from that area. All other R<sub>e</sub> traces show the cantonal results, so there may be some dissonance. For instance, canton Zurich is about 3.4x the size of the catchment area served by the Werdhölzli wastewater treatment plant.",
-    "fr-ch": "Le R<sub>e</sub> pour les eaux usées est basé sur les infections dans la zone de captage et correspondra au mieux au R<sub>e</sub> basé sur les cas confirmés dans cette zone. Tous les autres tracements de R<sub>e</sub> montrent les résultats cantonaux, raison pour laquelle une certaine dissonance est possible. Par exemple, le canton de Zurich est 3,4 fois plus grand que la zone du bassin versant desservie par la STEP de Werdhölzli.",
+    "it-ch": "L’R<sub>e</sub> per le acque reflue è aggiornato in base al numero di infezioni nel bacino idrografico e corrisponde meglio all’R<sub>e</sub> basato sui casi confermati di quell’area. Tutte le altre tracce dell’R<sub>e</sub> mostrano i risultati cantonali, pertanto potrebbero esservi delle discrepanze. Ad esempio, le dimensioni del Cantone di Zurigo sono pari a 3,4 volte quelle del bacino idrografico servito dall’impianto di trattamento delle acque reflue di Werdhölzli.",
+    "fr-ch": "Le R<sub>e</sub> pour les eaux usées est basé sur les infections dans la zone de captage et correspondra au mieux au R<sub>e</sub> basé sur les cas confirmés dans cette zone. Toutes les autres trajectoires de R<sub>e</sub> montrent les résultats cantonaux, raison pour laquelle une certaine dissonance est possible. Par exemple, le canton de Zurich est 3,4 fois plus grand que la zone de captage desservie par la STEP de Werdhölzli.",
     "de-ch": "R<sub>e</sub> für Abwasser basiert auf den Infektionen im Einzugsgebiet und entspricht am besten dem R<sub>e</sub>, welches auf bestätigten Fällen aus diesem Gebiet basiert. Alle anderen R<sub>e</sub>-Spuren zeigen die kantonalen Ergebnisse, so dass es zu einer gewissen Dissonanz kommen kann. Zum Beispiel ist der Kanton Zürich etwa 3,4x so groß wie das Einzugsgebiet, das von der Kläranlage Werdhölzli bedient wird."},
     {"en-gb": "While Lausanne is also one of the catchment areas being monitored, we have not included it in the dashboard due to data quality issues.",
-    "it-ch": " L’R<sub>e</sub> per le acque reflue è aggiornato in base al numero di infezioni nel bacino idrografico e corrisponde meglio all’R<sub>e</sub> basato sui casi confermati di quell’area. Tutte le altre tracce dell’R<sub>e</sub> mostrano i risultati cantonali, pertanto potrebbero esservi delle discrepanze. Ad esempio, le dimensioni del Cantone di Zurigo sono pari a 3,4 volte quelle del bacino idrografico servito dall’impianto di trattamento delle acque reflue di Werdhölzli.",
-    "fr-ch": "Bien que Lausanne soit également l’un des bassins versants surveillés, nous ne l’avons pas inclus dans le tableau de bord en raison de problèmes de qualité des données.",
+    "it-ch": "Anche se Losanna è uno dei bacini d'utenza monitorati, non l'abbiamo inclusa a causa di problemi di qualità dei dati.",
+    "fr-ch": "Bien que Lausanne soit également l’un des bassins de captage surveillés, nous ne l’avons pas inclus dans le tableau de bord en raison de problèmes de qualité des données.",
     "de-ch": "Obwohl Lausanne auch zu den überwachten Einzugsgebieten gehört, haben wir es aufgrund von Problemen mit der Datenqualität nicht in das Dashboard aufgenommen."},
     {
       "en-gb": "**Limit of detection (LOD) represents concentration levels at which SARS-CoV-2 can be reliably detected, while limit of quantification (LOQ) represents concentration levels with prespecified precision of detection. <LOD indicates values below the LOD; >LOD represents values below the LOQ, but above the LOD. These values have higher uncertainty, as the number of gene copies is very low. >LOQ indicates reliable values which are above the LOQ.",
       "it-ch": "**Il limite di rilevabilità (LOD) rappresenta i livelli di concentrazione a cui è possibile rilevare il virus SARS-CoV-2 in maniera affidabile, mentre il limite di quantificazione (LOQ) rappresenta i livelli di concentrazione con una precisione di rilevabilità prespecificata. <LOD indica valori al di sotto del LOD; >LOD rappresenta valori al di sotto del LOQ, ma al di sopra del LOD. Questi valori presentano un livello di incertezza più elevato, in quanto il numero di copie dei geni è molto basso. >LOQ indica valori affidabili al di sopra del LOQ.",
-      "fr-ch": "**La limite de détection (« Limit of Detection » - LOD) représente les valeurs de concentration auxquelles le SARS-CoV-2 peut être détecté de manière fiable, tandis que la limite de quantification (« Limit of quantification » - LOQ) représente les valeurs de concentration avec une précision spécifiée. <LOD indique des valeurs inférieures à la LOD ; >LOD représente des valeurs inférieures à la LOQ mais supérieures à la LOD. Ces valeurs présentent une plus grande incertitude, car le nombre de copies de gènes est très faible. >LOQ indique les valeurs fiables qui sont supérieures à la LOQ.",
+      "fr-ch": "**La limite de détection (« Limit of Detection » - LOD) représente les valeurs de concentration au-dessus desquelles le SARS-CoV-2 peut être détecté de manière fiable, tandis que la limite de quantification (« Limit of quantification » - LOQ) représente les valeurs de concentration au-dessus desquelles les résultats peuvent être quantifiés de manière précise. <LOD indique des valeurs inférieures à la LOD ; >LOD représente des valeurs inférieures à la LOQ mais supérieures à la LOD. Ces valeurs présentent une plus grande incertitude, car le nombre de copies de gènes est très faible. >LOQ indique les valeurs fiables qui sont supérieures à la LOQ.",
       "de-ch": "**Die Nachweisgrenze (limit of detection, LOD) stellt Konzentrationswerte dar, bei denen SARS-CoV-2 zuverlässig nachgewiesen werden kann, während die Bestimmungsgrenze (limit of quantification, LOQ) Konzentrationswerte mit vorgegebener Präzision darstellt. <LOD zeigt Werte unterhalb der LOD an; >LOD steht für Werte unterhalb der LOQ, aber oberhalb der LOD. Diese Werte haben eine höhere Unsicherheit, da die Anzahl der Genkopien sehr gering ist. >LOQ kennzeichnet zuverlässige Werte, die oberhalb der LOQ liegen."
     },
     {
@@ -42,7 +42,7 @@
       "en-gb": "Data Source (select to compare):",
       "it-ch": "Fonte dei dati (seleziona per confrontare)",
       "fr-ch": "Source de données (veuillez sélectionner pour comparaison)",
-      "de-ch": "Datenquelle (Wählen Sie, um zu vergleichen)"
+      "de-ch": "Datenquelle (Wählen Sie zum Vergleich)"
     },
     {
       "en-gb": "Wastewater",
@@ -77,8 +77,8 @@
     {
       "en-gb": "Catchments",
       "it-ch": "Bacini",
-      "fr-ch": "Zone de captage",
-      "de-ch": "Einzugsgebiet"
+      "fr-ch": "Zones de captage",
+      "de-ch": "Einzugsgebiete"
     },
     {
       "en-gb": "Catchment area",
@@ -101,20 +101,14 @@
     {
       "en-gb": "(The start and end date of the time interval to be displayed can be changed by moving the slider above.)",
       "it-ch": "(La data di inizio e quella di fine dell’intervallo di tempo da visualizzare possono essere modificate spostando il cursore in alto.)",
-      "fr-ch": "(Les dates de début et de fin de l’intervalle de temps à afficher peuvent être modifiées en déplaçant le curseur ci-dessus.)",
+      "fr-ch": "(Les dates de début et de fin de l’intervalle à afficher peuvent être modifiées en déplaçant le curseur ci-dessus.)",
       "de-ch": "(Das Start- und Enddatum des anzuzeigenden Zeitintervalls kann durch Verschieben des Schiebereglers oben verändert werden.)"
     },
     {
-      "en-gb": "For this location, available ",
-      "it-ch": "Per questa sede sono disponibili ",
-      "fr-ch": "Pour ce site sont disponibles ",
-      "de-ch": "Für diesen Standort sind "
-    },
-    {
-      "en-gb": " are the raw measurements of SARS-CoV-2 in wastewater.",
-      "it-ch": " le misurazioni grezze del virus SARS-CoV-2 nelle acque reflue.",
-      "fr-ch": " les données de mesures brutes du SARS-CoV-2 dans les eaux usées.",
-      "de-ch": " die Rohmessungen von SARS-CoV-2 im Abwasser verfügbar."
+      "en-gb": "The raw measurements of SARS-CoV-2 in wastewater for this location are available ",
+      "it-ch": "Le misurazioni grezze di SARS-CoV-2 nelle acque reflue per questa località sono disponibili ",
+      "fr-ch": "Les données de mesures brutes du SARS-CoV-2 dans les eaux usées pour ce site sont disponibles ",
+      "de-ch": "Die Rohmessungen von SARS-CoV-2 im Abwasser für diesen Standort sind verfügbar "
     },
     {
       "en-gb": "The raw measurements of SARS-CoV-2 in wastewater and associated catchment cases are displayed on ",
@@ -131,7 +125,7 @@
     {
       "en-gb": " with links to individual plant measurements.",
       "it-ch": " con collegamenti alle misurazioni dei singoli impianti.",
-      "fr-ch": " de l’EAWAG avec des liens vers les mesures de chaque installation.",
+      "fr-ch": " de l’EAWAG avec liens vers les mesures de chaque installation.",
       "de-ch": " der EAWAG mit Links zu den einzelnen Anlagenmessungen angezeigt."
     },
     {
@@ -149,25 +143,25 @@
     {
       "en-gb": "Catchment (select to compare):",
       "it-ch": "Bacino (seleziona per confrontare):",
-      "fr-ch": "TBT",
-      "de-ch": "Einzugsgebiet (wählen Sie, um zu vergleichen)"
+      "fr-ch": "Bassin de captage (sélectionner pour comparer",
+      "de-ch": "Einzugsgebiet (wählen Sie zum Vergleich)"
     },
     {
       "en-gb": "Wastewater measurements from 02.2021 to 07.03.2021 for ",
       "it-ch": "Le misurazioni delle acque reflue da febbraio 2021 al 07 marzo 2021 per ",
-      "fr-ch": "TBT",
-      "de-ch": "Abwassermessungen vom 02.2021 to 07.03.2021 für "
+      "fr-ch": "Mesures des eaux usées de février 2021 au 7.03.2021 ",
+      "de-ch": "Abwassermessungen vom 02.2021 bis 07.03.2021 für "
     },
     {
-      "en-gb": " have been excluded due to multiple consecutive measurements falling below the limit of quantification and/or detection, which affects the reliability of the raw measurements and the wastewater R<sub>e</e> estimates.",
+      "en-gb": " have been excluded due to multiple consecutive measurements falling below the limit of quantification and/or detection, which affects the reliability of the raw measurements and the wastewater R<sub>e</sub> estimates.",
       "it-ch": "TBT",
       "fr-ch": "TBT",
-      "de-ch": " wurden ausgeschlossen, weil mehrere aufeinanderfolgende Messungen unter die Bestimmungs- und/oder Nachweisgrenze fielen, was die Zuverlässigkeit der Rohmessungen und der Abwasser-R<sub>e</e>-Schätzungen beeinträchtigt."
+      "de-ch": " wurden ausgeschlossen, weil mehrere aufeinanderfolgende Messungen unter die Bestimmungs- und/oder Nachweisgrenze fielen, was die Zuverlässigkeit der Rohmessungen und der Abwasser-R<sub>e</sub>-Schätzungen beeinträchtigt."
     },    
     {
       "en-gb": "The Laupen catchment area consists of municipalities in both Bern and Fribourg (13 communities from Bern and 12 from Fribourg).",
       "it-ch": "Il bacino idrografico di Laupen è composto da comuni appartenenti alla municipalità di Berna e di Friburgo (13 comunità di Berna e 12 di Friburgo).",
-      "fr-ch": "Le bassin versant de Laupen est composé de communes des deux cantons de Berne et de Fribourg (13 communes de Berne et 12 de Fribourg).",
+      "fr-ch": "Le bassin de captage de Laupen est composé de communes des cantons de Berne et de Fribourg (13 communes de Berne et 12 de Fribourg).",
       "de-ch": "Das Einzugsgebiet von Laupen besteht aus Gemeinden der beiden Kantone Bern und Freiburg (13 Gemeinden aus Bern und 12 aus Freiburg)"
     },
     {
@@ -179,14 +173,14 @@
     {
       "en-gb": "Estimated Wastewater R",
       "it-ch": "R delle acque reflue stimato",
-      "fr-ch": "Eaux usées R ",
+      "fr-ch": "R estimé à partir des eaux usées",
       "de-ch": "Geschätztes Abwasser R"
     },    
     {
-      "en-gb": "using catchment specific confirmed cases for different catchment areas",
-      "it-ch": "utilizzando i casi confermati specifici di un bacino per diversi bacini idrografici",
-      "fr-ch": "utilisation de cas confirmés spécifiques pour différents bassins de captage",
-      "de-ch": "unter Verwendung einzugsgebiets-spezifischer bestätigter Fälle für verschiedene Einzugsgebiete "
+      "en-gb": " using catchment specific confirmed cases for different catchment areas",
+      "it-ch": " utilizzando i casi confermati specifici di un bacino per diversi bacini idrografici",
+      "fr-ch": " utilisation des cas confirmés spécifiques aux différents bassins de captage",
+      "de-ch": " unter Verwendung einzugsgebiets-spezifischer bestätigter Fälle für verschiedene Einzugsgebiete "
     },    
     {
       "en-gb": " for different catchment areas",
@@ -210,7 +204,7 @@
       "en-gb": "Quantification flag**",
       "it-ch": "Segnalazione della quantificazione**",
       "fr-ch": "Témoin de quantification**",
-      "de-ch": "TBT"
+      "de-ch": "Qualitätsangabe**"
     },    
     {
       "en-gb": "Gene copies",
@@ -227,8 +221,8 @@
     {
       "en-gb": "Imputed",
       "it-ch": "Attribuiti",
-      "fr-ch": "imputes ?",
-      "de-ch": "berechnet?"
+      "fr-ch": "Imputé",
+      "de-ch": "Interpoliert"
     }, 
     {
       "en-gb": "Source",
@@ -239,7 +233,7 @@
     {
       "en-gb": "Cases per 100'000 residents",
       "it-ch": " Casi ogni 100 000 residenti",
-      "fr-ch": " Cas par 100’000 habitants",
+      "fr-ch": " Cas pour 100’000 habitants",
       "de-ch": "Fälle pro 100’000 Einwohner"
     }, 
     {
@@ -262,9 +256,15 @@
     }, 
     {
       "en-gb": " residents): Cases, SARS-CoV Gene copies in Wastewater, Estimated R",
-      "it-ch": " Casi, copie dei geni di SARS-CoV nelle acque reflue, R stimato",
-      "fr-ch": " Cas, copies du gène SARS-CoV dans les eaux usées, estimation de R",
+      "it-ch": " residenti): Casi, copie dei geni di SARS-CoV nelle acque reflue, R stimato",
+      "fr-ch": " habitants): Cas, copies de gènes SARS-CoV dans les eaux usées, R estimé",
       "de-ch": " Einwohner): Fallzahlen, SARS-CoV Genkopien im Abwasser, Geschätztes R"
+    },
+    {
+      "en-gb": "*This is the most recent possible Re estimate due to delays between infection and being observed.",
+      "it-ch": "TBT",
+      "fr-ch": "TBT",
+      "de-ch": "TBT"
     }
 
   ]

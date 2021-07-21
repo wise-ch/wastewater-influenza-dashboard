@@ -174,9 +174,9 @@ navbarPageWithInputs("Covid-19: Wastewater Re",
            ),
            inputs = selectInput(inputId = "lang", label = NULL,
                                 choices = c("EN" = "en-gb",
-                                            "DE (in progress)" = "de-ch", 
-                                            "FR (in progress)" = "fr-ch", 
-                                            "IT (in progress)" = "it-ch"
+                                            "DE" = "de-ch", 
+                                            "FR" = "fr-ch", 
+                                            "IT" = "it-ch"
                                 ), width = '80px')
 )
 

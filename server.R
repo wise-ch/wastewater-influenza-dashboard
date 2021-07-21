@@ -299,9 +299,9 @@ function(input, output, session) {
     
     # text below plot for more info ---------
     output$link <- renderUI({
-        link <- p(i18n$t("For this location, available "),
+        link <- p(i18n$t("The raw measurements of SARS-CoV-2 in wastewater for this location are available "),
                   a(href = paste0("https://sensors-eawag.ch/sars/",tolower(ref[[input$region]]),".html"), i18n$t("here"), .noWS = "outside"),
-                  i18n$t(" are the raw measurements of SARS-CoV-2 in wastewater."),
+                  ".",
                   .noWS = c("after-begin", "before-end"), style="margin-bottom:0;font-size: 95%;")
         lod_loq <- p(i18n$t("**Limit of detection (LOD) represents concentration levels at which SARS-CoV-2 can be reliably detected, while limit of quantification (LOQ) represents concentration levels with prespecified precision of detection. <LOD indicates values below the LOD; >LOD represents values below the LOQ, but above the LOD. These values have higher uncertainty, as the number of gene copies is very low. >LOQ indicates reliable values which are above the LOQ."),
                      style = 'margin-bottom:0;font-size: 95%;')
@@ -311,7 +311,7 @@ function(input, output, session) {
         #                    currently not available due to a potential data quality issue.', style="margin-bottom:0;font-size: 95%;")
         
         exclude_lod <- p(HTML(paste0(strong('NB: '),i18n$t('Wastewater measurements from 02.2021 to 07.03.2021 for '), ref[[input$region]],
-                                     i18n$t(' have been excluded due to multiple consecutive measurements falling below the limit of quantification and/or detection, which affects the reliability of the raw measurements and the wastewater R<sub>e</e> estimates.'))),
+                                     i18n$t(' have been excluded due to multiple consecutive measurements falling below the limit of quantification and/or detection, which affects the reliability of the raw measurements and the wastewater R<sub>e</sub> estimates.'))),
                          style="margin-bottom:0;font-size: 95%;")
         
         laupen_2cantons <- p(strong('NB: '),i18n$t('The Laupen catchment area consists of municipalities in both Bern and Fribourg (13 communities from Bern and 12 from Fribourg).'), 
