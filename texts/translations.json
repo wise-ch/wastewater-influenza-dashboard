@@ -107,7 +107,7 @@
     {
       "en-gb": "The raw measurements of SARS-CoV-2 in wastewater for this location are available ",
       "it-ch": "Le misurazioni grezze di SARS-CoV-2 nelle acque reflue per questa località sono disponibili ",
-      "fr-ch": "Les données de mesures brutes du SARS-CoV-2 dans les eaux usées pour ce site sont disponibles ",
+      "fr-ch": "Les mesures brutes du SARS-CoV-2 dans les eaux usées pour ce site sont disponibles ",
       "de-ch": "Die Rohmessungen von SARS-CoV-2 im Abwasser für diesen Standort sind verfügbar "
     },
     {
@@ -149,14 +149,14 @@
     {
       "en-gb": "Wastewater measurements from 02.2021 to 07.03.2021 for ",
       "it-ch": "Le misurazioni delle acque reflue da febbraio 2021 al 07 marzo 2021 per ",
-      "fr-ch": "Mesures des eaux usées de février 2021 au 7.03.2021 ",
-      "de-ch": "Abwassermessungen vom 02.2021 bis 07.03.2021 für "
+      "fr-ch": "Les mesures brutes des eaux usées relevées du 02.2021 au 07.03.2021 pour ",
+      "de-ch": "Die Abwassermessungen vom 02.2021 bis 07.03.2021 für "
     },
     {
       "en-gb": " have been excluded due to multiple consecutive measurements falling below the limit of quantification and/or detection, which affects the reliability of the raw measurements and the wastewater R<sub>e</sub> estimates.",
-      "it-ch": "TBT",
-      "fr-ch": "TBT",
-      "de-ch": " wurden ausgeschlossen, weil mehrere aufeinanderfolgende Messungen unter die Bestimmungs- und/oder Nachweisgrenze fielen, was die Zuverlässigkeit der Rohmessungen und der Abwasser-R<sub>e</sub>-Schätzungen beeinträchtigt."
+      "it-ch": "sono state escluse a causa di varie misurazioni consecutive al di sotto del limite di quantificazione e/o rilevabilità, fattore che influisce sull’affidabilità delle misurazioni grezze delle stime dell’R<sub>e</sub> delle acque reflue.",
+      "fr-ch": "ont été omises en raison de multiples mesures consécutives tombant sous la limite de quantification et/ou de détection, ce qui affecte la fiabilité des mesures brutes et des estimations du R<sub>e</sub> des eaux usées.",
+      "de-ch": " wurden ausgeschlossen, da mehrere aufeinanderfolgende Messungen unter die Bestimmungs- und/oder Nachweisgrenze fielen, was die Zuverlässigkeit der Rohmessungen und der Abwasser-R<sub>e</sub>-Schätzungen beeinträchtigt."
     },    
     {
       "en-gb": "The Laupen catchment area consists of municipalities in both Bern and Fribourg (13 communities from Bern and 12 from Fribourg).",
@@ -262,9 +262,9 @@
     },
     {
       "en-gb": "*This is the most recent possible Re estimate due to delays between infection and being observed.",
-      "it-ch": "TBT",
-      "fr-ch": "TBT",
-      "de-ch": "TBT"
+      "it-ch": "Questo è la stima dell’Re più recente possibile a causa del tempo che intercorre tra il contagio e l’osservazione dell’infezione.",
+      "fr-ch": "Il s’agit de l’estimation du Re la plus récente possible en raison des délais entre l'infection et l'observation.",
+      "de-ch": "Dies ist die aktuellste mögliche Re-Schätzung aufgrund von Verzögerungen zwischen Infektion und Beobachtung."
     }
 
   ]
