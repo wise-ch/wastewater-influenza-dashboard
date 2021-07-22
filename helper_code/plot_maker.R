@@ -67,7 +67,7 @@ case_plotter <- function(data = case_data, canton, date_range, i18n = NA) {
     geom_bar(stat="identity", colour = viridis(5)[4], alpha = 0.7) +
     scale_x_date(limits = c(date_range[1], date_range[2]),
                  date_breaks = "months", date_labels = "%b") +
-    scale_y_continuous(labels = function(label) sprintf('%5.1f', label)) +
+    scale_y_continuous(labels = function(label) sprintf('%6.1f', label)) +
     labs(x = i18n$t("Date") , y=i18n$t("Cases per 100'000 residents")) +
     scale_fill_manual(name = '',values=rep(viridis(5)[4], 6), breaks = c('ZH', 'VD', 'SG','GR',
                                                           'FR', 'TI'),
@@ -96,7 +96,7 @@ raw_plotter <- function(data, canton, date_range, i18n = NA) {
     geom_point(aes(x=date, y = n1, colour = quantification_flag)) +
     scale_x_date(limits = c(date_range[1], date_range[2]),
                  date_breaks = "months", date_labels = "%b") +
-    scale_y_continuous(labels = function(label) sprintf('%5.1f', label)) +
+    scale_y_continuous(labels = function(label) sprintf('%4.1f', label)) +
     scale_colour_manual(values = c(viridis(4)[1], 'darkgrey', 'firebrick', viridis(5)[5]), #'lightseagreen'
                         labels = c('> LOQ', i18n$t('Imputed'), '> LOD', '< LOD'),
                         breaks = c('> LOQ', 'Imputed', '> LOD', '< LOD'),
@@ -109,7 +109,7 @@ raw_plotter <- function(data, canton, date_range, i18n = NA) {
     theme_minimal() +
     theme(strip.text = element_text(size=17),
           axis.text= element_text(size=14),
-          axis.title =  element_text(size=16),
+          axis.title =  element_text(size=15),
           legend.text= element_text(size=14),
           legend.title= element_text(size=17),
           plot.title = element_text(size = 18),
@@ -132,7 +132,15 @@ re_plotter <- function(source, canton, date_range, i18n = NA) {
   disc <- i18n$t("*This is the most recent possible Re estimate due to delays between infection and being observed.")
   
   p1 <- i18n$t("Estimated R")
-  ylabel <- bquote(.(p1)['e']~" (95% CI)")
+  if (nchar(p1)>10) {
+    # English and German
+    ylabel <- bquote(.(p1)['e']~" (95% CI)")
+  }
+  else {
+    # French and Italian
+    p1 <- strsplit(p1, " ")[[1]][2]
+    ylabel <- bquote("R"['e']~.(p1)~" (95% CI)")
+  }
   
   new_data %>%
     ggplot() +
@@ -173,7 +181,7 @@ re_plotter <- function(source, canton, date_range, i18n = NA) {
           legend.position = 'bottom') +
     annotate(geom = 'text',
              label = disc,
-             x = summary(date_range)[['3rd Qu.']]-2, y = 0.1, hjust = 0.5, vjust = 1, size = 4)
+             x = summary(date_range)[['3rd Qu.']]-25, y = 0.1, hjust = 0.5, vjust = 1, size = 3.9)
 }
 # special plot for Chur - 2 cantons ------
 re_plotter2 <- function(source, canton, date_range, i18n = NA) {
@@ -205,7 +213,16 @@ re_plotter2 <- function(source, canton, date_range, i18n = NA) {
   data_ends <- new_data %>% group_by(data_type) %>% filter(row_number()==n())
   
   p1 <- i18n$t("Estimated R")
-  ylabel <- bquote(.(p1)['e']~" (95% CI)")
+  if (nchar(p1)>10) {
+    # English and German
+    ylabel <- bquote(.(p1)['e']~" (95% CI)")
+  }
+  else {
+    # French and Italian
+    p1 <- strsplit(p1, " ")[[1]][2]
+    ylabel <- bquote("R"['e']~.(p1)~" (95% CI)")
+  }
+  
   
    new_data %>%
     ggplot() +
@@ -257,7 +274,15 @@ canton_plotter <- function(source, canton, date_range, i18n = NA) {
   # After: make into sliding scale
   #date_range[1] <- as.Date('2021-02-01')
   p1 <- i18n$t("Estimated R")
-  ylabel <- bquote(.(p1)['e']~" (95% CI)")
+  if (nchar(p1)>10) {
+    # English and German
+    ylabel <- bquote(.(p1)['e']~" (95% CI)")
+  }
+  else {
+    # French and Italian
+    p1 <- strsplit(p1, " ")[[1]][2]
+    ylabel <- bquote("R"['e']~.(p1)~" (95% CI)")
+  }
   
   plotData %>% filter(region %in% canton) %>%
     filter(data_type %in% source) %>%

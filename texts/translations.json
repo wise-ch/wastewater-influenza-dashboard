@@ -262,9 +262,9 @@
     },
     {
       "en-gb": "*This is the most recent possible Re estimate due to delays between infection and being observed.",
-      "it-ch": "Questo è la stima dell’Re più recente possibile a causa del tempo che intercorre tra il contagio e l’osservazione dell’infezione.",
-      "fr-ch": "Il s’agit de l’estimation du Re la plus récente possible en raison des délais entre l'infection et l'observation.",
-      "de-ch": "Dies ist die aktuellste mögliche Re-Schätzung aufgrund von Verzögerungen zwischen Infektion und Beobachtung."
+      "it-ch": "*Questo è la stima dell’Re più recente possibile a causa del tempo che intercorre tra il contagio e l’osservazione dell’infezione.",
+      "fr-ch": "*Il s’agit de l’estimation du Re la plus récente possible en raison des délais entre l'infection et l'observation.",
+      "de-ch": "*Dies ist die aktuellste mögliche Re-Schätzung aufgrund von Verzögerungen zwischen Infektion und Beobachtung."
     }
 
   ]
