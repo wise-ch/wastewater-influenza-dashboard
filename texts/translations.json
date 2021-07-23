@@ -51,6 +51,18 @@
       "de-ch": "Abwasser"
     },
     {
+      "en-gb": "Cases (Canton)",
+      "it-ch": "Casi (cantone)",
+      "fr-ch": "Cas (canton)",
+      "de-ch": "Fälle (Kanton)"
+    },
+    {
+      "en-gb": "Cases (Catchment)",
+      "it-ch": "Casi (bacino idrografico)",
+      "fr-ch": "Cas (le bassin de captage)",
+      "de-ch": "Fälle (Einzugsgebiet)"
+    },
+    {
       "en-gb": "Confirmed cases (in canton)",
       "it-ch": "Casi confermati (nel cantone)",
       "fr-ch": "Cas confirmés (dans le canton)",
@@ -255,10 +267,10 @@
       "de-ch": "Bestätigte Fälle"
     }, 
     {
-      "en-gb": " residents): Cases, SARS-CoV Gene copies in Wastewater, Estimated R",
-      "it-ch": " residenti): Casi, copie dei geni di SARS-CoV nelle acque reflue, R stimato",
-      "fr-ch": " habitants): Cas, copies de gènes SARS-CoV dans les eaux usées, R estimé",
-      "de-ch": " Einwohner): Fallzahlen, SARS-CoV Genkopien im Abwasser, Geschätztes R"
+      "en-gb": " residents): Cases, SARS-CoV Gene copies in Wastewater,",
+      "it-ch": " residenti): Casi, copie dei geni di SARS-CoV nelle acque reflue,",
+      "fr-ch": " habitants): Cas, copies de gènes SARS-CoV dans les eaux usées,",
+      "de-ch": " Einwohner): Fallzahlen, SARS-CoV Genkopien im Abwasser,"
     },
     {
       "en-gb": "*This is the most recent possible Re estimate due to delays between infection and being observed.",

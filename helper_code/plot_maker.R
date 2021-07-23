@@ -59,9 +59,18 @@ global_date_range <- range(ww_data$date)
 case_plotter <- function(data = case_data, canton, date_range, i18n = NA) {
   #date_range <- range((ww_data %>% filter(region == canton) %>% select(date))[["date"]])
   p1 <- i18n$t("Catchment area")
-  p2 <- i18n$t(" residents): Cases, SARS-CoV Gene copies in Wastewater, Estimated R")
-  main_title <-bquote(.(ref[[canton]])*" "*.(p1)*" ("*.(ref_size[[canton]])*.(p2)['e'])
-  
+  p2 <- i18n$t(" residents): Cases, SARS-CoV Gene copies in Wastewater,")
+  p3 <- i18n$t("Estimated R")
+  if (nchar(p3)>10) {
+    # English and German
+    main_title <-bquote(.(ref[[canton]])~.(p1)~"("~.(ref_size[[canton]])*.(p2)~.(p3)['e'])
+  }
+  else {
+    # French and Italian
+    p3 <- strsplit(p3, " ")[[1]][2]
+    main_title <-bquote(.(ref[[canton]])~.(p1)~"("~.(ref_size[[canton]])*.(p2)~"R"['e']~.(p3))
+  }
+
   data %>% filter(region == canton) %>%
     ggplot(aes(x=date, y = cases, fill = region) ) + # filling simply for a legend...
     geom_bar(stat="identity", colour = viridis(5)[4], alpha = 0.7) +
@@ -169,7 +178,6 @@ re_plotter <- function(source, canton, date_range, i18n = NA) {
     labs( x = i18n$t("Date"), y = ylabel,
           colour = i18n$t('Source'), fill = i18n$t('Source')) +
     guides(color = guide_legend(override.aes = list(size=5, shape = 0))) +
-    #ggtitle(expression("Estimated R"["e"]*" using Different Data Sources")) +
     theme_minimal() +
     theme(strip.text = element_text(size=17),
           axis.text= element_text(size=14),
@@ -180,7 +188,8 @@ re_plotter <- function(source, canton, date_range, i18n = NA) {
           panel.spacing.y = unit(2, "lines"),
           legend.position = 'bottom') +
     annotate(geom = 'text',
-             label = disc,
+             label = ifelse(is.infinite(min(data_ends$date)), " ",
+                            ifelse(date_range[2] >= min(data_ends$date) , disc, " ")),
              x = summary(date_range)[['3rd Qu.']]-25, y = 0.1, hjust = 0.5, vjust = 1, size = 3.9)
 }
 # special plot for Chur - 2 cantons ------
@@ -262,15 +271,16 @@ re_plotter2 <- function(source, canton, date_range, i18n = NA) {
            panel.spacing.y = unit(2, "lines"),
            legend.position = 'bottom') +
      annotate(geom = 'text',
-              label = disc,
-              x = summary(date_range)[['3rd Qu.']], y = 0.1, hjust = 0.5, vjust = 1, size = 4)
+              label = ifelse(is.infinite(min(data_ends$date)), " ",
+                             ifelse(date_range[2] >= min(data_ends$date) , disc, " ")),
+              x = summary(date_range)[['3rd Qu.']]-25, y = 0.1, hjust = 0.5, vjust = 1, size = 4)
 }
 
 # Plotting for all plants --------------
 
 canton_plotter <- function(source, canton, date_range, i18n = NA) {
   #date_range <- range((ww_data %>% filter(region %in% canton) %>% select(date))[["date"]])
-  # for now, as Zurich is only one from Oct - Jan end.
+  # for now, as Zurich is the only one from Oct - Jan end.
   # After: make into sliding scale
   #date_range[1] <- as.Date('2021-02-01')
   p1 <- i18n$t("Estimated R")
