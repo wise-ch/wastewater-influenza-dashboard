@@ -59,16 +59,16 @@ global_date_range <- range(ww_data$date)
 case_plotter <- function(data = case_data, canton, date_range, i18n = NA) {
   #date_range <- range((ww_data %>% filter(region == canton) %>% select(date))[["date"]])
   p1 <- i18n$t("Catchment area")
-  p2 <- i18n$t(" residents): Cases, SARS-CoV Gene copies in Wastewater,")
+  p2 <- i18n$t("residents): Cases, SARS-CoV Gene copies in Wastewater,")
   p3 <- i18n$t("Estimated R")
   if (nchar(p3)>10) {
     # English and German
-    main_title <-bquote(.(ref[[canton]])~.(p1)~"("~.(ref_size[[canton]])*.(p2)~.(p3)['e'])
+    main_title <-bquote(.(ref[[canton]])~.(p1)~"("~.(ref_size[[canton]])~.(p2)~.(p3)['e'])
   }
   else {
     # French and Italian
     p3 <- strsplit(p3, " ")[[1]][2]
-    main_title <-bquote(.(ref[[canton]])~.(p1)~"("~.(ref_size[[canton]])*.(p2)~"R"['e']~.(p3))
+    main_title <-bquote(.(ref[[canton]])~.(p1)~"("~.(ref_size[[canton]])~.(p2)~"R"['e']~.(p3))
   }
 
   data %>% filter(region == canton) %>%

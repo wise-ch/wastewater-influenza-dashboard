@@ -195,10 +195,10 @@
       "de-ch": " unter Verwendung einzugsgebiets-spezifischer bestätigter Fälle für verschiedene Einzugsgebiete "
     },    
     {
-      "en-gb": " for different catchment areas",
-      "it-ch": " per diversi bacini idrografici",
-      "fr-ch": " pour différents bassins de captage",
-      "de-ch": " für verschiedene Einzugsgebiete"
+      "en-gb": "for different catchment areas",
+      "it-ch": "per diversi bacini idrografici",
+      "fr-ch": "pour différents bassins de captage",
+      "de-ch": "für verschiedene Einzugsgebiete"
     },    
     {
       "en-gb": "Estimated R",
@@ -267,10 +267,10 @@
       "de-ch": "Bestätigte Fälle"
     }, 
     {
-      "en-gb": " residents): Cases, SARS-CoV Gene copies in Wastewater,",
-      "it-ch": " residenti): Casi, copie dei geni di SARS-CoV nelle acque reflue,",
-      "fr-ch": " habitants): Cas, copies de gènes SARS-CoV dans les eaux usées,",
-      "de-ch": " Einwohner): Fallzahlen, SARS-CoV Genkopien im Abwasser,"
+      "en-gb": "residents): Cases, SARS-CoV Gene copies in Wastewater,",
+      "it-ch": "residenti): Casi, copie dei geni di SARS-CoV nelle acque reflue,",
+      "fr-ch": "habitants): Cas, copies de gènes SARS-CoV dans les eaux usées,",
+      "de-ch": "Einwohner): Fallzahlen, SARS-CoV Genkopien im Abwasser,"
     },
     {
       "en-gb": "*This is the most recent possible Re estimate due to delays between infection and being observed.",

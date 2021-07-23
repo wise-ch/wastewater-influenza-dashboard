@@ -1,6 +1,6 @@
 library(shiny)
 library(patchwork)
-
+#library(ggtext)
 
 # it needs to be defined for both ui and server?
 i18n <- Translator$new(translation_json_path = "texts/translations.json")
@@ -267,10 +267,15 @@ function(input, output, session) {
             rww <- canton_plotter(source = 'Wastewater', canton = input$canton, 
                                   date_range = input$slider_dates_cantonal, i18n)
             title_p1 <- i18n$t("Estimated Wastewater R")
-            title_p2 <- i18n$t(" for different catchment areas")
+            title_p2 <- i18n$t("for different catchment areas")
+            title_p3 <- ""
+            if (nchar(title_p1)>25) {
+                title_p1 <- "R"
+                title_p3 <- gsub("R","",title_p1)
+            }
             
             rww + theme(legend.position = "none") +
-                ggtitle(bquote(.(title_p1)['e']~.(title_p2)))
+                ggtitle(bquote(.(title_p1)['e']*.(title_p3)~.(title_p2)))
         }
     )
     
@@ -306,7 +311,12 @@ function(input, output, session) {
                                   date_range = input$slider_dates_cantonal, i18n = i18n)
             title_p1 <- i18n$t("Estimated R")
             title_p2 <- i18n$t(" using catchment specific confirmed cases for different catchment areas")
-            rcc + ggtitle(bquote(.(title_p1)['e']~.(title_p2)))
+            title_p3 <- ""
+            if (nchar(title_p1)<10) {
+                title_p1 <- "R"
+                title_p3 <- gsub("R","",title_p1)
+            }
+            rcc + ggtitle(bquote(.(title_p1)['e']*.(title_p3)*.(title_p2)))
             
         }
     )
