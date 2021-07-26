@@ -7,7 +7,7 @@ library(shiny.i18n)
 
 source("helper_code/plot_maker.R")
 i18n <- Translator$new(translation_json_path = "texts/translations.json")
-i18n$set_translation_language("en-gb") # here you select the default translation to display
+#i18n$set_translation_language("en-gb") # here you select the default translation to display
 
 navbarPageWithInputs <- function(..., inputs) {
   navbar <- navbarPage(...)
@@ -32,26 +32,30 @@ navbarPageWithInputs("Covid-19: Wastewater Re",
                                                     #"Lausanne" = "VD",
                                                     "Altenrhein" = "SG", "Chur" = "GR",
                                                     "Laupen" = "FR", "Lugano" = "TI"
-                                        ), # ask about these two cantonal catchments
+                                        ), 
                             ),
                             shinyjs::useShinyjs(),
-                            checkboxGroupInput(inputId = "data_type",
-                                               label = i18n$t("Data Source (select to compare):"),
-                                               choices = c("Wastewater" = "Wastewater",
-                                                           "Confirmed cases (in canton)" = "Confirmed (Canton)"),
-                                               #"Deaths" = "Deaths",
-                                               #"Hospitalized patients"= "Hospitalized patients"),
-                                               selected = "Wastewater"),
-                            checkboxGroupInput(inputId = 'catchment_selection',
-                                               label = NULL,
-                                               choices = c("Confirmed cases (in catchment area)" = "Confirmed (Catchment)")),
-                            # if we would like deaths and hospitalised patients, comment out next chunk and
-                            # include back in checkboxGroupInput
-                            checkboxGroupInput(inputId = "data_type_disabled",
-                                                        label = NULL,
-                                                        choices = c("Deaths*" = "Deaths",
-                                                                    "Hospitalized patients*"=
-                                                                        "Hospitalized patients")),
+                            uiOutput('data_type'),
+                            uiOutput('catchment'),
+                            uiOutput('disabled'),
+                            # checkboxGroupInput(inputId = "data_type",
+                            #                    label = i18n$t("Data Source (select to compare):"),
+                            #                    choices = c("Wastewater" = "Wastewater",
+                            #                                "Confirmed cases (in canton)" = "Confirmed (Canton)"),
+                            #                    #"Deaths" = "Deaths",
+                            #                    #"Hospitalized patients"= "Hospitalized patients"),
+                            #                    selected = "Wastewater"),
+                            # checkboxGroupInput(inputId = 'catchment_selection',
+                            #                    label = NULL,
+                            #                    choices = c("Confirmed cases (in catchment area)" = "Confirmed (Catchment)")),
+                            # # if we would like deaths and hospitalised patients, comment out next chunk and
+                            # # include back in checkboxGroupInput
+                            # checkboxGroupInput(inputId = "data_type_disabled",
+                            #                             label = NULL,
+                            #                             choices = c("Deaths*" = "Deaths",
+                            #                                         "Hospitalized patients*"=
+                            #                                             "Hospitalized patients")),
+                            
                             uiOutput('death_hosp_info'),
                             
                             conditionalPanel(
@@ -61,16 +65,7 @@ navbarPageWithInputs("Covid-19: Wastewater Re",
                             ),
                             
                             uiOutput('other_disclaimers'),
-                            
-                            # selectInput(inputId = "lang", label = i18n$t("Language:"),
-                            #             choices = c("EN" = "en-gb",
-                            #                         #"Lausanne" = "VD",
-                            #                         "DE (in progress)" = "de-ch", 
-                            #                         "FR (in progress)" = "fr-ch", 
-                            #                         "IT (in progress)" = "it-ch"
-                            #             ), # ask about these two cantonal catchments
-                            # ),
-                            
+
                             width = 3
                         ),
                         

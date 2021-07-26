@@ -5,109 +5,68 @@ library(patchwork)
 # it needs to be defined for both ui and server?
 i18n <- Translator$new(translation_json_path = "texts/translations.json")
 #i18n$set_translation_language("en-gb") # here you select the default translation to display
+# zurich flicker: not present if no observe event language change
+
 Sys.setlocale("LC_TIME", "en_GB.UTF-8")
 function(input, output, session) {
-    # observeEvent(eventExpr = {
-    #     input$lang
-    #     input$region
-    # },
-    # handlerExpr = {
-    #     shiny.i18n::update_lang(session, input$lang)
-    #     options_disabled <- c('Deaths', 'Hospitalized patients')
-    #     names(options_disabled) <- i18n$t(c('Deaths*', 'Hospitalized patients*'))
-    #     updateCheckboxGroupInput(session, "data_type_disabled",
-    #                              label = NULL,
-    #                              choices = options_disabled)
-    #     shinyjs::delay(5, disable("data_type_disabled"))
-    # 
-    #     options_enabled <- c('Wastewater', 'Confirmed (Canton)')
-    #     names(options_enabled) <- i18n$t(c('Wastewater', 'Confirmed cases (in canton)'))
-    #     updateCheckboxGroupInput(session, "data_type",
-    #                              label = i18n$t("Data Source (select to compare):"),
-    #                              choices = options_enabled,
-    #                              selected = input$data_type)
-    #     options_catchment<- c('Confirmed (Catchment)')
-    #     names(options_catchment) <- i18n$t("Confirmed cases (in catchment area)")
-    #     updateCheckboxGroupInput(session, "catchment_selection",
-    #                              label = NULL,
-    #                              choices = options_catchment,
-    #                              selected = input$catchment_selection)
-    #     if (input$region== 'GR') {
-    #         shinyjs::delay(5, disable(id = "catchment_selection"))
-    #     }
-    # 
-    #     date_range <- c(range((ww_data %>% filter(region == input$region) %>%
-    #                                select(date))[["date"]])[1],
-    #                     Sys.Date())
-    #     # this is what is causing flickering for region
-    #     updateSliderInput(session, "slider_dates", value = date_range,
-    #                       min = date_range[1], max = Sys.Date())
-    # 
-    # 
-    # })
     # update language based on setting --------
     observeEvent(input$lang, {
         # Here is where we update language in session
         shiny.i18n::update_lang(session, input$lang)
-        #i18n_r()$set_translation_language(input$lang)
-        #shinyjs::disable(id = "data_type_disabled")
         lang_ref <- c("en-gb" = "en_GB.UTF-8",
                       "de-ch" = "de_CH.UTF-8",
                       "fr-ch" = "fr_CH.UTF-8",
                       "it-ch" = "it_CH.UTF-8")
         Sys.setlocale("LC_TIME", lang_ref[[input$lang]])
-        
+
     })
     # update title translation
     output$title_panel = renderText({
         i18n$t('Catchments')
     })
+    
+    output$data_type <- renderUI({
+        options_enabled <- c('Wastewater', 'Confirmed (Canton)')
+        names(options_enabled) <- i18n$t(c('Wastewater', 'Confirmed cases (in canton)'))
+
+        checkboxGroupInput(inputId = "data_type",
+                           label = i18n$t("Data Source (select to compare):"),
+                           choices = options_enabled,
+                           #"Deaths" = "Deaths",
+                           #"Hospitalized patients"= "Hospitalized patients"),
+                           selected = "Wastewater")
+    })
+    
+    output$catchment <- renderUI({
+        options_catchment<- c('Confirmed (Catchment)')
+        names(options_catchment) <- i18n$t("Confirmed cases (in catchment area)")
+        
+        checkboxGroupInput(inputId = 'catchment_selection',
+                           label = NULL,
+                           choices = options_catchment)
+
+    })
+    
+    output$disabled <- renderUI({
+        options_disabled <- c('Deaths', 'Hospitalized patients')
+        names(options_disabled) <- i18n$t(c('Deaths*', 'Hospitalized patients*'))
+        
+        disabled(checkboxGroupInput(inputId = "data_type_disabled",
+                           label = NULL,
+                           choices = options_disabled))
+        
+    })
 
     # control slider dates --------
 
-    # reactive values: region and dates on slider
-    #rv <- reactiveValues(sliderdates = c(global_date_range[1], Sys.Date()),
-    #                              region = 'ZH')
-
-    # consistently updates button translations and ensures they are disabled when needed
-    observe({
-        # update all choices according to language
-        # make sure to disable what needs to be disabled
-        options_disabled <- c('Deaths', 'Hospitalized patients')
-        names(options_disabled) <- i18n$t(c('Deaths*', 'Hospitalized patients*'))
-        updateCheckboxGroupInput(session, "data_type_disabled",
-                                 label = NULL,
-                                 choices = options_disabled)
-        shinyjs::delay(5, disable("data_type_disabled"))
-
-        options_enabled <- c('Wastewater', 'Confirmed (Canton)')
-        names(options_enabled) <- i18n$t(c('Wastewater', 'Confirmed cases (in canton)'))
-        updateCheckboxGroupInput(session, "data_type",
-                                 label = i18n$t("Data Source (select to compare):"),
-                                 choices = options_enabled,
-                                 selected = input$data_type)
-        options_catchment<- c('Confirmed (Catchment)')
-        names(options_catchment) <- i18n$t("Confirmed cases (in catchment area)")
-        updateCheckboxGroupInput(session, "catchment_selection",
-                                 label = NULL,
-                                 choices = options_catchment,
-                                 selected = input$catchment_selection)
-        if (input$region== 'GR') {
-            shinyjs::delay(5, disable(id = "catchment_selection"))
-        }
-
-    })
-    # # slider dates observed
-    # observeEvent(input$slider_dates, {
-    #     rv$sliderdates = input$slider_dates
+    # what is causing the problem of selection
+    # observe({
     # })
 
     # for Chur, no catchment selection ------
     observeEvent(input$region, {
         # Control the value, min, max according to region selected
         # min according to ww data min for catchment area
-        #rv$region <- input$region
-
         date_range <- c(range((ww_data %>% filter(region == input$region) %>%
                                    select(date))[["date"]])[1],
                         Sys.Date())
@@ -115,15 +74,12 @@ function(input, output, session) {
         updateSliderInput(session, "slider_dates", value = date_range,
                          min = date_range[1], max = Sys.Date())
 
-        #rv$sliderdates = input$slider_dates
-
         if(input$region == 'GR'){
             shinyjs::disable(id = "catchment_selection")
         }else{
             shinyjs::enable(id = "catchment_selection")
         }
     })
-
 
     # Plotting cases -------
     output$case_plots <- renderPlot(
