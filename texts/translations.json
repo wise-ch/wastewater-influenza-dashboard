@@ -220,8 +220,8 @@
     },    
     {
       "en-gb": "Gene copies",
-      "it-ch": " Copie dei geni ",
-      "fr-ch": " Copies de gènes",
+      "it-ch": "Copie dei geni ",
+      "fr-ch": "Copies de gènes",
       "de-ch": "Genkopien"
     },    
     {
@@ -244,20 +244,20 @@
     }, 
     {
       "en-gb": "Cases per 100'000 residents",
-      "it-ch": " Casi ogni 100 000 residenti",
-      "fr-ch": " Cas pour 100’000 habitants",
+      "it-ch": "Casi ogni 100 000 residenti",
+      "fr-ch": "Cas pour 100’000 habitants",
       "de-ch": "Fälle pro 100’000 Einwohner"
     }, 
     {
       "en-gb": "Confirmed cases (Catchment)",
-      "it-ch": " Casi confermati (Bacino)",
-      "fr-ch": " Cas confirmés (captage)",
+      "it-ch": "Casi confermati (Bacino)",
+      "fr-ch": "Cas confirmés (captage)",
       "de-ch": "Bestätigte Fälle (Einzugsgebiet)"
     }, 
     {
       "en-gb": "Confirmed cases (Canton)",
-      "it-ch": " Casi confermati (Cantone)",
-      "fr-ch": " Cas confirmés (canton)",
+      "it-ch": "Casi confermati (Cantone)",
+      "fr-ch": "Cas confirmés (canton)",
       "de-ch": "Bestätigte Fälle (Kanton)"
     }, 
     {
