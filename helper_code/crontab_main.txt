@@ -1,0 +1,3 @@
+0 0 * * * cd /home/wastewaterRe/app; Rscript helper_code/Rww_estimation.R
+15 * * * * touch restart.txt
+
