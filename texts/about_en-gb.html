@@ -1,0 +1,23 @@
+<h3>What is our aim?</h3>
+<p style="text-align:justify;color:black;padding:15px;border-radius:10px">We provide estimates of the effective reproductive number, R<sub>e</sub>, based on longitudinal measurements of SARS-CoV-2 RNA in wastewater. These estimates provide an independent account of COVID-19 transmission dynamics, complementing existing R<sub>e</sub> estimates based on clinical data such as confirmed cases, hospitalisations and/or deaths.
+<br>The purpose of this dashboard is to visualise the Re estimates from wastewater for the wastewater treatment plants that are part of the AbwasSARS-CoV-2 project in Switzerland. These estimates are shown together with existing R<sub>e</sub> estimates from clinical data sources (for the corresponding cantons).
+<p/>
+<h3>How do we do it?</h3>
+<p style="text-align:justify;color:black;padding:15px;border-radius:10px">The effective reproductive number, R<sub>e</sub>, quantifies the expected number of people an infected individual will infect over time. Since infected individuals excrete substantial amounts of SARS-CoV-2 RNA into the sewer system (via saliva, feces, and/or sputum), wastewater samples reflect the number of people in a particular catchment area that are infected with COVID-19. These longitudinal measurements of SARS-CoV-2 RNA in wastewater are then used to estimate R<sub>e</sub>.
+<br>As described in <a href="https://www.medrxiv.org/content/10.1101/2021.04.29.21255961v1">Huisman et al.</a>, we use a pipeline that was previously developed to estimate Re from clinical data sources (<a href="https://www.medrxiv.org/content/10.1101/2020.11.26.20239368v1.article-info">Huisman, Scire et al.</a>) and adapted it for use with wastewater measurements. The main difference between both methods is how the underlying time series of infection events is inferred from the input observations: clinical cases follow a delay distribution from infection to case confirmation, whereas wastewater measurements follow a shedding load distribution from infection to viral shedding.
+<br>Currently, these methods are applied to measurements of the <b>SARS-CoV-2 N1 gene</b>.
+<p/>
+<h3>Who is involved?</h3>
+<p style="text-align:justify;color:black;padding:15px;border-radius:10px">This dashboard is developed by Taru Singhal, supervised by Jana Huisman and Tanja Stadler (<a href="https://bsse.ethz.ch/cevo">Computational Evolution group</a>, ETH Zurich).
+<br>The underlying wastewater measurements are collected by teams at the Swiss Federal Institute of Aquatic Science and Technology (EAWAG) and EPFL, supervised by Tim Julian, Christoph Ort, and Tamar Kohn.
+<br>Funding for this project stems from the Swiss Federal Office of Public Health.
+<p/>
+<h3>Links and further reading</h3>
+<p style="text-align:justify;color:black;padding:15px;border-radius:10px">The method to estimate R<sub>e</sub> from wastewater is described <a href="https://www.medrxiv.org/content/10.1101/2021.04.29.21255961v1">here</a> and the code is available <a href="https://github.com/JSHuisman/wastewaterRe">here</a>.
+<br>The general R<sub>e</sub> estimation pipeline is described <a href="https://www.medrxiv.org/content/10.1101/2020.11.26.20239368v1.article-info">here</a> and the code is available <a href="https://github.com/covid-19-Re/shiny-dailyRe">here</a>.
+<br>The raw measurements of SARS-CoV-2 in wastewater are displayed on <a href="https://sensors-eawag.ch/sars/overview.html">EAWAG's overview page</a> with links to the measurements at individual treatment plants.
+<br>For more information on the wastewater sampling process, please visit <a href="https://www.eawag.ch/en/department/sww/projects/sars-cov2-in-wastewater/">EAWAG's SARS-CoV-2 project page</a>.
+<p/>
+<h3>Contact us</h3>
+<p style="text-align:justify;color:black;padding:15px;border-radius:10px">For general inquiries, feedback or suggestions for improvements, please contact Taru Singhal (<a href='mailto:tsinghal@student.ethz.ch'>tsinghal@student.ethz.ch</a>) or Jana Huisman (<a href='mailto:jana.huisman@env.ethz.ch'>jana.huisman@env.ethz.ch</a>).
+</p>

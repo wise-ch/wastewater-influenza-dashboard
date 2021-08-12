@@ -16,9 +16,14 @@ ww_read_in <- function(data_url, region) {
   
   new_case_data <- raw_data %>% select(date, cases, cases_smooth) %>% 
                     complete(date = seq.Date(min(date), max(date), by = 'days')) %>% # 
+<<<<<<< HEAD
                      mutate(region = region) #%>% # no interpolation 
                       #mutate(cases = replace_na(cases , 0))
                     
+=======
+                     mutate(region = region) #%>%  # no interpolation
+                    #mutate(cases = ifelse(!is.na(cases), cases, 0))
+>>>>>>> feature-testing
   
   new_ww_data <- raw_data %>% filter(!is.na(n1)) %>%
     mutate(orig_data = TRUE) %>%
