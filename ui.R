@@ -38,24 +38,6 @@ navbarPageWithInputs("Covid-19: Wastewater Re",
                             uiOutput('data_type'),
                             uiOutput('catchment'),
                             uiOutput('disabled'),
-                            # checkboxGroupInput(inputId = "data_type",
-                            #                    label = i18n$t("Data Source (select to compare):"),
-                            #                    choices = c("Wastewater" = "Wastewater",
-                            #                                "Confirmed cases (in canton)" = "Confirmed (Canton)"),
-                            #                    #"Deaths" = "Deaths",
-                            #                    #"Hospitalized patients"= "Hospitalized patients"),
-                            #                    selected = "Wastewater"),
-                            # checkboxGroupInput(inputId = 'catchment_selection',
-                            #                    label = NULL,
-                            #                    choices = c("Confirmed cases (in catchment area)" = "Confirmed (Catchment)")),
-                            # # if we would like deaths and hospitalised patients, comment out next chunk and
-                            # # include back in checkboxGroupInput
-                            # checkboxGroupInput(inputId = "data_type_disabled",
-                            #                             label = NULL,
-                            #                             choices = c("Deaths*" = "Deaths",
-                            #                                         "Hospitalized patients*"=
-                            #                                             "Hospitalized patients")),
-                            
                             uiOutput('death_hosp_info'),
                             
                             conditionalPanel(
@@ -94,10 +76,8 @@ navbarPageWithInputs("Covid-19: Wastewater Re",
                                     uiOutput("hover_info_re")
                                 ),
                                 # slider input for date range -----
-                                # idea 1: fix month range
-                                # idea 2: can change both date ranges - current 
-                                chooseSliderSkin("Flat", color = viridis(5)[4]),
-                                #setSliderColor(viridis(5)[4], 1),
+                                shinyWidgets::setSliderColor(color = rep("#5dc863FF", 2), 1:2), # for some reason, this is not working?
+                                #shinyWidgets::chooseSliderSkin("Flat", color = "#5dc863FF"),
                                 sliderInput("slider_dates", label = NULL, width = '950px',
                                             min = global_date_range[1], max = Sys.Date(), 
                                             value = c(global_date_range[1], Sys.Date())
@@ -142,8 +122,8 @@ navbarPageWithInputs("Covid-19: Wastewater Re",
                                         withSpinner(color="#0dc5c1"),
                                     uiOutput("hover_info_rcc")
                                 ),
-                                chooseSliderSkin("Flat", color = viridis(5)[4]),
-                                #setSliderColor(viridis(5)[4], 1:2), # for some reason, this is not working?
+                                #shinyWidgets::setSliderColor(color = "#5dc863FF", 1:2), # for some reason, this is not working?
+                                #shinyWidgets::chooseSliderSkin("Flat", color = "#5dc863FF"),
                                 sliderInput("slider_dates_cantonal", label = NULL, width = '950px',
                                             min = as.Date('2021-02-01'), max = Sys.Date(),
                                             value = c(as.Date('2021-02-01'), Sys.Date())

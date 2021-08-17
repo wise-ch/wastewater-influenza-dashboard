@@ -1,5 +1,5 @@
 library(shiny)
-#library(patchwork)
+library(patchwork)
 #library(ggtext)
 
 # it needs to be defined for both ui and server?
@@ -361,13 +361,13 @@ function(input, output, session) {
             } else {
                 re <- re_plotter(c(input$data_type, input$catchment_selection), input$region, input$slider_dates, i18n)
             }
-            # p <- patchwork::wrap_plots(case,raw,re, nrow = 3)+
-            #     plot_annotation(caption = paste0('Generated on: ',Sys.Date(),
-            #                                      ' (by: ibz-shiny.ethz.ch/wastewaterRe)'))
+            p <- patchwork::wrap_plots(case,raw,re, nrow = 3)+
+                plot_annotation(caption = paste0('Generated on: ',Sys.Date(),
+                                                 ' (by: ibz-shiny.ethz.ch/wastewaterRe)'))
             cairo_pdf(filename = file,
                       width = 16, height = 12, pointsize = 12, family = "sans", bg = "transparent",
                       antialias = "subpixel",fallback_resolution = 300)
-            #plot(p)
+            plot(p)
             dev.off()  # turn the device off
             
         }
