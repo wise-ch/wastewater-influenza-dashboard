@@ -54,8 +54,8 @@ navbarPageWithInputs("Covid-19: Wastewater Re",
                         # Home: main panel - all plotting and further info -------
                         mainPanel(
                             fluidRow(
-                              p("Disclaimer: There is currently a bug in the slider we are trying to fix.",style = 'margin-bottom:0;font-size: 90%;color: red'),
-                              br(),  
+                              #p("Disclaimer: There is currently a bug in the slider we are trying to fix.",style = 'margin-bottom:0;font-size: 90%;color: red'),
+                              #br(),  
                               div(
                                     style = "position:relative",
                                     plotOutput("case_plots", height = "255px", width = "950px",
