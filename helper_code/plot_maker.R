@@ -43,11 +43,11 @@ plotData <- plotData %>%
 
 
 # reference:
-ref <- c("ZH"="Zurich" ,  "VD"="Lausanne",
+ref <- c("ZH"="Zurich" ,  "GE"="Geneva",
          "SG"="Altenrhein", "GR"="Chur",
          "FR"="Laupen", "TI"="Lugano")
 
-ref_size <- c("ZH"="450'000" ,  "VD"="240'000",
+ref_size <- c("ZH"="450'000" ,  "GE"="454'000",
               "SG"="64'000", "GR"="55'000",
               "FR"="62'000", "TI"="124'000")
 
@@ -78,7 +78,7 @@ case_plotter <- function(data = case_data, canton, date_range, i18n = NA) {
                  date_breaks = "months", date_labels = "%b") +
     scale_y_continuous(labels = function(label) sprintf('%6.1f', label)) +
     labs(x = i18n$t("Date") , y=i18n$t("Cases per 100'000 residents")) +
-    scale_fill_manual(name = '',values=rep(viridis(5)[4], 6), breaks = c('ZH', 'VD', 'SG','GR',
+    scale_fill_manual(name = '',values=rep(viridis(5)[4], 6), breaks = c('ZH', 'GE', 'SG','GR',
                                                           'FR', 'TI'),
                       labels=rep(i18n$t("Confirmed cases (in catchment area)"), 6)) + # legend
     ggtitle(main_title) +
@@ -106,7 +106,7 @@ raw_plotter <- function(data, canton, date_range, i18n = NA) {
     scale_x_date(limits = c(date_range[1], date_range[2]),
                  date_breaks = "months", date_labels = "%b") +
     scale_y_continuous(labels = function(label) sprintf('%4.1f', label)) +
-    scale_colour_manual(values = c(viridis(4)[1], 'darkgrey', 'firebrick', viridis(5)[5]), #'lightseagreen'
+    scale_colour_manual(values = c(viridis(4)[1], 'darkgrey', 'firebrick', "#f4bc1c"), #'lightseagreen'
                         labels = c('> LOQ', i18n$t('Imputed'), '> LOD', '< LOD'),
                         breaks = c('> LOQ', 'Imputed', '> LOD', '< LOD'),
                         name = i18n$t('Quantification flag**'),
@@ -161,12 +161,12 @@ re_plotter <- function(source, canton, date_range, i18n = NA) {
     geom_hline(yintercept = 1) +
     geom_point(aes(x = date, y = median_R_mean, colour = data_type),
                data = data_ends, shape = 8) +
-    scale_colour_manual(values = viridis(5)[c(1, 4, 5, 3, 2)], #'lightseagreen'
+    scale_colour_manual(values = c(viridis(5)[c(1, 4)], "#f4bc1c", viridis(5)[c(3, 2)]), #'lightseagreen'
                         labels = i18n$t(c('Wastewater', 'Confirmed cases (Catchment)', 'Confirmed cases (Canton)',
                                    'Deaths', 'Hospitalized patients')),
                         breaks = c('Wastewater', 'Confirmed (Catchment)','Confirmed (Canton)',
                                    'Deaths', 'Hospitalized patients')) +
-    scale_fill_manual(values = viridis(5)[c(1, 4, 5, 3, 2)], #'lightseagreen'
+    scale_fill_manual(values = c(viridis(5)[c(1, 4)], "#f4bc1c", viridis(5)[c(3, 2)]), #'lightseagreen'
                        labels = i18n$t(c('Wastewater', 'Confirmed cases (Catchment)', 'Confirmed cases (Canton)',
                                   'Deaths', 'Hospitalized patients')),
                        breaks = c('Wastewater', 'Confirmed (Catchment)', 'Confirmed (Canton)',
@@ -303,15 +303,15 @@ canton_plotter <- function(source, canton, date_range, i18n = NA) {
                     ymax = median_R_highHPD, fill = region),
                 alpha = 0.2, show.legend = F) +
     geom_hline(yintercept = 1) +
-    scale_colour_manual(values = viridis(6), #'lightseagreen'
-                        labels = c('Zurich', 'Lausanne', 'Altenrhein', 'Chur',
+    scale_colour_manual(values = c(viridis(6)[1:5], "#f4bc1c"), #'lightseagreen'
+                        labels = c('Zurich', 'Geneva', 'Altenrhein', 'Chur',
                                    'Laupen', 'Lugano'),
-                        breaks = c('ZH', 'VD', 'SG','GR',
+                        breaks = c('ZH', 'GE', 'SG','GR',
                                    'FR', 'TI')) +
-    scale_fill_manual(values = viridis(6), #'lightseagreen'
-                      labels = c('Zurich', 'Lausanne', 'Altenrhein', 'Chur',
+    scale_fill_manual(values = c(viridis(6)[1:5], "#f4bc1c"), #'lightseagreen'
+                      labels = c('Zurich', 'Geneva', 'Altenrhein', 'Chur',
                                  'Laupen', 'Lugano'),
-                      breaks = c('ZH', 'VD', 'SG','GR',
+                      breaks = c('ZH', 'GE', 'SG','GR',
                                  'FR', 'TI')) +
     scale_x_date(limits = c(date_range[1], date_range[2]),
                  date_breaks = "months", date_labels = "%b") +

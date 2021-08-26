@@ -19,7 +19,7 @@ source("helper_code/wastewater_functions.R")
 
 # Rww estimation for all regions - bootstrap, deconvolve, compute Re ####
 
-config_df = expand.grid("region" = c('ZH', 'VD', 'SG', 'GR', 'FR', 'TI'),
+config_df = expand.grid("region" = c('ZH', 'GE', 'SG', 'GR', 'FR', 'TI'),
                         'incidence_var' = c('norm_n1'),
                         'GammaParams' = list(c('incubation', 'benefield')) )
 
@@ -62,7 +62,7 @@ write.csv(Re_ww_needed, "rww_data/Rww_cantonal.csv", row.names = F)
 
 # Rcc - catchment specific ------
 
-config_df_cc = expand.grid("region" = c('ZH', 'VD', 'SG', 'GR', 'FR', 'TI'),
+config_df_cc = expand.grid("region" = c('ZH', 'GE', 'SG', 'GR', 'FR', 'TI'),
                            'incidence_var' = c('cases'), # cases and not norm_n1
                            'GammaParams' = list(c('incubation', 'confirmed')) )
 # currently using confirmed as part of delay distribution

@@ -35,20 +35,34 @@ ww_read_in <- function(data_url, region) {
       filter(date >= as.Date('2021-03-08'))
   }
   
+  # For Altenrhein, there were a few ww measurements in Nov to be ignored.
+  if (region == "SG") {
+    new_ww_data <- new_ww_data %>%
+      filter(date >= as.Date('2021-02-01'))
+  }
+  
+  if (region == "GE") {
+    new_ww_data <- new_ww_data %>%
+      filter(date >= as.Date('2021-08-01'))
+  }
+  
   list(ww = new_ww_data, case = new_case_data)
 }
 
 
 #### New raw data format: Read in --------
 
-regions <- c('ZH', 'VD','SG', 'GR', 'FR','TI')
+regions <- c('ZH', 'GE','SG', 'GR', 'FR','TI')
 
-ref <- c("ZH"="Zurich" ,  "VD"="Lausanne",
+ref <- c("ZH"="Zurich" ,  "GE"="Geneva",
          "SG"="Altenrhein", "GR"="Chur",
          "FR"="Laupen", "TI"="Lugano")
 
 for (i in regions) {
   url = paste0("https://sensors-eawag.ch/sars/__data__/processed_normed_data_",tolower(ref[[i]]),".csv")
+  if (i == "GE") {
+    url = paste0("https://sensors-eawag.ch/sars/__data__/processed_normed_data_geneve.csv")
+  }
   all_data <- ww_read_in(url, i)
   ww_data <- bind_rows(ww_data, all_data[["ww"]])
   case_data <- bind_rows(case_data, all_data[["case"]])

@@ -236,7 +236,7 @@ function(input, output, session) {
     )
     
     output$hover_info_rww <- renderUI({
-        ref <- c("ZH"="Zurich" ,  "VD"="Lausanne",
+        ref <- c("ZH"="Zurich" ,  "GE"="Geneva",
                  "SG"="Altenrhein", "GR"="Chur",
                  "FR"="Laupen", "TI"="Lugano")
         hover <- input$plot_hover_rww
@@ -278,7 +278,7 @@ function(input, output, session) {
     )
     
     output$hover_info_rcc <- renderUI({
-        ref <- c("ZH"="Zurich" ,  "VD"="Lausanne",
+        ref <- c("ZH"="Zurich" ,  "GE"="Geneva",
                  "SG"="Altenrhein", "GR"="Chur",
                  "FR"="Laupen", "TI"="Lugano")
         hover <- input$plot_hover_rcc

@@ -29,9 +29,9 @@ navbarPageWithInputs("Covid-19: Wastewater Re",
                             selectInput(inputId = "region", 
                                         label = i18n$t("Select wastewater treatment plant:"),
                                         choices = c("Zurich" = "ZH",
-                                                    #"Lausanne" = "VD",
                                                     "Altenrhein" = "SG", "Chur" = "GR",
-                                                    "Laupen" = "FR", "Lugano" = "TI"
+                                                    "Laupen" = "FR", "Lugano" = "TI",
+                                                    "Geneva" = "GE"
                                         ), 
                             ),
                             shinyjs::useShinyjs(),
