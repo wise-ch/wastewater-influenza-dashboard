@@ -47,7 +47,7 @@ ref <- c("ZH"="Zurich" ,  "GE"="Geneva",
          "SG"="Altenrhein", "GR"="Chur",
          "FR"="Laupen", "TI"="Lugano")
 
-ref_size <- c("ZH"="450'000" ,  "GE"="454'000",
+ref_size <- c("ZH"="471'000" ,  "GE"="454'000",
               "SG"="64'000", "GR"="55'000",
               "FR"="62'000", "TI"="124'000")
 
