@@ -155,7 +155,8 @@ re_plotter <- function(source, canton, date_range, i18n = NA) {
   
   new_data <- new_data %>% filter(date >= date_range[1] & date <= date_range[2])
   
-  if (global_date_range[1]==date_range[1] & date_range[2]==Sys.Date()) { 
+  if (range((ww_data %>% filter(region == canton) %>%
+             select(date))[["date"]])[1]==date_range[1] & date_range[2]==Sys.Date()) { 
     ylimits <- c(0, 2)
   } else { 
      ylimits <- c(max(min(new_data$median_R_lowHPD), 0), min(max(new_data$median_R_highHPD), 2))}
@@ -232,7 +233,8 @@ re_plotter2 <- function(source, canton, date_range, i18n = NA) {
   
   new_data <- new_data %>% filter(date >= date_range[1] & date <= date_range[2])
   
-  if (global_date_range[1]==date_range[1] & date_range[2]==Sys.Date()) { 
+  if (range((ww_data %>% filter(region == 'FR') %>%
+             select(date))[["date"]])[1]==date_range[1] & date_range[2]==Sys.Date()) { 
     ylimits <- c(0, 2)
   } else { 
     ylimits <- c(max(min(new_data$median_R_lowHPD), 0), min(max(new_data$median_R_highHPD), 2))}
