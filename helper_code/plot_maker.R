@@ -71,7 +71,7 @@ case_plotter <- function(data = case_data, canton, date_range, i18n = NA) {
     main_title <-bquote(.(ref[[canton]])~.(p1)~"("~.(ref_size[[canton]])~.(p2)~"R"['e']~.(p3))
   }
 
-  data %>% filter(region == canton) %>%
+  data %>% filter(region == canton) %>% filter(date >= date_range[1] & date <= date_range[2]) %>%
     ggplot(aes(x=date, y = cases, fill = region) ) + # filling simply for a legend...
     geom_bar(stat="identity", colour = viridis(5)[4], alpha = 0.7) +
     scale_x_date(limits = c(date_range[1], date_range[2]),
@@ -101,6 +101,7 @@ raw_plotter <- function(data, canton, date_range, i18n = NA) {
   p1 <- i18n$t("Gene copies")
   ylabel <- bquote(.(p1)*" ("%*%"10"^12*")")
   data %>% filter(region == canton) %>% mutate(n1 = n1/10^12) %>%
+    filter(date >= date_range[1] & date <= date_range[2]) %>%
     ggplot( ) +
     geom_point(aes(x=date, y = n1, colour = quantification_flag)) +
     scale_x_date(limits = c(date_range[1], date_range[2]),
@@ -111,7 +112,8 @@ raw_plotter <- function(data, canton, date_range, i18n = NA) {
                         breaks = c('> LOQ', 'Imputed', '> LOD', '< LOD'),
                         name = i18n$t('Quantification flag**'),
                         guide = guide_legend(override.aes = list(size = 3) )) + # to increase size of point in legend
-    geom_line(data = data %>% filter(region == canton) %>% filter(orig_data)  %>% mutate(n1 = n1/10^12),
+    geom_line(data = data %>% filter(region == canton) %>% filter(orig_data)  %>% 
+                filter(date >= date_range[1] & date <= date_range[2]) %>% mutate(n1 = n1/10^12),
               aes(x=date, y= n1,colour = name_orig), linetype = 'dashed', colour = "black") +
     labs(x = i18n$t("Date") , y=ylabel) +
     #ggtitle(paste0("SARS-CoV2-RNA copies in Wastewater in ", ref[[canton]])) +
@@ -151,7 +153,14 @@ re_plotter <- function(source, canton, date_range, i18n = NA) {
     ylabel <- bquote("R"['e']~.(p1)~" (95% CI)")
   }
   
-  new_data %>%
+  new_data <- new_data %>% filter(date >= date_range[1] & date <= date_range[2])
+  
+  if (global_date_range[1]==date_range[1] & date_range[2]==Sys.Date()) { 
+    ylimits <- c(0, 2)
+  } else { 
+     ylimits <- c(max(min(new_data$median_R_lowHPD), 0), min(max(new_data$median_R_highHPD), 2))}
+  
+  new_data  %>%
     ggplot() +
     geom_line(aes(x = date, y = median_R_mean, colour = data_type),
               alpha = 0.7, lwd = 0.8) +
@@ -174,7 +183,7 @@ re_plotter <- function(source, canton, date_range, i18n = NA) {
     scale_x_date(limits = c(date_range[1], date_range[2]),
                  date_breaks = "months", date_labels = "%b") +
     scale_y_continuous(labels = function(label) sprintf('%6.1f', label)) +
-    coord_cartesian(ylim = c(0, 2)) +
+    coord_cartesian(ylim = ylimits) + # change this? Autoadjust? but how?
     labs( x = i18n$t("Date"), y = ylabel,
           colour = i18n$t('Source'), fill = i18n$t('Source')) +
     guides(color = guide_legend(override.aes = list(size=5, shape = 0))) +
@@ -221,6 +230,14 @@ re_plotter2 <- function(source, canton, date_range, i18n = NA) {
   disc <- "*This is the most recent possible Re estimate due to delays between infection and being observed."
   data_ends <- new_data %>% group_by(data_type) %>% filter(row_number()==n())
   
+  new_data <- new_data %>% filter(date >= date_range[1] & date <= date_range[2])
+  
+  if (global_date_range[1]==date_range[1] & date_range[2]==Sys.Date()) { 
+    ylimits <- c(0, 2)
+  } else { 
+    ylimits <- c(max(min(new_data$median_R_lowHPD), 0), min(max(new_data$median_R_highHPD), 2))}
+  
+  
   p1 <- i18n$t("Estimated R")
   if (nchar(p1)>10) {
     # English and German
@@ -256,7 +273,7 @@ re_plotter2 <- function(source, canton, date_range, i18n = NA) {
     scale_x_date(limits = c(date_range[1], date_range[2]),
                  date_breaks = "months", date_labels = "%b") +
     scale_y_continuous(labels = function(label) sprintf('%6.1f', label)) +
-    coord_cartesian(ylim = c(0, 2)) +
+    coord_cartesian(ylim = ylimits) +
     labs( x = i18n$t("Date"), y = ylabel,
           colour = 'Source', fill = 'Source') +
     guides(color = guide_legend(override.aes = list(size=5, shape = 0))) +
