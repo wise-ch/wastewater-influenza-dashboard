@@ -124,9 +124,15 @@ function(input, output, session) {
     
     output$hover_info_raw <- renderUI({
         hover_raw <- input$plot_hover_raw
-        point <- nearPoints(ww_data %>% filter(region == input$region) %>% mutate(n1 = n1/10^12) %>%
-                                filter(date >= input$slider_dates[1] & date <= input$slider_dates[2]),
-                            hover_raw, threshold = 8, maxpoints = 1, addDist = TRUE)
+        # TODO
+        # this would need to change based on reading_in changes
+        select_data <- ww_data %>% mutate(protocol = 'v3.1') %>% bind_rows(pmg_n1_raw) %>% 
+            mutate(n1 = n1/10^12) %>% filter(region == input$region)  %>%
+            filter(date >= input$slider_dates[1] & date <= input$slider_dates[2]) 
+        
+        point <- nearPoints(select_data,
+                            hover_raw, threshold = 8, maxpoints = 1, addDist = TRUE,
+                            xvar = 'date', yvar = 'n1')
         if (nrow(point) == 0) return(NULL)
         
         left_px <- hover_raw$coords_css$x
@@ -140,7 +146,8 @@ function(input, output, session) {
             style = style,
             p(HTML(paste0("<i>", point$date, "</i>", "<br/>",
                           "<b>", i18n$t("Gene copies"),"</b> (x10<sup>12</sup>): ", round(point$n1, 2), "<br/>",
-                          "<i>(", i18n$t(as.character(point$quantification_flag)), ")</i>")))
+                          "<i>(", i18n$t(as.character(point$quantification_flag)), ")</i>", "<br/>",
+                          "<i>(",'Protocol: ',point$protocol ,")</i>")))
         )
     })
     # Plotting Rww+Re for other sources --------
@@ -187,9 +194,12 @@ function(input, output, session) {
                                 hover, threshold = 5, maxpoints = 1, addDist = TRUE)
         }
         else {
-            
+            flag <- NA
+            if ('Wastewater' %in% input$data_type) {
+                flag <- 'Wastewater (Promega)'
+            }
             point <- nearPoints(plotData %>% filter(region == input$region) %>%
-                                    filter(data_type %in% c(input$data_type, input$catchment_selection)) %>% 
+                                    filter(data_type %in% c(input$data_type, input$catchment_selection, flag)) %>% 
                                     filter(date >= input$slider_dates[1] & date <= input$slider_dates[2]),
                                 hover, threshold = 5, maxpoints = 1, addDist = TRUE)
         }
