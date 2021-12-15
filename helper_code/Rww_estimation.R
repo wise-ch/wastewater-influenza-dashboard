@@ -27,8 +27,10 @@ deconv_ww_data <- data.frame()
 Re_ww <- data.frame()
 
 for(row_i in 1:nrow(config_df)){
-  # for wastewater
-  new_deconv_data = deconvolveIncidence(ww_data %>%
+  # for wastewater - promega
+  # old is in a csv
+  # old: ww_data
+  new_deconv_data = deconvolveIncidence(ww_data_new %>%
                                           filter(region == config_df[row_i, 'region']),
                                         incidence_var = config_df[row_i, 'incidence_var'],
                                         getCountParams(unlist(config_df[row_i, 'GammaParams'])[1]),
@@ -56,9 +58,11 @@ for(row_i in 1:nrow(config_df)){
 }
 
 Re_ww_needed <- Re_ww %>% select(region, data_type, date,
-                                 median_R_mean, median_R_highHPD, median_R_lowHPD) # write to csv
+                                 median_R_mean, median_R_highHPD, median_R_lowHPD) %>%
+  filter(date >= as.Date('2021-10-20'))
+# write to csv
 
-write.csv(Re_ww_needed, "rww_data/Rww_cantonal.csv", row.names = F)
+write.csv(Re_ww_needed, "rww_data/Rww_cantonal_pmg.csv", row.names = F)
 
 # Rcc - catchment specific ------
 

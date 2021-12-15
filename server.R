@@ -117,7 +117,7 @@ function(input, output, session) {
     # Plotting raw RNA copies -------
     output$raw_plots <- renderPlot(
         {
-            raw <- raw_plotter(ww_data, input$region, input$slider_dates, i18n)
+            raw <- raw_plotter(ww_data_all, input$region, input$slider_dates, i18n)
             raw
         }
     )
@@ -126,7 +126,7 @@ function(input, output, session) {
         hover_raw <- input$plot_hover_raw
         # TODO
         # this would need to change based on reading_in changes
-        select_data <- ww_data %>% mutate(protocol = 'v3.1') %>% bind_rows(pmg_n1_raw) %>% 
+        select_data <- ww_data_all %>% 
             mutate(n1 = n1/10^12) %>% filter(region == input$region)  %>%
             filter(date >= input$slider_dates[1] & date <= input$slider_dates[2]) 
         
@@ -166,7 +166,7 @@ function(input, output, session) {
     
     output$hover_info_re <- renderUI({
         hover <- input$plot_hover_re
-        date_range <- range((ww_data %>% filter(region == input$region) %>% select(date))[["date"]]) # only look at valid region.
+        date_range <- range((ww_data_all %>% filter(region == input$region) %>% select(date))[["date"]]) # only look at valid region.
         # NB as some places have chunks cut out... Chur and Lugano.
         # special treatment: Laupen - has both Fribourg and Bern! ------
         if (input$region == "FR") {
@@ -194,13 +194,19 @@ function(input, output, session) {
                                 hover, threshold = 5, maxpoints = 1, addDist = TRUE)
         }
         else {
-            flag <- NA
-            if ('Wastewater' %in% input$data_type) {
-                flag <- 'Wastewater (Promega)'
+            if (! 'Wastewater' %in% input$data_type) {
+                selected_data <- plotData %>% filter(region == input$region) %>%
+                    filter(data_type %in% c(input$data_type, input$catchment_selection)) %>% 
+                    filter(date >= input$slider_dates[1] & date <= input$slider_dates[2])
+            } else {
+                selected_data <- plotData %>% filter(region == input$region) %>%
+                    filter(data_type %in% c(input$data_type, input$catchment_selection)) %>% 
+                    bind_rows(plotData %>% filter(region %in% input$region) %>%
+                    filter(data_type == 'Wastewater (PMG2)'))  %>%                   
+                filter(date >= input$slider_dates[1] & date <= input$slider_dates[2])
+
             }
-            point <- nearPoints(plotData %>% filter(region == input$region) %>%
-                                    filter(data_type %in% c(input$data_type, input$catchment_selection, flag)) %>% 
-                                    filter(date >= input$slider_dates[1] & date <= input$slider_dates[2]),
+            point <- nearPoints(selected_data,
                                 hover, threshold = 5, maxpoints = 1, addDist = TRUE)
         }
         
@@ -250,8 +256,15 @@ function(input, output, session) {
                  "SG"="Altenrhein", "GR"="Chur",
                  "FR"="Laupen", "TI"="Lugano")
         hover <- input$plot_hover_rww
-        point <- nearPoints(plotData %>% filter(region %in% input$canton) %>%
-                                filter(data_type =='Wastewater'), hover, threshold = 5, maxpoints = 1, addDist = TRUE)
+        CH_data <- plotData %>% filter(region %in% input$canton) %>%
+            filter(data_type %in% 'Wastewater') %>%
+            bind_rows(plotData %>% filter(region %in% input$canton) %>%
+                          filter(data_type == 'Wastewater (PMG2)') %>%
+                          filter(date > (transition_period[2] - 10))) %>% 
+            filter(date >= input$slider_dates_cantonal[1] & date <= input$slider_dates_cantonal[2])
+        
+        
+        point <- nearPoints(CH_data, hover, threshold = 5, maxpoints = 1, addDist = TRUE)
         if (nrow(point) == 0) return(NULL)
         
         left_px <- hover$coords_css$x
@@ -324,11 +337,18 @@ function(input, output, session) {
           style="font-size: 95%;")
     })
     
+    disc_protocol <- 'The grey shaded regions represent a switch in protocol during the wastewater sample preparation. 
+    During this period, the old and new protocols (v3.1 and Promega respectively) were run simulataneously (10-11-2021 to 30-11-2021). 
+    The R<sub>e</sub> for the new protocol takes around 3 weeks to stabilise (31-10-2021 to 20-11-2021). 
+    Further details of the protocol switch are described '
+    
     output$other_disclaimers <- renderUI({
         p(
             tags$ul(style="padding-left:10px;font-size: 95%;",
                     tags$li(HTML(paste0(i18n$t("The R<sub>e</sub> for wastewater is informed by infections in the catchment area, and will correspond best to the R<sub>e</sub> based on confirmed cases from that area. All other R<sub>e</sub> traces show the cantonal results, so there may be some dissonance. For instance, canton Zurich is about 3.4x the size of the catchment area served by the Werdhölzli wastewater treatment plant.")))),
-                    tags$li(i18n$t('While Lausanne is also one of the catchment areas being monitored, we have not included it in the dashboard due to data quality issues.') ) ) )
+                    tags$li(HTML(paste0((disc_protocol) )) , 
+                            a(href = paste0("https://sensors-eawag.ch/sars/overview.html",tolower(ref[[input$region]]),".html"), i18n$t("here"), .noWS = "outside"), '.'
+                            ) ) ) # i18 the disc
     })
     
     # text below plot for more info ---------

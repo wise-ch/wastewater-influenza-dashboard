@@ -5,7 +5,7 @@ library(lubridate)
 library(viridis)
 
 source("helper_code/reading_in.R") #
-source("helper_code/method_change.R")
+#source("helper_code/method_change.R")
 # Reading in cantonal Re estimates ####
 
 Restimates_url = "https://raw.githubusercontent.com/covid-19-Re/dailyRe-Data/master/CHE-estimates.csv"
@@ -29,6 +29,7 @@ Restimates_canton <- Restimates_canton %>% filter(estimate_type == 'Cori_sliding
 # Reading in Rww and catchment Rcc estimates ####
 
 Re_ww_needed <- read_csv("rww_data/Rww_cantonal.csv")
+Re_ww_needed_pmg <- read_csv("rww_data/Rww_cantonal_pmg.csv")
 Re_cc_needed <- read_csv("rww_data/Rcc_catchment.csv")
 
 # Binding the Re and Rww estimates ####
@@ -40,7 +41,7 @@ plotData <- Restimates_canton %>%
 
 plotData <- plotData %>%
   bind_rows(Re_cc_needed) %>% 
-  bind_rows(Re_ww_pmg) %>% # added this - 'Promega N1
+  bind_rows(Re_ww_needed_pmg %>% mutate(data_type = 'Wastewater (PMG2)')) %>% # added this - 'Promega N1
   mutate(data_type = factor(data_type)) %>% # the rww binded
   mutate(data_type = recode_factor(data_type, "infection_cases" = "Confirmed (Catchment)"))
 
@@ -54,7 +55,7 @@ ref_size <- c("ZH"="471'000" ,  "GE"="454'000",
               "SG"="64'000", "GR"="55'000",
               "FR"="62'000", "TI"="124'000")
 
-global_date_range <- range(ww_data$date)
+global_date_range <- range(ww_data_all$date)
   
 
 # Raw plots ####
@@ -131,6 +132,7 @@ raw_plotter <- function(data, canton, date_range, i18n = NA) {
           legend.position = 'bottom')
 }
 # TODO
+transition_period <- as.Date(c('2021-11-10', '2021-11-30'))
 # raw plotter copy to allow for promega values - testing
 raw_plotter <- function(data, canton, date_range, i18n = NA) {
   n <- ww_data %>% filter(region==canton) %>%
@@ -138,25 +140,33 @@ raw_plotter <- function(data, canton, date_range, i18n = NA) {
   # changes ------
   # new data joined - rather have it in the reading file
   # csv will come changed
-  data <- data %>% mutate(protocol = 'v3.1') %>% bind_rows(pmg_n1_raw) %>% 
-    mutate(n1 = n1/10^12) %>% filter(region == canton)  %>%
+  data <- data %>%  mutate(n1 = n1/10^12) %>% filter(region == canton)  %>%
     filter(date >= date_range[1] & date <= date_range[2])
+  
+  # ww data and ww data new is what is currently present
   
   #date_range <- range((ww_data %>% filter(region == canton) %>% select(date))[["date"]])
   p1 <- i18n$t("Gene copies")
   ylabel <- bquote(.(p1)*" ("%*%"10"^12*")")
   data  %>%
     ggplot( ) +    
-    annotate('rect',xmin = as.Date('2021-11-10'), xmax = as.Date('2021-12-01'), ymin = 0, ymax = Inf ,
+    annotate('rect',xmin = as.Date('2021-11-10'), xmax = as.Date('2021-11-30'), ymin = 0, ymax = Inf ,
                              fill = 'grey', alpha = 0.4) +
+    # old protocol
     geom_point(data = data %>% filter(protocol =='v3.1'), aes(x=date, y = n1, colour = quantification_flag)) +
     geom_line(data = data %>% filter(protocol=='v3.1') %>% filter(!is.na(n1)),
               aes(x=date, y= n1,colour = 'black'), linetype = 'dashed', colour = "black") +
-    geom_point(data = data %>% filter(protocol == 'PMG2') ,
+    # new protocol - transition
+    geom_point(data = data %>% filter(protocol == 'PMG2') %>% filter(date <= transition_period[2]),
                aes(x=date, y = n1, colour = quantification_flag), alpha = 0.5) +
-    geom_line(data = data %>% filter(protocol == 'PMG2') ,
+    geom_line(data = data %>% filter(protocol == 'PMG2') %>% filter(date <= transition_period[2]),
               aes(x=date, y = n1), linetype = 'dotted', colour = 'black') +
-    geom_vline(xintercept = as.Date(c('2021-11-10', '2021-12-01')), linetype = 'dashed', alpha = 0.6) +
+    # new protocol - normal
+    geom_point(data = data %>% filter(protocol =='PMG2') %>% filter(date > transition_period[2]), 
+               aes(x=date, y = n1, colour = quantification_flag)) +
+    geom_line(data = data %>% filter(protocol=='PMG2') %>% filter(!is.na(n1)) %>% filter(date >= transition_period[2]),
+              aes(x=date, y= n1,colour = 'black'), linetype = 'dashed', colour = "black") +
+    geom_vline(xintercept = as.Date(c('2021-11-10', '2021-11-30')), linetype = 'dotdash', alpha = 0.6) +
     scale_x_date(limits = c(date_range[1], date_range[2]),
                  date_breaks = "months", date_labels = "%b") +
     scale_y_continuous(labels = function(label) sprintf('%4.1f', label)) +
@@ -223,7 +233,7 @@ re_plotter <- function(source, canton, date_range, i18n = NA) {
     geom_point(aes(x = date, y = median_R_mean, colour = data_type),
                data = data_ends, shape = 8) +
     scale_colour_manual(values = c(viridis(5)[c(1, 4)], "#f4bc1c", viridis(5)[c(3, 2)]), #'lightseagreen'
-                        labels = i18n$t(c('Wastewater (v3.1)', 'Confirmed cases (Catchment)', 'Confirmed cases (Canton)',
+                        labels = i18n$t(c('Wastewater', 'Confirmed cases (Catchment)', 'Confirmed cases (Canton)',
                                    'Deaths', 'Hospitalized patients')),
                         breaks = c('Wastewater', 'Confirmed (Catchment)','Confirmed (Canton)',
                                    'Deaths', 'Hospitalized patients')) +
@@ -265,12 +275,15 @@ re_plotter <- function(source, canton, date_range, i18n = NA) {
     source <- source[! source %in% 'Confirmed (Catchment)']
   }
   
-  
+  # if ('Wastewater' %in% source) {
+  #   # make new sources
+  #   source <- c(source[source!='Wastewater'], 'Wastewater (PMG2)', 'Wastewater (v3.1)')
+  # }
   
   new_data <- plotData %>% filter(region %in% canton) %>%
     filter(data_type %in% source) %>% filter(date >= date_range[1])
   
-  data_ends <- new_data %>% group_by(data_type) %>% filter(row_number()==n())
+  data_ends <- new_data %>% filter(data_type != 'Wastewater') %>% group_by(data_type) %>% filter(row_number()==n())
   disc <- i18n$t("*This is the most recent possible Re estimate due to delays between infection and being observed.")
   
   p1 <- i18n$t("Estimated R")
@@ -285,9 +298,9 @@ re_plotter <- function(source, canton, date_range, i18n = NA) {
   
   new_data <- new_data %>% filter(date >= date_range[1] & date <= date_range[2])
   
-  if (range((ww_data %>% filter(region == canton) %>%
+  if (range((ww_data_all %>% filter(region == canton) %>%
              select(date))[["date"]])[1]==date_range[1] & date_range[2]==Sys.Date()) { 
-    ylimits <- c(0, 2)
+    ylimits <- c(0, 2) # default
   } else { 
     ylimits <- c(max(min(new_data$median_R_lowHPD), 0), min(max(new_data$median_R_highHPD), 2))}
   
@@ -301,16 +314,23 @@ re_plotter <- function(source, canton, date_range, i18n = NA) {
     geom_hline(yintercept = 1) +
     geom_point(aes(x = date, y = median_R_mean, colour = data_type),
                data = data_ends, shape = 8) +
-    scale_colour_manual(values = c(viridis(5)[c(1, 4)], "#f4bc1c", viridis(5)[c(3, 2)], viridis(5)[1]), #repeating purple
-                        labels = i18n$t(c('Wastewater (v3.1)', 'Confirmed cases (Catchment)', 'Confirmed cases (Canton)',
-                                          'Deaths', 'Hospitalized patients', 'Promega N1')),
-                        breaks = c('Wastewater', 'Confirmed (Catchment)', 'Confirmed (Canton)',
-                                   'Deaths', 'Hospitalized patients', 'Promega N1')) +
-    scale_fill_manual(values = c(viridis(5)[c(1, 4)], "#f4bc1c", viridis(5)[c(3, 2)], viridis(5)[1]), #repeating purple
-                      labels = i18n$t(c('Wastewater (v3.1)', 'Confirmed cases (Catchment)', 'Confirmed cases (Canton)',
-                                        'Deaths', 'Hospitalized patients', 'Promega N1')),
-                      breaks = c('Wastewater', 'Confirmed (Catchment)', 'Confirmed (Canton)',
-                                 'Deaths', 'Hospitalized patients', 'Promega N1')) +
+    geom_vline(xintercept = as.Date(c('2021-10-31', '2021-11-20')), linetype = 'dotdash', alpha = 0.6)  +
+    annotate('rect',xmin = as.Date('2021-10-31'), xmax = as.Date('2021-11-20'), ymin = 0, ymax = Inf ,
+             fill = 'grey', alpha = 0.4) +
+    scale_colour_manual(values = c(viridis(5)[c(1, 4)], "#f4bc1c", viridis(5)[c(3, 2)]), #repeating purple
+                        labels = i18n$t(c('Wastewater','Confirmed cases (Catchment)', 
+                                          'Confirmed cases (Canton)',
+                                          'Deaths', 'Hospitalized patients')),
+                        breaks = c('Wastewater','Confirmed (Catchment)', 
+                                   'Confirmed (Canton)',
+                                   'Deaths', 'Hospitalized patients')) +
+    scale_fill_manual(values = c(viridis(5)[c(1, 4)], "#f4bc1c", viridis(5)[c(3, 2)]), #repeating purple
+                      labels = i18n$t(c('Wastewater','Confirmed cases (Catchment)', 
+                                        'Confirmed cases (Canton)',
+                                        'Deaths', 'Hospitalized patients')),
+                      breaks = c('Wastewater','Confirmed (Catchment)', 
+                                 'Confirmed (Canton)',
+                                 'Deaths', 'Hospitalized patients')) +
     scale_x_date(limits = c(date_range[1], date_range[2]),
                  date_breaks = "months", date_labels = "%b") +
     scale_y_continuous(labels = function(label) sprintf('%6.1f', label)) +
@@ -334,18 +354,41 @@ re_plotter <- function(source, canton, date_range, i18n = NA) {
     
   # would have to change once we are over the threshold
   if ('Wastewater' %in% source) {
-   pp <- pp +
-     geom_line(data = re_ww_pmg %>% filter(region==canton), 
+    pmg <- plotData %>% filter(region %in% canton) %>%
+      filter(data_type == 'Wastewater (PMG2)') %>% filter(date >= date_range[1])
+    
+    
+    if (range((ww_data_all %>% filter(region == canton) %>%
+               select(date))[["date"]])[1]==date_range[1] & date_range[2]==Sys.Date()) { 
+      ylimits <- c(0, 2) # default
+    } else { 
+      ylimits <- c(min(range(pmg$median_R_mean)[1], range(new_data$median_R_mean)[1]), 
+                   max(range(pmg$median_R_mean)[1], 2))}
+    
+
+    pp <- pp +
+     geom_line(data = pmg %>% filter(date<=(transition_period[2]-10)), 
                aes(x = date, y = median_R_mean), 
-               linetype = 'dashed', colour = viridis(1), alpha = 0.8) +
-     geom_ribbon(data = re_ww_pmg %>% filter(region==canton), aes(x = date, ymin = median_R_lowHPD,
+               linetype = 'dashed', colour = viridis(1), alpha = 0.6, lwd = 0.8) +
+     geom_ribbon(data = pmg %>% filter(region==canton) %>% filter(date<=(transition_period[2]-10)),
+                 aes(x = date, ymin = median_R_lowHPD,
                                        ymax = median_R_highHPD) , 
-                 colour = NA, alpha = 0.2, show.legend = F, fill = viridis(1)) +
-     geom_vline(xintercept = as.Date(c('2021-11-01', '2021-11-20')), linetype = 'dashed', alpha = 0.6)  +
-     annotate('rect',xmin = as.Date('2021-11-01'), xmax = as.Date('2021-11-20'), ymin = 0, ymax = Inf ,
-              fill = 'grey', alpha = 0.4) +
+                 colour = NA, alpha = 0.1, show.legend = F, fill = viridis(1)) +
+      geom_line(data = pmg %>% filter(date>=(transition_period[2]-10)) , 
+                aes(x = date, y = median_R_mean), 
+                colour = viridis(1), alpha = 0.7, lwd = 0.8) +
+      geom_ribbon(data = pmg %>% filter(region==canton)%>% filter(date>=(transition_period[2]-10)),
+                  aes(x = date, ymin = median_R_lowHPD,
+                                                             ymax = median_R_highHPD) , 
+                  colour = NA, alpha = 0.2, show.legend = F, fill = viridis(1)) +
+     geom_point(aes(x = date, y = median_R_mean, colour = data_type),
+                data = pmg %>% filter(row_number()==n()), shape = 8, colour = viridis(1)) +
+      geom_point(aes(x = date, y = median_R_mean, colour = data_type),
+                 data = new_data %>% filter(data_type == 'Wastewater') %>% filter(row_number()==n()), 
+                 shape = 4, colour = viridis(1)) +
+      
      #scale_colour_manual(values = viridis(1))  +
-     coord_cartesian(ylim = c(range(re_ww_pmg$median_R_mean)[1], max(range(re_ww_pmg$median_R_mean)[1], 2)))
+     coord_cartesian(ylim = ylimits)
   }
   
   pp
@@ -379,11 +422,11 @@ re_plotter2 <- function(source, canton, date_range, i18n = NA) {
   # even though two cantons, rww only exists internally for FR! (so BE makes no diff)
   # Must now include plots for BE
   disc <- "*This is the most recent possible Re estimate due to delays between infection and being observed."
-  data_ends <- new_data %>% group_by(data_type) %>% filter(row_number()==n())
+  data_ends <- new_data %>% filter(data_type != 'Wastewater') %>% group_by(data_type) %>% filter(row_number()==n())
   
   new_data <- new_data %>% filter(date >= date_range[1] & date <= date_range[2])
   
-  if (range((ww_data %>% filter(region == 'FR') %>%
+  if (range((ww_data_all %>% filter(region == 'FR') %>%
              select(date))[["date"]])[1]==date_range[1] & date_range[2]==Sys.Date()) { 
     ylimits <- c(0, 2)
   } else { 
@@ -402,7 +445,7 @@ re_plotter2 <- function(source, canton, date_range, i18n = NA) {
   }
   
   
-   new_data %>%
+  pp <- new_data %>%
     ggplot() +
     geom_line(aes(x = date, y = median_R_mean, colour = data_type),
               alpha = 0.7, lwd = 0.8) +
@@ -412,6 +455,9 @@ re_plotter2 <- function(source, canton, date_range, i18n = NA) {
     geom_hline(yintercept = 1) +
     geom_point(aes(x = date, y = median_R_mean, colour = data_type),
                data = data_ends, shape = 8) +
+     geom_vline(xintercept = as.Date(c('2021-10-31', '2021-11-20')), linetype = 'dotdash', alpha = 0.6)  +
+     annotate('rect',xmin = as.Date('2021-10-31'), xmax = as.Date('2021-11-20'), ymin = 0, ymax = Inf ,
+              fill = 'grey', alpha = 0.4) +
     scale_colour_manual(values = c(viridis(5)[c(1, 4)], '#CFE11CFF', '#2E6E8EFF'), #'lightseagreen'
                         labels = c('Wastewater (v3.1)', 'Confirmed cases (Catchment)', paste0(i18n$t('Confirmed cases'), ' (Fribourg)'),
                                    paste0(i18n$t('Confirmed cases'), ' (Bern)')),
@@ -443,6 +489,48 @@ re_plotter2 <- function(source, canton, date_range, i18n = NA) {
               label = ifelse(is.infinite(min(data_ends$date)), " ",
                              ifelse(date_range[2] >= min(data_ends$date) , disc, " ")),
               x = summary(date_range)[['3rd Qu.']]-25, y = 0.1, hjust = 0.5, vjust = 1, size = 4)
+   
+  # would have to change once we are over the threshold
+  if ('Wastewater' %in% source) {
+    pmg <- plotData %>% filter(region %in% canton) %>%
+      filter(data_type == 'Wastewater (PMG2)') %>% filter(date >= date_range[1])
+    
+    
+    if (range((ww_data_all %>% filter(region == canton) %>%
+               select(date))[["date"]])[1]==date_range[1] & date_range[2]==Sys.Date()) { 
+      ylimits <- c(0, 2) # default
+    } else { 
+      ylimits <- c(min(range(pmg$median_R_mean)[1], range(new_data$median_R_mean)[1]), 
+                   max(range(pmg$median_R_mean)[1], 2))}
+    
+    
+    pp <- pp +
+      geom_line(data = pmg %>% filter(date<=(transition_period[2]-10)), 
+                aes(x = date, y = median_R_mean), 
+                linetype = 'dashed', colour = viridis(1), alpha = 0.6, lwd = 0.8) +
+      geom_ribbon(data = pmg %>% filter(region==canton) %>% filter(date<=(transition_period[2]-10)),
+                  aes(x = date, ymin = median_R_lowHPD,
+                      ymax = median_R_highHPD) , 
+                  colour = NA, alpha = 0.1, show.legend = F, fill = viridis(1)) +
+      geom_line(data = pmg %>% filter(date>=(transition_period[2]-10)) , 
+                aes(x = date, y = median_R_mean), 
+                colour = viridis(1), alpha = 0.7, lwd = 0.8) +
+      geom_ribbon(data = pmg %>% filter(region==canton)%>% filter(date>=(transition_period[2]-10)),
+                  aes(x = date, ymin = median_R_lowHPD,
+                      ymax = median_R_highHPD) , 
+                  colour = NA, alpha = 0.2, show.legend = F, fill = viridis(1)) +
+      geom_point(aes(x = date, y = median_R_mean, colour = data_type),
+                 data = pmg %>% filter(row_number()==n()), shape = 8, colour = viridis(1)) +
+      geom_point(aes(x = date, y = median_R_mean, colour = data_type),
+                 data = new_data %>% filter(data_type == 'Wastewater') %>% filter(row_number()==n()), 
+                 shape = 4, colour = viridis(1)) +
+      
+      #scale_colour_manual(values = viridis(1))  +
+      coord_cartesian(ylim = ylimits)
+  }
+  
+  pp
+   
 }
 
 # Plotting for all plants --------------
@@ -456,15 +544,28 @@ canton_plotter <- function(source, canton, date_range, i18n = NA) {
   if (nchar(p1)>10) {
     # English and German
     ylabel <- bquote(.(p1)['e']~" (95% CI)")
-  }
-  else {
+  } else {
     # French and Italian
     p1 <- strsplit(p1, " ")[[1]][2]
     ylabel <- bquote("R"['e']~.(p1)~" (95% CI)")
   }
   
-  plotData %>% filter(region %in% canton) %>%
-    filter(data_type %in% source) %>%
+  
+  
+  if (source == 'Wastewater') {
+    CH_data <- plotData %>% filter(region %in% canton) %>%
+      filter(data_type %in% source) %>%
+      bind_rows(plotData %>% filter(region %in% canton) %>%
+                  filter(data_type == 'Wastewater (PMG2)') %>%
+                  filter(date > (transition_period[2] - 10))) %>% 
+      filter(date >= date_range[1] & date <= date_range[2])
+  } else {
+    CH_data <- plotData %>% filter(region %in% canton) %>%
+      filter(data_type %in% source) %>% filter(date >= date_range[1] & date <= date_range[2])
+  }
+  
+  
+  pp <- CH_data %>%
     ggplot() +
     geom_line(aes(x = date, y = median_R_mean, colour = region),
               alpha = 0.7, lwd = 0.8) +
@@ -497,6 +598,14 @@ canton_plotter <- function(source, canton, date_range, i18n = NA) {
           plot.title = element_text(size = 18),
           panel.spacing.y = unit(2, "lines"),
           legend.position = 'bottom')
+  
+  if (source == 'Wastewater') {
+    pp <- pp +
+      geom_vline(xintercept = as.Date('2021-11-20'), linetype = 'dashed', colour = 'grey') 
+      
+  }
+  
+  pp
 }
 
 
