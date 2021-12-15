@@ -157,15 +157,15 @@ raw_plotter <- function(data, canton, date_range, i18n = NA) {
     geom_line(data = data %>% filter(protocol=='v3.1') %>% filter(!is.na(n1)),
               aes(x=date, y= n1,colour = 'black'), linetype = 'dashed', colour = "black") +
     # new protocol - transition
-    geom_point(data = data %>% filter(protocol == 'PMG2') %>% filter(date <= transition_period[2]),
+    geom_point(data = data %>% filter(protocol == 'PMG2'),
                aes(x=date, y = n1, colour = quantification_flag), alpha = 0.5) +
-    geom_line(data = data %>% filter(protocol == 'PMG2') %>% filter(date <= transition_period[2]),
+    geom_line(data = data %>% filter(protocol == 'PMG2') ,
               aes(x=date, y = n1), linetype = 'dotted', colour = 'black') +
     # new protocol - normal
-    geom_point(data = data %>% filter(protocol =='PMG2') %>% filter(date > transition_period[2]), 
-               aes(x=date, y = n1, colour = quantification_flag)) +
-    geom_line(data = data %>% filter(protocol=='PMG2') %>% filter(!is.na(n1)) %>% filter(date >= transition_period[2]),
-              aes(x=date, y= n1,colour = 'black'), linetype = 'dashed', colour = "black") +
+    # geom_point(data = data %>% filter(protocol =='PMG2') %>% filter(date > transition_period[2]), 
+    #            aes(x=date, y = n1, colour = quantification_flag), alpha = 0.5) +
+    # geom_line(data = data %>% filter(protocol=='PMG2') %>% filter(!is.na(n1)) %>% filter(date >= transition_period[2]),
+    #           aes(x=date, y= n1,colour = 'black'), linetype = 'dotted', colour = "black") +
     geom_vline(xintercept = as.Date(c('2021-11-10', '2021-11-30')), linetype = 'dotdash', alpha = 0.6) +
     scale_x_date(limits = c(date_range[1], date_range[2]),
                  date_breaks = "months", date_labels = "%b") +
@@ -367,20 +367,20 @@ re_plotter <- function(source, canton, date_range, i18n = NA) {
     
 
     pp <- pp +
-     geom_line(data = pmg %>% filter(date<=(transition_period[2]-10)), 
+     geom_line(data = pmg , 
                aes(x = date, y = median_R_mean), 
                linetype = 'dashed', colour = viridis(1), alpha = 0.6, lwd = 0.8) +
-     geom_ribbon(data = pmg %>% filter(region==canton) %>% filter(date<=(transition_period[2]-10)),
+     geom_ribbon(data = pmg %>% filter(region==canton),
                  aes(x = date, ymin = median_R_lowHPD,
                                        ymax = median_R_highHPD) , 
                  colour = NA, alpha = 0.1, show.legend = F, fill = viridis(1)) +
-      geom_line(data = pmg %>% filter(date>=(transition_period[2]-10)) , 
-                aes(x = date, y = median_R_mean), 
-                colour = viridis(1), alpha = 0.7, lwd = 0.8) +
-      geom_ribbon(data = pmg %>% filter(region==canton)%>% filter(date>=(transition_period[2]-10)),
-                  aes(x = date, ymin = median_R_lowHPD,
-                                                             ymax = median_R_highHPD) , 
-                  colour = NA, alpha = 0.2, show.legend = F, fill = viridis(1)) +
+      # geom_line(data = pmg %>% filter(date>=(transition_period[2]-10)) , 
+      #           aes(x = date, y = median_R_mean), 
+      #           colour = viridis(1), alpha = 0.7, lwd = 0.8) +
+      # geom_ribbon(data = pmg %>% filter(region==canton)%>% filter(date>=(transition_period[2]-10)),
+      #             aes(x = date, ymin = median_R_lowHPD,
+      #                                                        ymax = median_R_highHPD) , 
+      #             colour = NA, alpha = 0.2, show.legend = F, fill = viridis(1)) +
      geom_point(aes(x = date, y = median_R_mean, colour = data_type),
                 data = pmg %>% filter(row_number()==n()), shape = 8, colour = viridis(1)) +
       geom_point(aes(x = date, y = median_R_mean, colour = data_type),
@@ -505,20 +505,20 @@ re_plotter2 <- function(source, canton, date_range, i18n = NA) {
     
     
     pp <- pp +
-      geom_line(data = pmg %>% filter(date<=(transition_period[2]-10)), 
+      geom_line(data = pmg , 
                 aes(x = date, y = median_R_mean), 
                 linetype = 'dashed', colour = viridis(1), alpha = 0.6, lwd = 0.8) +
-      geom_ribbon(data = pmg %>% filter(region==canton) %>% filter(date<=(transition_period[2]-10)),
+      geom_ribbon(data = pmg %>% filter(region==canton) ,
                   aes(x = date, ymin = median_R_lowHPD,
                       ymax = median_R_highHPD) , 
                   colour = NA, alpha = 0.1, show.legend = F, fill = viridis(1)) +
-      geom_line(data = pmg %>% filter(date>=(transition_period[2]-10)) , 
-                aes(x = date, y = median_R_mean), 
-                colour = viridis(1), alpha = 0.7, lwd = 0.8) +
-      geom_ribbon(data = pmg %>% filter(region==canton)%>% filter(date>=(transition_period[2]-10)),
-                  aes(x = date, ymin = median_R_lowHPD,
-                      ymax = median_R_highHPD) , 
-                  colour = NA, alpha = 0.2, show.legend = F, fill = viridis(1)) +
+      # geom_line(data = pmg %>% filter(date>=(transition_period[2]-10)) , 
+      #           aes(x = date, y = median_R_mean), 
+      #           colour = viridis(1), alpha = 0.7, lwd = 0.8) +
+      # geom_ribbon(data = pmg %>% filter(region==canton)%>% filter(date>=(transition_period[2]-10)),
+      #             aes(x = date, ymin = median_R_lowHPD,
+      #                 ymax = median_R_highHPD) , 
+      #             colour = NA, alpha = 0.2, show.legend = F, fill = viridis(1)) +
       geom_point(aes(x = date, y = median_R_mean, colour = data_type),
                  data = pmg %>% filter(row_number()==n()), shape = 8, colour = viridis(1)) +
       geom_point(aes(x = date, y = median_R_mean, colour = data_type),

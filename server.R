@@ -337,7 +337,7 @@ function(input, output, session) {
           style="font-size: 95%;")
     })
     
-    disc_protocol <- 'The grey shaded regions represent a switch in protocol during the wastewater sample preparation. 
+    disc_protocol <- 'The grey shaded regions represent a switch in protocol used for the wastewater sample preparation. 
     During this period, the old and new protocols (v3.1 and Promega respectively) were run simulataneously (10-11-2021 to 30-11-2021). 
     The R<sub>e</sub> for the new protocol takes around 3 weeks to stabilise (31-10-2021 to 20-11-2021). 
     Further details of the protocol switch are described '
@@ -347,7 +347,7 @@ function(input, output, session) {
             tags$ul(style="padding-left:10px;font-size: 95%;",
                     tags$li(HTML(paste0(i18n$t("The R<sub>e</sub> for wastewater is informed by infections in the catchment area, and will correspond best to the R<sub>e</sub> based on confirmed cases from that area. All other R<sub>e</sub> traces show the cantonal results, so there may be some dissonance. For instance, canton Zurich is about 3.4x the size of the catchment area served by the Werdhölzli wastewater treatment plant.")))),
                     tags$li(HTML(paste0((disc_protocol) )) , 
-                            a(href = paste0("https://sensors-eawag.ch/sars/overview.html",tolower(ref[[input$region]]),".html"), i18n$t("here"), .noWS = "outside"), '.'
+                            a(href = paste0("https://sensors-eawag.ch/sars/overview.html"), i18n$t("here"), .noWS = "outside"), '.'
                             ) ) ) # i18 the disc
     })
     
