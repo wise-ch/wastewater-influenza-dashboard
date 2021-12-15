@@ -338,7 +338,7 @@ function(input, output, session) {
     })
     
     disc_protocol <- 'The grey shaded regions represent a switch in protocol used for the wastewater sample preparation. 
-    During this period, the old and new protocols (v3.1 and Promega respectively) were run simulataneously (10-11-2021 to 30-11-2021). 
+    During this period, the old and new protocols (v3.1 and Promega respectively) were run simultaneously (10-11-2021 to 30-11-2021). 
     The R<sub>e</sub> for the new protocol takes around 3 weeks to stabilise (31-10-2021 to 20-11-2021). 
     Further details of the protocol switch are described '
     
