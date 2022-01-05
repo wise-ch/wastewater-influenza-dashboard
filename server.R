@@ -326,11 +326,11 @@ function(input, output, session) {
         )
     })
     
-    output$chur_catchment_disc <- renderUI({
-        p(HTML(paste0(strong('NB: '),
-                      i18n$t('The estimated R<sub>e</sub> for confirmed cases in the Chur catchment area is currently not available due to a potential data quality issue.'))),
-          style="font-size: 95%;")
-    })
+    # output$chur_catchment_disc <- renderUI({
+    #     p(HTML(paste0(strong('NB: '),
+    #                   i18n$t('The estimated R<sub>e</sub> for confirmed cases in the Chur catchment area is currently not available due to a potential data quality issue.'))),
+    #       style="font-size: 95%;")
+    # })
     
     output$death_hosp_info <- renderUI({
         p(HTML(i18n$t('*The R<sub>e</sub> for hospitalised patients and deaths are currently not displayed because the low case incidence results in large confidence intervals and low usefulness.')), 
