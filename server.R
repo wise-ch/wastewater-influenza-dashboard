@@ -74,11 +74,11 @@ function(input, output, session) {
         updateSliderInput(session, "slider_dates", value = date_range,
                          min = date_range[1], max = Sys.Date())
 
-        if(input$region == 'GR'){
-            shinyjs::disable(id = "catchment_selection")
-        }else{
-            shinyjs::enable(id = "catchment_selection")
-        }
+        # if(input$region == 'GR'){
+        #     shinyjs::disable(id = "catchment_selection")
+        # }else{
+        #     shinyjs::enable(id = "catchment_selection")
+        # }
     })
 
     # Plotting cases -------

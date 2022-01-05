@@ -98,13 +98,19 @@ for(row_i in 1:nrow(config_df_cc)){
            onsetToCountParams = unlist(config_df_cc[row_i, 'GammaParams'])[2],
            GammaParams = paste0(incubationParams, '_', onsetToCountParams),
            region = config_df_cc[row_i, 'region'])
-
+  # for Chur: Only from November 10 onwards
+  if (config_df_cc[row_i, 'region'] == 'GR') {
+    new_Re_cc <- new_Re_cc %>% filter(date >= as.Date('2021-11-10'))
+  }
+  
   deconv_cc_data <- bind_rows(deconv_cc_data, new_deconv_data)
   Re_cc = bind_rows(Re_cc, new_Re_cc)
 }
 
 Re_cc_needed <- Re_cc %>% select(region, data_type, date,
                                  median_R_mean, median_R_highHPD, median_R_lowHPD) # write to csv
+
+
 
 write.csv(Re_cc_needed, "rww_data/Rcc_catchment.csv", row.names = F)
 

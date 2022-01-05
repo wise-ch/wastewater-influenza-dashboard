@@ -194,9 +194,9 @@ raw_plotter <- function(data, canton, date_range, i18n = NA) {
 re_plotter <- function(source, canton, date_range, i18n = NA) {
   #date_range <- range((ww_data %>% filter(region == canton) %>% select(date))[["date"]])
   # For CHUR: leave out confirmed catchment case Re for now (as lots of missing data) ---------
-  if (canton == "GR") {
-    source <- source[! source %in% 'Confirmed (Catchment)']
-  }
+  # if (canton == "GR") {
+  #   source <- source[! source %in% 'Confirmed (Catchment)']
+  # }
   new_data <- plotData %>% filter(region %in% canton) %>%
     filter(data_type %in% source) %>% filter(date >= date_range[1])
 
@@ -271,9 +271,9 @@ re_plotter <- function(source, canton, date_range, i18n = NA) {
 re_plotter <- function(source, canton, date_range, i18n = NA) {
   #date_range <- range((ww_data %>% filter(region == canton) %>% select(date))[["date"]])
   # For CHUR: leave out confirmed catchment case Re for now (as lots of missing data) ---------
-  if (canton == "GR") {
-    source <- source[! source %in% 'Confirmed (Catchment)']
-  }
+  # if (canton == "GR") {
+  #   source <- source[! source %in% 'Confirmed (Catchment)']
+  # }
   
   # if ('Wastewater' %in% source) {
   #   # make new sources
