@@ -337,22 +337,22 @@ function(input, output, session) {
           style="font-size: 95%;")
     })
     
-    disc_protocol <- 'The grey shaded regions represent a switch in protocol used for the wastewater sample preparation. 
-    During this period, the old and new protocols (v3.1 and Promega respectively) were run simultaneously (10-11-2021 to 30-11-2021). 
-    The R<sub>e</sub> for the new protocol takes around 3 weeks to stabilise (31-10-2021 to 20-11-2021). 
-    Further details of the protocol switch are described '
-    
+    #disc_protocol <- 'The grey shaded regions represent a switch in protocol used for the wastewater sample preparation. During this period, the old and new protocols (v3.1 and Promega respectively) were run simultaneously (10-11-2021 to 30-11-2021). The R<sub>e</sub> for the new protocol takes around 3 weeks to stabilise (31-10-2021 to 20-11-2021). Further details of the protocol switch are described '
+    disc_protocol <- "The grey shaded regions represent a switch in protocol used for the wastewater sample preparation. During this period, the old and new protocols (v3.1 and Promega respectively) were run simultaneously (10-11-2021 to 30-11-2021). The R<sub>e</sub> for the new protocol takes around 3 weeks to stabilise (31-10-2021 to 20-11-2021). Further details of the protocol switch are described <a href='https://sensors-eawag.ch/sars/overview.html'>here</a>."
     output$other_disclaimers <- renderUI({
         p(
             tags$ul(style="padding-left:10px;font-size: 95%;",
                     tags$li(HTML(paste0(i18n$t("The R<sub>e</sub> for wastewater is informed by infections in the catchment area, and will correspond best to the R<sub>e</sub> based on confirmed cases from that area. All other R<sub>e</sub> traces show the cantonal results, so there may be some dissonance. For instance, canton Zurich is about 3.4x the size of the catchment area served by the Werdhölzli wastewater treatment plant.")))),
-                    tags$li(HTML(paste0((disc_protocol) )) , 
-                            a(href = paste0("https://sensors-eawag.ch/sars/overview.html"), i18n$t("here"), .noWS = "outside"), '.'
+                    tags$li(HTML((i18n$t(disc_protocol) )) 
                             ) ) ) # i18 the disc
     })
     
     # text below plot for more info ---------
     output$link <- renderUI({
+        
+        disc_omicron <- p(strong('NB: '),HTML(i18n$t("We are currently investigating potential data inconsistencies in recent wastewater data due to differences in the shedding load of Omicron, therefore interpret recent wastewater R<sub>e</sub> estimates with caution. Further details can be found <a href='https://lfpress.com/news/local-news/omicron-not-showing-up-in-wastewater-the-way-delta-did-despite-surging-case-counts'>here</a>.")),
+                  .noWS = c("after-begin", "before-end"), style="margin-bottom:0;font-size: 95%;font-weight: normal;")
+        
         link <- p(i18n$t("The raw measurements of SARS-CoV-2 in wastewater for this location are available "),
                   a(href = paste0("https://sensors-eawag.ch/sars/",tolower(ref[[input$region]]),".html"), i18n$t("here"), .noWS = "outside"),
                   ".",
@@ -379,10 +379,11 @@ function(input, output, session) {
         laupen_2cantons <- p(strong('NB: '),i18n$t('The Laupen catchment area consists of municipalities in both Bern and Fribourg (13 communities from Bern and 12 from Fribourg).'), 
                              style="margin-bottom:0;font-size: 95%;")
         
-        if (input$region == 'GR') HTML(paste(link, lod_loq, exclude_lod, sep = ""))
-        else if (input$region == 'FR') HTML(paste(link, lod_loq, laupen_2cantons, sep = ""))
-        else if (input$region == 'TI') HTML(paste(link, lod_loq, exclude_lod, sep = ""))
-        else HTML(paste(link, lod_loq, sep = ""))
+        
+        if (input$region == 'GR') HTML(paste(disc_omicron, link, lod_loq, exclude_lod, sep = ""))
+        else if (input$region == 'FR') HTML(paste(disc_omicron, link, lod_loq, laupen_2cantons, sep = ""))
+        else if (input$region == 'TI') HTML(paste(disc_omicron, link, lod_loq, exclude_lod, sep = ""))
+        else HTML(paste(disc_omicron, link, lod_loq, sep = ""))
     })
     
     # download the plot ------
