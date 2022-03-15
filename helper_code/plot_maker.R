@@ -346,7 +346,7 @@ re_plotter <- function(source, canton, date_range, i18n = NA) {
           legend.title= element_text(size=17),
           plot.title = element_text(size = 18),
           panel.spacing.y = unit(2, "lines"),
-          legend.position = 'bottom') +
+          legend.position = 'bottom') + 
     annotate(geom = 'text',
              label = ifelse(is.infinite(min(data_ends$date)), " ",
                             ifelse(date_range[2] >= min(data_ends$date) , disc, " ")),
@@ -388,7 +388,7 @@ re_plotter <- function(source, canton, date_range, i18n = NA) {
                  shape = 4, colour = viridis(1)) +
       
      #scale_colour_manual(values = viridis(1))  +
-     coord_cartesian(ylim = ylimits)
+     coord_cartesian(ylim = ylimits) 
   }
   
   pp
@@ -484,7 +484,7 @@ re_plotter2 <- function(source, canton, date_range, i18n = NA) {
            legend.title= element_text(size=17),
            plot.title = element_text(size = 18),
            panel.spacing.y = unit(2, "lines"),
-           legend.position = 'bottom') +
+           legend.position = 'bottom')  +
      annotate(geom = 'text',
               label = ifelse(is.infinite(min(data_ends$date)), " ",
                              ifelse(date_range[2] >= min(data_ends$date) , disc, " ")),
@@ -526,9 +526,10 @@ re_plotter2 <- function(source, canton, date_range, i18n = NA) {
                  shape = 4, colour = viridis(1)) +
       
       #scale_colour_manual(values = viridis(1))  +
-      coord_cartesian(ylim = ylimits)
+      coord_cartesian(ylim = ylimits) 
   }
   
+
   pp
    
 }

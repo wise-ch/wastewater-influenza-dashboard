@@ -233,6 +233,206 @@ function(input, output, session) {
         )
     })
     
+    # plotting variants --------
+    output$zh_plot <- renderPlot(
+        {
+            plot_Re(re_var %>% filter(source %in% input$variant_source), 'ZH', input$variant, 
+                    'source', c('Wastewater (NGS)', 'Catchment cases'), c('Wastewater (NGS)', 'Catchment cases'))
+        }
+    )
+    output$sg_plot <- renderPlot(
+        {
+            plot_Re(re_var %>% filter(source %in% input$variant_source), 'SG', 
+                    input$variant, 'source', c('Wastewater (NGS)', 'Catchment cases'), c('Wastewater (NGS)', 'Catchment cases'))
+        }
+    )
+    output$gr_plot <- renderPlot(
+        {
+            plot_Re(re_var %>% filter(source %in% input$variant_source), 'GR', 
+                    input$variant, 'source', c('Wastewater (NGS)', 'Catchment cases'), c('Wastewater (NGS)', 'Catchment cases'))
+        }
+    )
+    output$fr_plot <- renderPlot(
+        {
+            plot_Re(re_var %>% filter(source %in% input$variant_source), 'FR', 
+                    input$variant, 'source', c('Wastewater (NGS)', 'Catchment cases'), c('Wastewater (NGS)', 'Catchment cases'))
+        }
+    )
+    output$ti_plot <- renderPlot(
+        {
+            plot_Re(re_var %>% filter(source %in% input$variant_source), 'TI', 
+                    input$variant, 'source', c('Wastewater (NGS)', 'Catchment cases'), c('Wastewater (NGS)', 'Catchment cases'))
+        }
+    )
+    output$ge_plot <- renderPlot(
+        {
+            plot_Re(re_var %>% filter(source %in% input$variant_source), 'GE', 
+                    input$variant, 'source', c('Wastewater (NGS)', 'Catchment cases'), c('Wastewater (NGS)', 'Catchment cases'))
+        }
+    )
+    output$hover_info_variant_zh <- renderUI({
+        hover <- input$plot_hover_variant_zh
+        variant_data <- re_var %>% filter(source %in% input$variant_source) %>% filter(variant %in% input$variant) %>% filter(region == 'ZH')
+        
+        point <- nearPoints(variant_data, hover, threshold = 5, maxpoints = 1, addDist = TRUE)
+        if (nrow(point) == 0) return(NULL)
+        
+        left_px <- hover$coords_css$x
+        top_px <- hover$coords_css$y
+        
+        style <- paste0("position:absolute; z-index:100; background-color: rgba(245, 245, 245, 0.9); ",
+                        "left:", left_px+2, "px; top:", top_px+2, "px;")
+        
+        # actual tooltip created as wellPanel
+        wellPanel(
+            style = style,
+            p(HTML(paste0("<i>", point$date, "</i>", "<br/>",
+                          "<b> R<sub>e</sub>: </b>", round(point$median_R_mean, 2),
+                          " (", round(point$median_R_lowHPD, 2),", ", round(point$median_R_highHPD, 2), ")",
+                          "<br/>",
+                          "Variant: ", point$variant, 
+                          "<br/>",
+                          "Source: ", point$source, 
+                          "<br/>",
+                          "<i>(", ref[[point$region]], ")</i>")))
+        )
+    })
+    output$hover_info_variant_sg <- renderUI({
+        hover <- input$plot_hover_variant_sg
+        variant_data <- re_var %>% filter(source %in% input$variant_source) %>% filter(variant %in% input$variant) %>% filter(region == 'SG')
+        
+        point <- nearPoints(variant_data, hover, threshold = 5, maxpoints = 1, addDist = TRUE)
+        if (nrow(point) == 0) return(NULL)
+        
+        left_px <- hover$coords_css$x
+        top_px <- hover$coords_css$y
+        
+        style <- paste0("position:absolute; z-index:100; background-color: rgba(245, 245, 245, 0.9); ",
+                        "left:", left_px+2, "px; top:", top_px+2, "px;")
+        
+        # actual tooltip created as wellPanel
+        wellPanel(
+            style = style,
+            p(HTML(paste0("<i>", point$date, "</i>", "<br/>",
+                          "<b> R<sub>e</sub>: </b>", round(point$median_R_mean, 2),
+                          " (", round(point$median_R_lowHPD, 2),", ", round(point$median_R_highHPD, 2), ")",
+                          "<br/>",
+                          "Variant: ", point$variant, 
+                          "<br/>",
+                          "Source: ", point$source, 
+                          "<br/>",
+                          "<i>(", ref[[point$region]], ")</i>")))
+        )
+    })
+    output$hover_info_variant_gr <- renderUI({
+        hover <- input$plot_hover_variant_gr
+        variant_data <- re_var %>% filter(source %in% input$variant_source) %>% filter(variant %in% input$variant) %>% filter(region == 'GR')
+        
+        point <- nearPoints(variant_data, hover, threshold = 5, maxpoints = 1, addDist = TRUE)
+        if (nrow(point) == 0) return(NULL)
+        
+        left_px <- hover$coords_css$x
+        top_px <- hover$coords_css$y
+        
+        style <- paste0("position:absolute; z-index:100; background-color: rgba(245, 245, 245, 0.9); ",
+                        "left:", left_px+2, "px; top:", top_px+2, "px;")
+        
+        # actual tooltip created as wellPanel
+        wellPanel(
+            style = style,
+            p(HTML(paste0("<i>", point$date, "</i>", "<br/>",
+                          "<b> R<sub>e</sub>: </b>", round(point$median_R_mean, 2),
+                          " (", round(point$median_R_lowHPD, 2),", ", round(point$median_R_highHPD, 2), ")",
+                          "<br/>",
+                          "Variant: ", point$variant, 
+                          "<br/>",
+                          "Source: ", point$source, 
+                          "<br/>",
+                          "<i>(", ref[[point$region]], ")</i>")))
+        )
+    })
+    output$hover_info_variant_fr <- renderUI({
+        hover <- input$plot_hover_variant_fr
+        variant_data <- re_var %>% filter(source %in% input$variant_source) %>% filter(variant %in% input$variant) %>% filter(region == 'FR')
+        
+        point <- nearPoints(variant_data, hover, threshold = 5, maxpoints = 1, addDist = TRUE)
+        if (nrow(point) == 0) return(NULL)
+        
+        left_px <- hover$coords_css$x
+        top_px <- hover$coords_css$y
+        
+        style <- paste0("position:absolute; z-index:100; background-color: rgba(245, 245, 245, 0.9); ",
+                        "left:", left_px+2, "px; top:", top_px+2, "px;")
+        
+        # actual tooltip created as wellPanel
+        wellPanel(
+            style = style,
+            p(HTML(paste0("<i>", point$date, "</i>", "<br/>",
+                          "<b> R<sub>e</sub>: </b>", round(point$median_R_mean, 2),
+                          " (", round(point$median_R_lowHPD, 2),", ", round(point$median_R_highHPD, 2), ")",
+                          "<br/>",
+                          "Variant: ", point$variant, 
+                          "<br/>",
+                          "Source: ", point$source, 
+                          "<br/>",
+                          "<i>(", ref[[point$region]], ")</i>")))
+        )
+    })
+    output$hover_info_variant_ti <- renderUI({
+        hover <- input$plot_hover_variant_ti
+        variant_data <- re_var %>% filter(source %in% input$variant_source) %>% filter(variant %in% input$variant) %>% filter(region == 'TI')
+        
+        point <- nearPoints(variant_data, hover, threshold = 5, maxpoints = 1, addDist = TRUE)
+        if (nrow(point) == 0) return(NULL)
+        
+        left_px <- hover$coords_css$x
+        top_px <- hover$coords_css$y
+        
+        style <- paste0("position:absolute; z-index:100; background-color: rgba(245, 245, 245, 0.9); ",
+                        "left:", left_px+2, "px; top:", top_px+2, "px;")
+        
+        # actual tooltip created as wellPanel
+        wellPanel(
+            style = style,
+            p(HTML(paste0("<i>", point$date, "</i>", "<br/>",
+                          "<b> R<sub>e</sub>: </b>", round(point$median_R_mean, 2),
+                          " (", round(point$median_R_lowHPD, 2),", ", round(point$median_R_highHPD, 2), ")",
+                          "<br/>",
+                          "Variant: ", point$variant, 
+                          "<br/>",
+                          "Source: ", point$source, 
+                          "<br/>",
+                          "<i>(", ref[[point$region]], ")</i>")))
+        )
+    })
+    output$hover_info_variant_ge <- renderUI({
+        hover <- input$plot_hover_variant_ge
+        variant_data <- re_var %>% filter(source %in% input$variant_source) %>% filter(variant %in% input$variant) %>% filter(region == 'GE')
+        
+        point <- nearPoints(variant_data, hover, threshold = 5, maxpoints = 1, addDist = TRUE)
+        if (nrow(point) == 0) return(NULL)
+        
+        left_px <- hover$coords_css$x
+        top_px <- hover$coords_css$y
+        
+        style <- paste0("position:absolute; z-index:100; background-color: rgba(245, 245, 245, 0.9); ",
+                        "left:", left_px+2, "px; top:", top_px+2, "px;")
+        
+        # actual tooltip created as wellPanel
+        wellPanel(
+            style = style,
+            p(HTML(paste0("<i>", point$date, "</i>", "<br/>",
+                          "<b> R<sub>e</sub>: </b>", round(point$median_R_mean, 2),
+                          " (", round(point$median_R_lowHPD, 2),", ", round(point$median_R_highHPD, 2), ")",
+                          "<br/>",
+                          "Variant: ", point$variant, 
+                          "<br/>",
+                          "Source: ", point$source, 
+                          "<br/>",
+                          "<i>(", ref[[point$region]], ")</i>")))
+        )
+    })
+    
     # plotting all Rww ---------
     output$rww_plots <- renderPlot(
         {

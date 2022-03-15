@@ -114,3 +114,6 @@ Re_cc_needed <- Re_cc %>% select(region, data_type, date,
 
 write.csv(Re_cc_needed, "rww_data/Rcc_catchment.csv", row.names = F)
 
+# variants
+
+source('helper_code/variants.R')

@@ -6,6 +6,7 @@ library(shinyWidgets)
 library(shiny.i18n)
 
 source("helper_code/plot_maker.R")
+source('helper_code/variant_plots.R')
 i18n <- Translator$new(translation_json_path = "texts/translations.json")
 #i18n$set_translation_language("en-gb") # here you select the default translation to display
 
@@ -140,13 +141,84 @@ navbarPageWithInputs("Covid-19: Wastewater Re",
                     )
                     
            ),
+           # Variants -----------
+           tabPanel('Variants',
+                    sidebarLayout(
+                      sidebarPanel(
+                        checkboxGroupInput(inputId = "variant", 
+                                    label = i18n$t("Select variant:"),
+                                    choices = c("Alpha (B.1.1.7)" = "B.1.1.7",
+                                                "Delta (B.1.617.2)" = "B.1.617.2", 
+                                                'Omicron (BA.1)' = 'BA.1',
+                                                'Omicron (BA.2)' = 'BA.2'),
+                                    selected = 'BA.2'
+                        ),
+                        checkboxGroupInput(inputId = "variant_source", 
+                                           label = i18n$t("Select data source:"),
+                                           choices = c("Wastewater (NGS)" = "Wastewater (NGS)",
+                                                       "Catchment cases" = "Catchment cases"),
+                                           selected = 'Wastewater (NGS)'
+                        ),
+                        
+                        width = 3
+                      ),
+                      
+                      # Home: main panel - all plotting and further info -------
+                      mainPanel(
+                        fluidRow(
+                                 div(
+                                   style = "position:relative",
+                                   plotOutput("zh_plot", height = "255px", width = "950px",
+                                              hover = hoverOpts("plot_hover_variant_zh", delay = 10))%>%
+                                     withSpinner(color="#0dc5c1"),
+                                   uiOutput("hover_info_variant_zh")
+                                 ),
+                                 div(
+                                   style = "position:relative",
+                                   plotOutput("sg_plot", height = "255px", width = "950px",
+                                              hover = hoverOpts("plot_hover_variant_sg", delay = 10))%>%
+                                     withSpinner(color="#0dc5c1"),
+                                   uiOutput("hover_info_variant_sg")
+                                 ),
+                                 div(
+                                   style = "position:relative",
+                                   plotOutput("gr_plot", height = "255px", width = "950px",
+                                              hover = hoverOpts("plot_hover_variant_gr", delay = 10))%>%
+                                     withSpinner(color="#0dc5c1"),
+                                   uiOutput("hover_info_variant_gr")
+                                 ),
+                                 div(
+                                   style = "position:relative",
+                                   plotOutput("fr_plot", height = "255px", width = "950px",
+                                              hover = hoverOpts("plot_hover_variant_fr", delay = 10))%>%
+                                     withSpinner(color="#0dc5c1"),
+                                   uiOutput("hover_info_variant_fr")
+                                 ),
+                                 div(
+                                   style = "position:relative",
+                                   plotOutput("ti_plot", height = "255px", width = "950px",
+                                              hover = hoverOpts("plot_hover_variant_ti", delay = 10))%>%
+                                     withSpinner(color="#0dc5c1"),
+                                   uiOutput("hover_info_variant_ti")
+                                 ),
+                                 div(
+                                   style = "position:relative",
+                                   plotOutput("ge_plot", height = "255px", width = "950px",
+                                              hover = hoverOpts("plot_hover_variant_ge", delay = 10))%>%
+                                     withSpinner(color="#0dc5c1"),
+                                   uiOutput("hover_info_variant_ge")
+                                 )
+                        ) # fluid row
+                      ) # main panel
+                    ) # Sidebar layout
+           ),
            # About ---------
            tabPanel(i18n$t("About"),
                     fluidRow(column(
-                        htmlOutput('about_page'),
-                        width = 10),
-                        hr()
-                        
+                      htmlOutput('about_page'),
+                      width = 10),
+                      hr()
+                      
                     )
            ),
            inputs = selectInput(inputId = "lang", label = NULL,
