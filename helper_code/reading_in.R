@@ -13,7 +13,7 @@ ww_read_in <- function(data_url, region) {
                          col_names = c('date', 'n1', 'n1_smooth', 'cases', 
                                        'cases_smooth', 'quantification_flag', 'flow'),
                          col_types = cols(date = col_date(format = '')),
-                         skip = 1)
+                         skip = 1) %>% mutate(flow = as.numeric(flow))
   
   new_case_data <- raw_data %>% select(date, cases, cases_smooth) %>% 
                     complete(date = seq.Date(min(date), max(date), by = 'days')) %>% # 

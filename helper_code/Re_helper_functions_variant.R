@@ -77,10 +77,10 @@ plot_Re <- function(data, location, var, data_source = 'source', lab = c('Wastew
                     xlim = range(plotData$date)) +
     labs( x = ref[location], y = bquote("Estimated R"['e']~" (95% CI)"),
           colour = 'Source', fill = 'Source') +
-    scale_colour_manual(values = viridis(nsource),
+    scale_colour_manual(values = c(viridis(1), viridis(5)[4]),
                         labels = lab,
                         breaks = breaks) +
-    scale_fill_manual(values = viridis(nsource), 
+    scale_fill_manual(values = c(viridis(1), viridis(5)[4]), 
                       labels = lab,
                       breaks = breaks) +
     guides(color = guide_legend(override.aes = list(size=5, shape = 0))) +
