@@ -588,7 +588,7 @@ canton_plotter <- function(source, canton, date_range, i18n = NA) {
                  date_breaks = "months", date_labels = "%b") +
     coord_cartesian(ylim = c(0, 2)) +
     labs( x = i18n$t('Date'), y = ylabel,
-          colour = i18n$t('Canton'), fill = i18n$t('Canton')) +
+          colour = i18n$t('Catchment area'), fill = i18n$t('Canton')) +
     guides(color = guide_legend(override.aes = list(size=5))) +
     theme_minimal() +
     theme(strip.text = element_text(size=17),

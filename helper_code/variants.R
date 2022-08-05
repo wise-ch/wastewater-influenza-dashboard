@@ -8,6 +8,7 @@ library(jsonlite)
 library(ggplot2)
 library(dplyr)
 library(EpiEstim)
+library(ggrepel)
 # wastewater -----------
 # Query the API
 #date_from <- as.Date("2020-11-01")

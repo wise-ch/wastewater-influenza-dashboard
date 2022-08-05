@@ -617,4 +617,9 @@ function(input, output, session) {
         name <- paste0('texts/about_',input$lang,'.html')
         includeHTML(path = name)
     })
+    
+    # VARIANTS --------
+    output$variant_disclaimer <- renderUI({
+        HTML("<b>Note:</b><br>Variant R<sub>e</sub> is only calculated once the variant prevalence is above 2%. This is because for low variant prevalence, the estimates are volatile and not as reliable. Therefore, some variant options exist without corresponding estimates for wastewater and/or case data (such as BA.2.75).")
+    })
 }

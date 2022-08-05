@@ -63,16 +63,48 @@ plot_Re <- function(data, location, var, data_source = 'source', lab = c('Wastew
   
   nsource <- length(lab)
   plotData <- data %>% filter(variant %in% var) %>% filter(region == location) #filter(date>=date_low) %>%
-    plotData %>% ggplot() +
-    geom_line(aes(x = date, y = median_R_mean, group = interaction(variant, get(data_source)),colour = get(data_source), linetype = variant),
+  
+  # within the plot data, where is the beginning dates for each variant
+  starting_dates <- plotData %>% group_by(variant, region) %>% 
+        summarise(beg_date = min(date, na.rm = T))
+    
+  plotData %>% ggplot() +
+    geom_line(aes(x = date, 
+                  y = median_R_mean, 
+                  group = interaction(variant, get(data_source)),
+                  colour = get(data_source), 
+                  linetype = variant),
               alpha = 0.7, lwd = 0.8) +
-    geom_ribbon(aes(x = date, ymin = median_R_lowHPD,
-                    ymax = median_R_highHPD, fill = get(data_source), group = interaction(variant, get(data_source))),
-                alpha = 0.2, show.legend = F) +
+      geom_ribbon(aes(x = date, ymin = median_R_lowHPD,
+                      ymax = median_R_highHPD, fill = get(data_source), 
+                      group = interaction(variant, get(data_source))), 
+                  alpha = 0.2, show.legend = F) +
+      # geom_ribbon_pattern(aes(x = date, 
+      #                         ymin = median_R_lowHPD,
+      #                         ymax = median_R_highHPD,
+      #                         pattern_angle = variant,
+      #                         pattern_colour = get(data_source),
+      #                         group = interaction(variant, get(data_source))), 
+      #                     pattern = 'stripe', 
+      #                     pattern_fill = 'grey', 
+      #                     pattern_density = 0.05,
+      #                     pattern_spacing = 0.1,
+      #                     pattern_alpha = 0.4,
+      #                     alpha = 0.001, 
+      #                     show.legend = F) +
+      # scale_pattern_angle_manual( values = c(30, -30, 30, -30, 30), 
+      #                             labels = c("B.1.1.7","B.1.617.2","BA.1","BA.2","BA.5"),
+      #                             breaks = c("B.1.1.7","B.1.617.2","BA.1","BA.2","BA.5")) +
+      # scale_pattern_colour_manual(values = c(viridis(1), viridis(5)[4]), 
+      #                             labels = lab,
+      #                             breaks = breaks) +
     geom_hline(yintercept = 1) +
-    geom_vline(xintercept = as.Date('2021-11-20'), colour = 'grey', linetype = 'dashed') +
-    annotate('rect',xmin = as.Date('2021-11-10'), xmax = as.Date('2021-11-30'), ymin = -Inf, ymax = Inf ,
-             fill = 'grey', alpha = 0.4) +
+    # geom_vline(xintercept = as.Date('2021-11-20'), colour = 'grey', linetype = 'dashed') +
+    # annotate('rect',xmin = as.Date('2021-11-10'), xmax = as.Date('2021-11-30'), ymin = -Inf, ymax = Inf ,
+    #          fill = 'grey', alpha = 0.4) +
+    geom_vline(xintercept = starting_dates$beg_date, colour = 'grey', linetype = 'dashed') +
+    geom_text_repel(data = starting_dates,
+                    aes(x = beg_date, y = 3.75, label = variant), colour = 'black')+ 
     coord_cartesian(ylim = c(0, 4), 
                     xlim = range(plotData$date)) +
     labs( x = ref[location], y = bquote("Estimated R"['e']~" (95% CI)"),
@@ -93,6 +125,10 @@ plot_Re <- function(data, location, var, data_source = 'source', lab = c('Wastew
           plot.title = element_text(size = 18),
           panel.spacing.y = unit(2, "lines"),
           legend.position = 'bottom') 
+    
+    
+    # would now also like to add vertical breaks where a new variant starts
+    
 }
 
 

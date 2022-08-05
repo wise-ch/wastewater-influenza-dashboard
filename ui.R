@@ -162,7 +162,7 @@ navbarPageWithInputs("Covid-19: Wastewater Re",
                                                        "Catchment cases" = "Catchment cases"),
                                            selected = 'Wastewater (NGS)'
                         ),
-                        
+                        htmlOutput('variant_disclaimer'),
                         width = 3
                       ),
                       

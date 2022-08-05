@@ -1,5 +1,6 @@
 
 source('helper_code/Re_helper_functions_variant.R')
+library(ggpattern)
 
 re_ww <- read_csv('rww_data/variant_re.csv')
 
