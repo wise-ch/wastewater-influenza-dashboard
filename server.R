@@ -1,6 +1,6 @@
 library(shiny)
 library(patchwork)
-#library(ggtext)
+library(ggrepel)
 
 # it needs to be defined for both ui and server?
 i18n <- Translator$new(translation_json_path = "texts/translations.json")
