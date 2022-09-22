@@ -534,8 +534,10 @@ function(input, output, session) {
     # })
     
     output$death_hosp_info <- renderUI({
-        p(HTML(i18n$t('*The R<sub>e</sub> for hospitalised patients and deaths are currently not displayed because the low case incidence results in large confidence intervals and low usefulness.')), 
-          style="font-size: 95%;")
+      p(
+        tags$ul(style="padding-left:10px;font-size: 95%;",
+                tags$li(HTML(paste0(i18n$t("The R<sub>e</sub> for hospitalised patients and deaths are currently not displayed because the low case incidence results in large confidence intervals and low usefulness."))))
+                ) ) # i18 the disc
     })
     
     #disc_protocol <- 'The grey shaded regions represent a switch in protocol used for the wastewater sample preparation. During this period, the old and new protocols (v3.1 and Promega respectively) were run simultaneously (10-11-2021 to 30-11-2021). The R<sub>e</sub> for the new protocol takes around 3 weeks to stabilise (31-10-2021 to 20-11-2021). Further details of the protocol switch are described '
