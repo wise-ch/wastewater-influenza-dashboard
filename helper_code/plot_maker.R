@@ -4,9 +4,27 @@ library(lubridate)
 #library(patchwork)
 library(viridis)
 
+# Reading in SARS-CoV-2 wastewater data ####
 source("helper_code/reading_in.R") #
 #source("helper_code/method_change.R")
-# Reading in cantonal Re estimates ####
+
+# Reading in influenza wastewater data ####
+ww_data_flu <- read_csv("rww_data_flu/ww_loads.csv") %>%
+  rename(date = sample_date, orig_data = is_observation) %>%
+  mutate(quantification_flag = NA) %>%
+  mutate(region = case_when(
+    observation_type == "ARA Basel" ~ "BS",
+    observation_type == "ARA Werdhölzli" ~ "ZH",
+    observation_type == "STEP Aire" ~ "GE"
+  )) %>%
+  pivot_longer(cols = "IAV_(gc/day)", "IBV_(gc/day)", names_to = "measurement_type", values_to = "measurement") %>%
+  select(date, quantification_flag, orig_data, region, measurement_type, measurement)
+
+# Stitching together SARS-CoV-2 and influenza wastewater data ####
+ww_data_all <- ww_data_sars_cov_2 %>%
+  full_join(ww_data_flu)
+
+# Reading in cantonal Re estimates for SARS-CoV-2 ####
 
 Restimates_url = "https://raw.githubusercontent.com/covid-19-Re/dailyRe-Data/master/CHE-estimates.csv"
 
@@ -24,7 +42,9 @@ Restimates_canton <- Restimates_canton %>% filter(estimate_type == 'Cori_sliding
   dplyr::select(-estimate_type, -countryIso3, -country, -source) %>%
   mutate(data_type = recode_factor(data_type, 'Confirmed cases' = 'Confirmed (Canton)'))
 
-
+# Reading in Rww estimates for influenza ####
+Re_ww_flu_raw <- read_csv("rww_data_flu/ww_re_estimates.csv")
+# TODO: add to data for plot
 
 # Reading in Rww and catchment Rcc estimates ####
 
@@ -104,10 +124,10 @@ raw_plotter <- function(data, canton, date_range, i18n = NA) {
   #date_range <- range((ww_data %>% filter(region == canton) %>% select(date))[["date"]])
   p1 <- i18n$t("Gene copies")
   ylabel <- bquote(.(p1)*" ("%*%"10"^12*")")
-  data %>% filter(region == canton) %>% mutate(n1 = n1/10^12) %>%
+  data %>% filter(region == canton) %>% mutate(measurement = measurement/10^12) %>%
     filter(date >= date_range[1] & date <= date_range[2]) %>%
     ggplot( ) +
-    geom_point(aes(x=date, y = n1, colour = quantification_flag)) +
+    geom_point(aes(x=date, y = measurement, colour = quantification_flag)) +
     scale_x_date(limits = c(date_range[1], date_range[2]),
                  date_breaks = "months", date_labels = "%b") +
     scale_y_continuous(labels = function(label) sprintf('%4.1f', label)) +
@@ -117,8 +137,8 @@ raw_plotter <- function(data, canton, date_range, i18n = NA) {
                         name = i18n$t('Quantification flag**'),
                         guide = guide_legend(override.aes = list(size = 3) )) + # to increase size of point in legend
     geom_line(data = data %>% filter(region == canton) %>% filter(orig_data)  %>% 
-                filter(date >= date_range[1] & date <= date_range[2]) %>% mutate(n1 = n1/10^12),
-              aes(x=date, y= n1,colour = name_orig), linetype = 'dashed', colour = "black") +
+                filter(date >= date_range[1] & date <= date_range[2]) %>% mutate(measurement = measurement/10^12),
+              aes(x=date, y= measurement,colour = name_orig), linetype = 'dashed', colour = "black") +
     labs(x = i18n$t("Date") , y=ylabel) +
     #ggtitle(paste0("SARS-CoV2-RNA copies in Wastewater in ", ref[[canton]])) +
     theme_minimal() +
@@ -140,7 +160,7 @@ raw_plotter <- function(data, canton, date_range, i18n = NA) {
   # changes ------
   # new data joined - rather have it in the reading file
   # csv will come changed
-  data <- data %>%  mutate(n1 = n1/10^12) %>% filter(region == canton)  %>%
+  data <- data %>%  mutate(measurement = measurement/10^12) %>% filter(region == canton)  %>%
     filter(date >= date_range[1] & date <= date_range[2])
   
   # ww data and ww data new is what is currently present
@@ -153,19 +173,19 @@ raw_plotter <- function(data, canton, date_range, i18n = NA) {
     annotate('rect',xmin = as.Date('2021-11-10'), xmax = as.Date('2021-11-30'), ymin = 0, ymax = Inf ,
                              fill = 'grey', alpha = 0.4) +
     # old protocol
-    geom_point(data = data %>% filter(protocol =='v3.1'), aes(x=date, y = n1, colour = quantification_flag)) +
-    geom_line(data = data %>% filter(protocol=='v3.1') %>% filter(!is.na(n1)),
-              aes(x=date, y= n1,colour = 'black'), linetype = 'dashed', colour = "black") +
+    geom_point(data = data %>% filter(protocol =='v3.1'), aes(x=date, y = measurement, colour = quantification_flag)) +
+    geom_line(data = data %>% filter(protocol=='v3.1') %>% filter(!is.na(measurement)),
+              aes(x=date, y= measurement,colour = 'black'), linetype = 'dashed', colour = "black") +
     # new protocol - transition
     geom_point(data = data %>% filter(protocol == 'PMG2'),
-               aes(x=date, y = n1, colour = quantification_flag), alpha = 0.5) +
+               aes(x=date, y = measurement, colour = quantification_flag), alpha = 0.5) +
     geom_line(data = data %>% filter(protocol == 'PMG2') ,
-              aes(x=date, y = n1), linetype = 'dotted', colour = 'black') +
+              aes(x=date, y = measurement), linetype = 'dotted', colour = 'black') +
     # new protocol - normal
     # geom_point(data = data %>% filter(protocol =='PMG2') %>% filter(date > transition_period[2]), 
-    #            aes(x=date, y = n1, colour = quantification_flag), alpha = 0.5) +
-    # geom_line(data = data %>% filter(protocol=='PMG2') %>% filter(!is.na(n1)) %>% filter(date >= transition_period[2]),
-    #           aes(x=date, y= n1,colour = 'black'), linetype = 'dotted', colour = "black") +
+    #            aes(x=date, y = measurement, colour = quantification_flag), alpha = 0.5) +
+    # geom_line(data = data %>% filter(protocol=='PMG2') %>% filter(!is.na(measurement)) %>% filter(date >= transition_period[2]),
+    #           aes(x=date, y= measurement,colour = 'black'), linetype = 'dotted', colour = "black") +
     geom_vline(xintercept = as.Date(c('2021-11-10', '2021-11-30')), linetype = 'dotdash', alpha = 0.6) +
     scale_x_date(limits = c(date_range[1], date_range[2]),
                  date_breaks = "months", date_labels = "%b") +

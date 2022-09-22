@@ -92,10 +92,11 @@ for (i in regions) {
   case_data <- bind_rows(case_data, all_data[["case"]]) #%>% bind_rows(all_data2[["case"]]) %>% unique()
 }
 
-ww_data_all <- ww_data %>% mutate(protocol = 'v3.1') %>%
-  bind_rows(ww_data_new %>% mutate(protocol = 'PMG2'))
+ww_data_sars_cov_2 <- ww_data %>% mutate(protocol = 'v3.1') %>%
+  bind_rows(ww_data_new %>% mutate(protocol = 'PMG2')) %>%
+  pivot_longer(cols = "n1", names_to = "measurement_type", values_to = "measurement")
 
 # stitching the old and new 
-ww_data_new <- ww_data %>% filter(date<min(ww_data_new$date)) %>% bind_rows(ww_data_new) %>% 
-  group_by(region) %>% mutate(norm_n1 = n1/min(n1)) %>% ungroup()
+# ww_data_new <- ww_data %>% filter(date<min(ww_data_new$date)) %>% bind_rows(ww_data_new) %>% 
+#   group_by(region) %>% mutate(norm_n1 = n1/min(n1)) %>% ungroup()
 # so still using the same normalisation values

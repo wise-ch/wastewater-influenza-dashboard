@@ -128,12 +128,12 @@ function(input, output, session) {
         # TODO
         # this would need to change based on reading_in changes
         select_data <- ww_data_all %>% 
-            mutate(n1 = n1/10^12) %>% filter(region == input$region)  %>%
+            mutate(measurement = measurement/10^12) %>% filter(region == input$region)  %>%
             filter(date >= input$slider_dates[1] & date <= input$slider_dates[2]) 
         
         point <- nearPoints(select_data,
                             hover_raw, threshold = 8, maxpoints = 1, addDist = TRUE,
-                            xvar = 'date', yvar = 'n1')
+                            xvar = 'date', yvar = 'measurement')
         if (nrow(point) == 0) return(NULL)
         
         left_px <- hover_raw$coords_css$x
@@ -146,7 +146,7 @@ function(input, output, session) {
         wellPanel(
             style = style,
             p(HTML(paste0("<i>", point$date, "</i>", "<br/>",
-                          "<b>", i18n$t("Gene copies"),"</b> (x10<sup>12</sup>): ", round(point$n1, 2), "<br/>",
+                          "<b>", i18n$t("Gene copies"),"</b> (x10<sup>12</sup>): ", round(point$measurement, 2), "<br/>",
                           "<i>(", i18n$t(as.character(point$quantification_flag)), ")</i>", "<br/>",
                           "<i>(",'Protocol: ',point$protocol ,")</i>")))
         )
