@@ -1,12 +1,10 @@
 # plots ####
 library(tidyverse)
 library(lubridate)
-#library(patchwork)
 library(viridis)
 
 # Reading in SARS-CoV-2 wastewater data ####
 source("helper_code/reading_in.R") #
-#source("helper_code/method_change.R")
 
 # Reading in influenza wastewater data ####
 ww_data_flu <- read_csv("rww_data_flu/ww_loads.csv") %>%
@@ -50,8 +48,18 @@ Restimates_canton <- Restimates_canton %>% filter(estimate_type == 'Cori_sliding
   mutate(data_type = recode_factor(data_type, 'Confirmed cases' = 'Confirmed (Canton)'))
 
 # Reading in Rww estimates for influenza ####
-Re_ww_flu_raw <- read_csv("rww_data_flu/ww_re_estimates.csv")
-# TODO: add to data for plot
+Re_ww_flu <- read_csv("rww_data_flu/ww_re_estimates.csv") %>%
+  mutate(data_type = "Wastewater") %>%
+  mutate(region = case_when(
+    observation_type == "ARA Basel" ~ "BS",
+    observation_type == "ARA Werdhölzli" ~ "ZH",
+    observation_type == "STEP Aire" ~ "GE"
+  )) %>%
+  mutate(pathogen_type = influenza_type) %>%
+  rename(median_R_mean = Re_estimate, median_R_highHPD = CI_up_Re_estimate, 
+         median_R_lowHPD = CI_down_Re_estimate) %>%
+  select(region, data_type, date, median_R_mean, median_R_highHPD, median_R_lowHPD,
+         pathogen_type)
 
 # Reading in Rww and catchment Rcc estimates ####
 
@@ -63,14 +71,15 @@ Re_cc_needed <- read_csv("rww_data/Rcc_catchment.csv")
 
 plotData <- Restimates_canton %>%
   bind_rows(Re_ww_needed) %>% mutate(data_type = factor(data_type)) %>% # the rww binded
-  mutate(data_type = recode_factor(data_type, "infection_norm_n1" = "Wastewater")) 
-# might need to recode to v3.1 N1 wastewater or smth
+  mutate(data_type = recode_factor(data_type, "infection_norm_n1" = "Wastewater"))
 
 plotData <- plotData %>%
   bind_rows(Re_cc_needed) %>% 
   bind_rows(Re_ww_needed_pmg %>% mutate(data_type = 'Wastewater (PMG2)')) %>% # added this - 'Promega N1
   mutate(data_type = factor(data_type)) %>% # the rww binded
-  mutate(data_type = recode_factor(data_type, "infection_cases" = "Confirmed (Catchment)"))
+  mutate(data_type = recode_factor(data_type, "infection_cases" = "Confirmed (Catchment)")) %>%
+  mutate(pathogen_type = "COVID") %>%
+  bind_rows(Re_ww_flu)
 
 
 # reference:
@@ -176,97 +185,10 @@ raw_plotter <- function(data, canton, pathogen, date_range, i18n = NA) {
 
 # Re plots ####
 
-re_plotter <- function(source, canton, date_range, i18n = NA) {
-  #date_range <- range((ww_data %>% filter(region == canton) %>% select(date))[["date"]])
-  # For CHUR: leave out confirmed catchment case Re for now (as lots of missing data) ---------
-  # if (canton == "GR") {
-  #   source <- source[! source %in% 'Confirmed (Catchment)']
-  # }
-  new_data <- plotData %>% filter(region %in% canton) %>%
-    filter(data_type %in% source) %>% filter(date >= date_range[1])
-
-  data_ends <- new_data %>% group_by(data_type) %>% filter(row_number()==n())
-  disc <- i18n$t("*This is the most recent possible Re estimate due to delays between infection and being observed.")
+re_plotter <- function(source, canton, pathogen, date_range, i18n = NA) {
   
-  p1 <- i18n$t("Estimated R")
-  if (nchar(p1)>10) {
-    # English and German
-    ylabel <- bquote(.(p1)['e']~" (95% CI)")
-  }
-  else {
-    # French and Italian
-    p1 <- strsplit(p1, " ")[[1]][2]
-    ylabel <- bquote("R"['e']~.(p1)~" (95% CI)")
-  }
-  
-  new_data <- new_data %>% filter(date >= date_range[1] & date <= date_range[2])
-  
-  if (range((ww_data %>% filter(region == canton) %>%
-             select(date))[["date"]])[1]==date_range[1] & date_range[2]==Sys.Date()) { 
-    ylimits <- c(0, 2)
-  } else { 
-     ylimits <- c(max(min(new_data$median_R_lowHPD), 0), min(max(new_data$median_R_highHPD), 2))}
-  
-  new_data  %>%
-    ggplot() +
-    geom_line(aes(x = date, y = median_R_mean, colour = data_type),
-              alpha = 0.7, lwd = 0.8) +
-    geom_ribbon(aes(x = date, ymin = median_R_lowHPD,
-                    ymax = median_R_highHPD, fill = data_type),
-                alpha = 0.2, show.legend = F) +
-    geom_hline(yintercept = 1) +
-    geom_point(aes(x = date, y = median_R_mean, colour = data_type),
-               data = data_ends, shape = 8) +
-    scale_colour_manual(values = c(viridis(5)[c(1, 4)], "#f4bc1c", viridis(5)[c(3, 2)]), #'lightseagreen'
-                        labels = i18n$t(c('Wastewater', 'Confirmed cases (Catchment)', 'Confirmed cases (Canton)',
-                                   'Deaths', 'Hospitalized patients')),
-                        breaks = c('Wastewater', 'Confirmed (Catchment)','Confirmed (Canton)',
-                                   'Deaths', 'Hospitalized patients')) +
-    scale_fill_manual(values = c(viridis(5)[c(1, 4)], "#f4bc1c", viridis(5)[c(3, 2)]), #'lightseagreen'
-                       labels = i18n$t(c('Wastewater', 'Confirmed cases (Catchment)', 'Confirmed cases (Canton)',
-                                  'Deaths', 'Hospitalized patients')),
-                       breaks = c('Wastewater', 'Confirmed (Catchment)', 'Confirmed (Canton)',
-                                  'Deaths', 'Hospitalized patients')) +
-    scale_x_date(limits = c(date_range[1], date_range[2]),
-                 date_breaks = "months", date_labels = "%b") +
-    scale_y_continuous(labels = function(label) sprintf('%6.1f', label)) +
-    coord_cartesian(ylim = ylimits) + # change this? Autoadjust? but how?
-    labs( x = i18n$t("Date"), y = ylabel,
-          colour = i18n$t('Source'), fill = i18n$t('Source')) +
-    guides(color = guide_legend(override.aes = list(size=5, shape = 0))) +
-    theme_minimal() +
-    theme(strip.text = element_text(size=17),
-          axis.text= element_text(size=14),
-          axis.title =  element_text(size=16),
-          legend.text= element_text(size=14),
-          legend.title= element_text(size=17),
-          plot.title = element_text(size = 18),
-          panel.spacing.y = unit(2, "lines"),
-          legend.position = 'bottom') +
-    annotate(geom = 'text',
-             label = ifelse(is.infinite(min(data_ends$date)), " ",
-                            ifelse(date_range[2] >= min(data_ends$date) , disc, " ")),
-             x = summary(date_range)[['3rd Qu.']]-25, y = 0.1, hjust = 0.5, vjust = 1, size = 3.9)
-}
-
-
-# re plotter changed according to promega/v3
-# has Promega N1 as data type
-# only included when wastewater included in source
-re_plotter <- function(source, canton, date_range, i18n = NA) {
-  #date_range <- range((ww_data %>% filter(region == canton) %>% select(date))[["date"]])
-  # For CHUR: leave out confirmed catchment case Re for now (as lots of missing data) ---------
-  # if (canton == "GR") {
-  #   source <- source[! source %in% 'Confirmed (Catchment)']
-  # }
-  
-  # if ('Wastewater' %in% source) {
-  #   # make new sources
-  #   source <- c(source[source!='Wastewater'], 'Wastewater (PMG2)', 'Wastewater (v3.1)')
-  # }
-  
-  new_data <- plotData %>% filter(region %in% canton) %>%
-    filter(data_type %in% source) %>% filter(date >= date_range[1])
+  new_data <- plotData %>% filter(region %in% canton, pathogen_type %in% pathogen) %>%
+    filter(data_type %in% source)
   
   data_ends <- new_data %>% filter(data_type != 'Wastewater') %>% group_by(data_type) %>% filter(row_number()==n())
   disc <- i18n$t("*This is the most recent possible Re estimate due to delays between infection and being observed.")
@@ -283,13 +205,13 @@ re_plotter <- function(source, canton, date_range, i18n = NA) {
   
   new_data <- new_data %>% filter(date >= date_range[1] & date <= date_range[2])
   
-  if (range((ww_data_all %>% filter(region == canton) %>%
+  if (range((ww_data_all %>% filter(region == canton, pathogen_type == pathogen) %>%
              select(date))[["date"]])[1]==date_range[1] & date_range[2]==Sys.Date()) { 
     ylimits <- c(0, 2) # default
   } else { 
-    ylimits <- c(max(min(new_data$median_R_lowHPD), 0), min(max(new_data$median_R_highHPD), 2))}
+    ylimits <- c(max(min(new_data$median_R_lowHPD, na.rm = T), 0), min(max(new_data$median_R_highHPD, na.rm = T), 2))}
   
-  pp <- new_data  %>%
+  p <- new_data  %>%
     ggplot() +
     geom_line(aes(x = date, y = median_R_mean, colour = data_type),
               alpha = 0.7, lwd = 0.8) +
@@ -299,18 +221,15 @@ re_plotter <- function(source, canton, date_range, i18n = NA) {
     geom_hline(yintercept = 1) +
     geom_point(aes(x = date, y = median_R_mean, colour = data_type),
                data = data_ends, shape = 8) +
-    geom_vline(xintercept = as.Date(c('2021-10-31', '2021-11-20')), linetype = 'dotdash', alpha = 0.6)  +
-    annotate('rect',xmin = as.Date('2021-10-31'), xmax = as.Date('2021-11-20'), ymin = 0, ymax = Inf ,
-             fill = 'grey', alpha = 0.4) +
     scale_colour_manual(values = c(viridis(5)[c(1, 4)], "#f4bc1c", viridis(5)[c(3, 2)]), #repeating purple
-                        labels = i18n$t(c('Wastewater','Confirmed cases (Catchment)', 
-                                          'Confirmed cases (Canton)',
-                                          'Deaths', 'Hospitalized patients')),
+                        labels = i18n$t(c('Wastewater','Confirmed cases (Catchment)',
+                        'Confirmed cases (Canton)',
+                        'Deaths', 'Hospitalized patients')),
                         breaks = c('Wastewater','Confirmed (Catchment)', 
                                    'Confirmed (Canton)',
                                    'Deaths', 'Hospitalized patients')) +
     scale_fill_manual(values = c(viridis(5)[c(1, 4)], "#f4bc1c", viridis(5)[c(3, 2)]), #repeating purple
-                      labels = i18n$t(c('Wastewater','Confirmed cases (Catchment)', 
+                      labels = i18n$t(c('Wastewater','Confirmed cases (Catchment)',
                                         'Confirmed cases (Canton)',
                                         'Deaths', 'Hospitalized patients')),
                       breaks = c('Wastewater','Confirmed (Catchment)', 
@@ -331,17 +250,17 @@ re_plotter <- function(source, canton, date_range, i18n = NA) {
           legend.title= element_text(size=17),
           plot.title = element_text(size = 18),
           panel.spacing.y = unit(2, "lines"),
-          legend.position = 'bottom') + 
-    annotate(geom = 'text',
-             label = ifelse(is.infinite(min(data_ends$date)), " ",
-                            ifelse(date_range[2] >= min(data_ends$date) , disc, " ")),
-             x = summary(date_range)[['3rd Qu.']]-25, y = 0.1, hjust = 0.5, vjust = 1, size = 3.9)
+          legend.position = 'bottom') #+ # TODO: add influenza case-based Re
+    # annotate(geom = 'text',
+    #          label = ifelse(is.infinite(min(data_ends$date)), " ",
+    #                         ifelse(date_range[2] >= min(data_ends$date) , disc, " ")),
+    #          x = summary(date_range)[['3rd Qu.']]-25, y = 0.1, hjust = 0.5, vjust = 1, size = 3.9)
     
-  # would have to change once we are over the threshold
-  if ('Wastewater' %in% source) {
+  # Add layers to plot for data generated under older protocols
+  if (pathogen == "COVID" & 'Wastewater' %in% source) {
+    
     pmg <- plotData %>% filter(region %in% canton) %>%
       filter(data_type == 'Wastewater (PMG2)') %>% filter(date >= date_range[1])
-    
     
     if (range((ww_data_all %>% filter(region == canton) %>%
                select(date))[["date"]])[1]==date_range[1] & date_range[2]==Sys.Date()) { 
@@ -350,33 +269,27 @@ re_plotter <- function(source, canton, date_range, i18n = NA) {
       ylimits <- c(min(range(pmg$median_R_mean)[1], range(new_data$median_R_mean)[1]), 
                    max(range(pmg$median_R_mean)[1], 2))}
     
-
-    pp <- pp +
-     geom_line(data = pmg , 
-               aes(x = date, y = median_R_mean), 
-               linetype = 'dashed', colour = viridis(1), alpha = 0.6, lwd = 0.8) +
-     geom_ribbon(data = pmg %>% filter(region==canton),
-                 aes(x = date, ymin = median_R_lowHPD,
-                                       ymax = median_R_highHPD) , 
-                 colour = NA, alpha = 0.1, show.legend = F, fill = viridis(1)) +
-      # geom_line(data = pmg %>% filter(date>=(transition_period[2]-10)) , 
-      #           aes(x = date, y = median_R_mean), 
-      #           colour = viridis(1), alpha = 0.7, lwd = 0.8) +
-      # geom_ribbon(data = pmg %>% filter(region==canton)%>% filter(date>=(transition_period[2]-10)),
-      #             aes(x = date, ymin = median_R_lowHPD,
-      #                                                        ymax = median_R_highHPD) , 
-      #             colour = NA, alpha = 0.2, show.legend = F, fill = viridis(1)) +
-     geom_point(aes(x = date, y = median_R_mean, colour = data_type),
-                data = pmg %>% filter(row_number()==n()), shape = 8, colour = viridis(1)) +
+    p <- p + 
+      annotate('rect',xmin = as.Date('2021-10-31'), xmax = as.Date('2021-11-20'), ymin = 0, ymax = Inf ,
+               fill = 'grey', alpha = 0.4) +
+      # old protocol
+      geom_line(data = pmg , 
+                aes(x = date, y = median_R_mean), 
+                linetype = 'dashed', colour = viridis(1), alpha = 0.6, lwd = 0.8) +
+      geom_ribbon(data = pmg %>% filter(region==canton),
+                  aes(x = date, ymin = median_R_lowHPD,
+                      ymax = median_R_highHPD) , 
+                  colour = NA, alpha = 0.1, show.legend = F, fill = viridis(1)) +
+      geom_point(aes(x = date, y = median_R_mean, colour = data_type),
+                 data = pmg %>% filter(row_number()==n()), shape = 8, colour = viridis(1)) +
       geom_point(aes(x = date, y = median_R_mean, colour = data_type),
                  data = new_data %>% filter(data_type == 'Wastewater') %>% filter(row_number()==n()), 
                  shape = 4, colour = viridis(1)) +
-      
-     #scale_colour_manual(values = viridis(1))  +
-     coord_cartesian(ylim = ylimits) 
+      coord_cartesian(ylim = ylimits) 
+      geom_vline(xintercept = as.Date(c('2021-10-31', '2021-11-20')), linetype = 'dotdash', alpha = 0.6)
   }
   
-  pp
+  p
 }
 
 

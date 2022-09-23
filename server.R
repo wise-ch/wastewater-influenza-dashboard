@@ -159,7 +159,7 @@ function(input, output, session) {
             }
             else {
                 re <- re_plotter(source = c(input$data_type, input$catchment_selection), canton = input$region, 
-                                date_range =  input$slider_dates, i18n = i18n)
+                                pathogen = input$pathogen, date_range = input$slider_dates, i18n = i18n)
             }
             re
         }
@@ -601,7 +601,7 @@ function(input, output, session) {
             if (input$region == "FR") {
                 re <- re_plotter2(c(input$data_type, input$catchment_selection), input$region, input$slider_dates, i18n) # call plotter 2: 2 cantons!
             } else {
-                re <- re_plotter(c(input$data_type, input$catchment_selection), input$region, input$slider_dates, i18n)
+                re <- re_plotter(c(input$data_type, input$catchment_selection), input$region, input$pathogen, input$slider_dates, i18n)
             }
             p <- patchwork::wrap_plots(case,raw,re, nrow = 3)+
                 plot_annotation(caption = paste0('Generated on: ',Sys.Date(),
