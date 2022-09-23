@@ -26,36 +26,38 @@ function(input, output, session) {
         i18n$t('Catchments')
     })
     
-    output$data_type <- renderUI({
-        options_enabled <- c('Wastewater', 'Confirmed (Canton)')
-        names(options_enabled) <- i18n$t(c('Wastewater', 'Confirmed cases (in canton)'))
-
+    
+    # update available data types based on pathogen --------
+    observeEvent(input$pathogen, {
+      # Here is where we update data types available
+      if (input$pathogen == "COVID") {
+        options_enabled <- c("Wastewater", "Confirmed (Canton)", "Confirmed (Catchment)")
+        names(options_enabled) <- c("Wastewater", "Confirmed cases (in canton)", "Confirmed cases (in catchment area)")
+        options_disabled <- c('Deaths', 'Hospitalized patients')
+        names(options_disabled) <- i18n$t(c('Deaths*', 'Hospitalized patients*'))
+      } else if (input$pathogen %in% c("IAV", "IBV")) {
+        options_enabled <- c("Wastewater", "Influenza-like illness consultations (National)")
+        names(options_enabled) <- c("Wastewater", "Influenza-like illness consultations (National)")
+        options_disabled <- c('Deaths', 'Hospitalized patients', "Confirmed (Canton)", "Confirmed (Catchment)")
+        names(options_disabled) <- i18n$t(c('Deaths*', 'Hospitalized patients*', "Confirmed cases (in canton)", "Confirmed cases (in catchment area)"))
+      }
+      
+      output$data_type <- renderUI({
+        
         checkboxGroupInput(inputId = "data_type",
                            label = i18n$t("Data Source (select to compare):"),
                            choices = options_enabled,
-                           #"Deaths" = "Deaths",
-                           #"Hospitalized patients"= "Hospitalized patients"),
-                           selected = "Wastewater")
-    })
-    
-    output$catchment <- renderUI({
-        options_catchment<- c('Confirmed (Catchment)')
-        names(options_catchment) <- i18n$t("Confirmed cases (in catchment area)")
-        
-        checkboxGroupInput(inputId = 'catchment_selection',
-                           label = NULL,
-                           choices = options_catchment)
-
-    })
-    
-    output$disabled <- renderUI({
-        options_disabled <- c('Deaths', 'Hospitalized patients')
-        names(options_disabled) <- i18n$t(c('Deaths*', 'Hospitalized patients*'))
+                           selected = "Wastewater")  # this assumes wastewater is an available data type for all pathogens
+      })
+      
+      output$disabled <- renderUI({
         
         disabled(checkboxGroupInput(inputId = "data_type_disabled",
-                           label = NULL,
-                           choices = options_disabled))
+                                    label = NULL,
+                                    choices = options_disabled))
         
+      })
+      
     })
 
     # control slider dates --------
