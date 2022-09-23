@@ -118,7 +118,7 @@ function(input, output, session) {
     # Plotting raw RNA copies -------
     output$raw_plots <- renderPlot(
         {
-            raw <- raw_plotter(ww_data_all, input$region, input$slider_dates, i18n)
+            raw <- raw_plotter(ww_data_all, input$region, input$pathogen, input$slider_dates, i18n)
             raw
         }
     )
@@ -128,7 +128,7 @@ function(input, output, session) {
         # TODO
         # this would need to change based on reading_in changes
         select_data <- ww_data_all %>% 
-            mutate(measurement = measurement/10^12) %>% filter(region == input$region)  %>%
+            mutate(measurement = measurement/10^12) %>% filter(region == input$region, pathogen_type == input$pathogen)  %>%
             filter(date >= input$slider_dates[1] & date <= input$slider_dates[2]) 
         
         point <- nearPoints(select_data,
@@ -597,7 +597,7 @@ function(input, output, session) {
         # content is a function with argument file. content writes the plot to the device
         content = function(file) {
             case <- case_plotter(case_data, input$region, input$slider_dates, i18n)
-            raw <- raw_plotter(ww_data, input$region, input$slider_dates, i18n)
+            raw <- raw_plotter(ww_data_all, input$region, input$pathogen, input$slider_dates, i18n)
             if (input$region == "FR") {
                 re <- re_plotter2(c(input$data_type, input$catchment_selection), input$region, input$slider_dates, i18n) # call plotter 2: 2 cantons!
             } else {
