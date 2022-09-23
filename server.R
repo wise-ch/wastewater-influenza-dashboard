@@ -38,8 +38,7 @@ function(input, output, session) {
       } else if (input$pathogen %in% c("IAV", "IBV")) {
         options_enabled <- c("Wastewater", "Influenza-like illness consultations (National)")
         names(options_enabled) <- c("Wastewater", "Influenza-like illness consultations (National)")
-        options_disabled <- c('Deaths', 'Hospitalized patients', "Confirmed (Canton)", "Confirmed (Catchment)")
-        names(options_disabled) <- i18n$t(c('Deaths*', 'Hospitalized patients*', "Confirmed cases (in canton)", "Confirmed cases (in catchment area)"))
+        options_disabled <- c()
       }
       
       output$data_type <- renderUI({
