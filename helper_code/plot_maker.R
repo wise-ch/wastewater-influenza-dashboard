@@ -384,7 +384,7 @@ re_plotter2 <- function(source, canton, date_range, i18n = NA) {
 
 # Plotting for all plants --------------
 
-canton_plotter <- function(source, canton, date_range, i18n = NA) {
+canton_plotter <- function(source, canton, pathogen, date_range, i18n = NA) {
   #date_range <- range((ww_data %>% filter(region %in% canton) %>% select(date))[["date"]])
   # for now, as Zurich is the only one from Oct - Jan end.
   # After: make into sliding scale
@@ -399,20 +399,15 @@ canton_plotter <- function(source, canton, date_range, i18n = NA) {
     ylabel <- bquote("R"['e']~.(p1)~" (95% CI)")
   }
   
-  
-  
-  if (source == 'Wastewater') {
-    CH_data <- plotDataRe %>% filter(region %in% canton) %>%
-      filter(data_type %in% source) %>%
+  CH_data <- plotDataRe %>% filter(region %in% canton, pathogen_type == pathogen) %>%
+    filter(data_type %in% source)
+  if (pathogen == "COVID") {
+    CH_data <- CH_data %>% 
       bind_rows(plotDataRe %>% filter(region %in% canton) %>%
-                  filter(data_type == 'Wastewater (PMG2)') %>%
-                  filter(date > (transition_period[2] - 10))) %>% 
-      filter(date >= date_range[1] & date <= date_range[2])
-  } else {
-    CH_data <- plotDataRe %>% filter(region %in% canton) %>%
-      filter(data_type %in% source) %>% filter(date >= date_range[1] & date <= date_range[2])
+      filter(data_type == 'Wastewater (PMG2)') %>%
+      filter(date > (transition_period[2] - 10)))
   }
-  
+  CH_data <- CH_data %>% filter(date >= date_range[1] & date <= date_range[2])
   
   pp <- CH_data %>%
     ggplot() +

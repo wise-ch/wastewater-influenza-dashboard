@@ -453,6 +453,7 @@ function(input, output, session) {
     output$rww_plots <- renderPlot(
         {
             rww <- canton_plotter(source = 'Wastewater', canton = input$canton, 
+                                  pathogen = input$pathogen,
                                   date_range = input$slider_dates_cantonal, i18n)
             title_p1 <- i18n$t("Estimated Wastewater R")
             title_p2 <- i18n$t("for different catchment areas")
@@ -472,11 +473,15 @@ function(input, output, session) {
                  "SG"="Altenrhein", "GR"="Chur",
                  "FR"="Laupen", "TI"="Lugano")
         hover <- input$plot_hover_rww
-        CH_data <- plotDataWW %>% filter(region %in% input$canton) %>%
-            filter(data_type %in% 'Wastewater') %>%
-            bind_rows(plotDataWW %>% filter(region %in% input$canton) %>%
+        CH_data <- plotDataRe %>% filter(region %in% input$canton, pathogen_type == input$pathogen) %>%
+            filter(data_type %in% 'Wastewater')
+        if (input$pathogen == "COVID") {
+          CH_data <- CH_data %>%
+            bind_rows(plotDataRe %>% filter(region %in% input$canton, pathogen_type == input$pathogen) %>%
                           filter(data_type == 'Wastewater (PMG2)') %>%
-                          filter(date > (transition_period[2] - 10))) %>% 
+                          filter(date > (transition_period[2] - 10)))
+        }
+        CH_data <- CH_data %>% 
             filter(date >= input$slider_dates_cantonal[1] & date <= input$slider_dates_cantonal[2])
         
         
@@ -502,7 +507,7 @@ function(input, output, session) {
     
     output$rcc_plots <- renderPlot(
         {
-            rcc <- canton_plotter(canton = input$canton, source = 'Confirmed (Catchment)', 
+            rcc <- canton_plotter(canton = input$canton, source = 'Confirmed (Catchment)', pathogen = input$pathogen,
                                   date_range = input$slider_dates_cantonal, i18n = i18n)
             title_p1 <- i18n$t("Estimated R")
             title_p2 <- i18n$t(" using catchment specific confirmed cases for different catchment areas")
