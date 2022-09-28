@@ -44,7 +44,6 @@ navbarPageWithInputs("Covid-19: Wastewater Re",
                             ),
                             shinyjs::useShinyjs(),
                             uiOutput('data_type'),
-                            uiOutput('catchment'),
                             uiOutput('disabled'),
                             uiOutput('death_hosp_info'),
                             

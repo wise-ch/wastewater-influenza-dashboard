@@ -176,15 +176,15 @@ function(input, output, session) {
             source_canton <- source[source %in% c('Confirmed (Canton)')]
             source_without_canton <- source[! source %in% c('Confirmed (Canton)')]
             
-            bern_confirmed <- plotData %>% filter(region == "BE") %>%
+            bern_confirmed <- plotDataRe %>% filter(region == "BE") %>%
                 filter(data_type == "Confirmed (Canton)") %>%
                 mutate(data_type = recode_factor(data_type, 'Confirmed (Canton)' = 'Confirmed (Bern)'))
             
-            fribourg_confirmed <- plotData %>% filter(region == "FR") %>%
+            fribourg_confirmed <- plotDataRe %>% filter(region == "FR") %>%
                 filter(data_type == "Confirmed (Canton)") %>%
                 mutate(data_type = recode_factor(data_type, 'Confirmed (Canton)' = 'Confirmed (Fribourg)'))
             
-            new_data <- plotData %>% filter(region %in% c("BE", "FR")) %>%
+            new_data <- plotDataRe %>% filter(region %in% c("BE", "FR")) %>%
                 filter(data_type %in% source_without_canton) %>% 
                 filter(date >= input$slider_dates[1] & date <= input$slider_dates[2])
             
@@ -197,13 +197,13 @@ function(input, output, session) {
         }
         else {
             if (! 'Wastewater' %in% input$data_type) {
-                selected_data <- plotData %>% filter(region == input$region) %>%
+                selected_data <- plotDataRe %>% filter(region == input$region) %>%
                     filter(data_type %in% c(input$data_type, input$catchment_selection)) %>% 
                     filter(date >= input$slider_dates[1] & date <= input$slider_dates[2])
             } else {
-                selected_data <- plotData %>% filter(region == input$region) %>%
+                selected_data <- plotDataRe %>% filter(region == input$region) %>%
                     filter(data_type %in% c(input$data_type, input$catchment_selection)) %>% 
-                    bind_rows(plotData %>% filter(region %in% input$region) %>%
+                    bind_rows(plotDataRe %>% filter(region %in% input$region) %>%
                     filter(data_type == 'Wastewater (PMG2)'))  %>%                   
                 filter(date >= input$slider_dates[1] & date <= input$slider_dates[2])
 
@@ -458,9 +458,9 @@ function(input, output, session) {
                  "SG"="Altenrhein", "GR"="Chur",
                  "FR"="Laupen", "TI"="Lugano")
         hover <- input$plot_hover_rww
-        CH_data <- plotData %>% filter(region %in% input$canton) %>%
+        CH_data <- plotDataRe %>% filter(region %in% input$canton) %>%
             filter(data_type %in% 'Wastewater') %>%
-            bind_rows(plotData %>% filter(region %in% input$canton) %>%
+            bind_rows(plotDataRe %>% filter(region %in% input$canton) %>%
                           filter(data_type == 'Wastewater (PMG2)') %>%
                           filter(date > (transition_period[2] - 10))) %>% 
             filter(date >= input$slider_dates_cantonal[1] & date <= input$slider_dates_cantonal[2])
@@ -507,7 +507,7 @@ function(input, output, session) {
                  "SG"="Altenrhein", "GR"="Chur",
                  "FR"="Laupen", "TI"="Lugano")
         hover <- input$plot_hover_rcc
-        point <- nearPoints(plotData %>% filter(region %in% input$canton) %>%
+        point <- nearPoints(plotDataRe %>% filter(region %in% input$canton) %>%
                                 filter(data_type =='Confirmed (Catchment)'), hover, threshold = 5, maxpoints = 1, addDist = TRUE)
         if (nrow(point) == 0) return(NULL)
         

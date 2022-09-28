@@ -2,85 +2,29 @@
 library(tidyverse)
 library(lubridate)
 library(viridis)
+library(zoo)
 
-# Reading in SARS-CoV-2 wastewater data ####
-source("helper_code/reading_in.R") #
+# Reading in data: each helper script has function(s) to read in data set(s) ####
+# Columns in Re data sets must be: region, pathogen_type, data_type, date, median_R_mean, median_R_highHPD, median_R_lowHPD
+# Columns in observation data sets must be: region, pathogen_type, data_type, date, observation, (optional: observation_smooth, orig_data, protocol_status)
 
-# Reading in influenza wastewater data ####
-ww_data_flu <- read_csv("rww_data_flu/ww_loads.csv") %>%
-  rename(date = sample_date, orig_data = is_observation) %>%
-  mutate(quantification_flag = "N/A") %>%
-  mutate(region = case_when(
-    observation_type == "ARA Basel" ~ "BS",
-    observation_type == "ARA Werdhölzli" ~ "ZH",
-    observation_type == "STEP Aire" ~ "GE"
-  )) %>%
-  pivot_longer(cols = c("IAV_(gc/day)", "IBV_(gc/day)"), names_to = "measurement_type", values_to = "measurement") %>%
-  select(date, quantification_flag, orig_data, region, measurement_type, measurement) %>%
-  mutate(pathogen_type = case_when(
-    measurement_type == "IAV_(gc/day)" ~ "IAV",
-    measurement_type == "IBV_(gc/day)" ~ "IBV"
-  )) %>%
-  mutate(protocol_status = "latest")
+source("helper_code/reading_in/reading_in_flu_ili.R")
+source("helper_code/reading_in/reading_in_flu_ww.R")
+source("helper_code/reading_in/reading_in_covid_ww.R")
+source("helper_code/reading_in/reading_in_covid_cases.R")
 
-# Stitching together SARS-CoV-2 and influenza wastewater data ####
-ww_data_all <- ww_data_sars_cov_2 %>%
-  mutate(pathogen_type = "COVID") %>%
-  mutate(protocol_status = case_when(protocol == "PMG2" ~ "latest", T ~ "older")) %>%
-  full_join(ww_data_flu)
+flu_ili_data <- load_flu_ili_all()
+flu_ww_data <- load_flu_ww_all()
+covid_ww_data <- load_covid_ww_all()
+covid_catchment_cases_re <- load_covid_catchment_cases_re()
+covid_cantonal_cases_re <- load_covid_cantonal_cases_re()
 
-# Reading in cantonal Re estimates for SARS-CoV-2 ####
-
-Restimates_url = "https://raw.githubusercontent.com/covid-19-Re/dailyRe-Data/master/CHE-estimates.csv"
-
-Restimates_canton <- read_csv(Restimates_url,
-                              col_names = c('country', 'region','source','data_type',
-                                            'estimate_type','date','median_R_mean',
-                                            'median_R_highHPD','median_R_lowHPD',
-                                            'countryIso3'),
-                              col_types = cols(date = col_date(format = '')),
-                              skip = 1)
-
-Restimates_canton <- Restimates_canton %>% filter(estimate_type == 'Cori_slidingWindow',
-                                                  data_type != 'Confirmed cases / tests',
-                                                  date >= as_date("2020-10-01")) %>%
-  dplyr::select(-estimate_type, -countryIso3, -country, -source) %>%
-  mutate(data_type = recode_factor(data_type, 'Confirmed cases' = 'Confirmed (Canton)'))
-
-# Reading in Rww estimates for influenza ####
-Re_ww_flu <- read_csv("rww_data_flu/ww_re_estimates.csv") %>%
-  mutate(data_type = "Wastewater") %>%
-  mutate(region = case_when(
-    observation_type == "ARA Basel" ~ "BS",
-    observation_type == "ARA Werdhölzli" ~ "ZH",
-    observation_type == "STEP Aire" ~ "GE"
-  )) %>%
-  mutate(pathogen_type = influenza_type) %>%
-  rename(median_R_mean = Re_estimate, median_R_highHPD = CI_up_Re_estimate, 
-         median_R_lowHPD = CI_down_Re_estimate) %>%
-  select(region, data_type, date, median_R_mean, median_R_highHPD, median_R_lowHPD,
-         pathogen_type)
-
-# Reading in Rww and catchment Rcc estimates ####
-
-Re_ww_needed <- read_csv("rww_data/Rww_cantonal.csv")
-Re_ww_needed_pmg <- read_csv("rww_data/Rww_cantonal_pmg.csv")
-Re_cc_needed <- read_csv("rww_data/Rcc_catchment.csv")
-
-# Binding the Re and Rww estimates ####
-
-plotData <- Restimates_canton %>%
-  bind_rows(Re_ww_needed) %>% mutate(data_type = factor(data_type)) %>% # the rww binded
-  mutate(data_type = recode_factor(data_type, "infection_norm_n1" = "Wastewater"))
-
-plotData <- plotData %>%
-  bind_rows(Re_cc_needed) %>% 
-  bind_rows(Re_ww_needed_pmg %>% mutate(data_type = 'Wastewater (PMG2)')) %>% # added this - 'Promega N1
-  mutate(data_type = factor(data_type)) %>% # the rww binded
-  mutate(data_type = recode_factor(data_type, "infection_cases" = "Confirmed (Catchment)")) %>%
-  mutate(pathogen_type = "COVID") %>%
-  bind_rows(Re_ww_flu)
-
+# Binding the Re estimates for all diseases from all data types ####
+plotDataRe <- covid_cantonal_cases_re %>%
+  bind_rows(covid_catchment_cases_re) %>%
+  bind_rows(covid_ww_data$re) %>%
+  bind_rows(flu_ili_data$re) %>%
+  bind_rows(flu_ww_data$re)
 
 # reference:
 ref <- c("ZH"="Zurich" ,  "GE"="Geneva",
@@ -90,8 +34,6 @@ ref <- c("ZH"="Zurich" ,  "GE"="Geneva",
 ref_size <- c("ZH"="471'000" ,  "GE"="454'000",
               "SG"="64'000", "GR"="55'000",
               "FR"="62'000", "TI"="124'000")
-
-global_date_range <- range(ww_data_all$date)
   
 
 # Raw plots ####
@@ -187,7 +129,9 @@ raw_plotter <- function(data, canton, pathogen, date_range, i18n = NA) {
 
 re_plotter <- function(source, canton, pathogen, date_range, i18n = NA) {
   
-  new_data <- plotData %>% filter(region %in% canton, pathogen_type %in% pathogen) %>%
+  new_data <- plotDataRe %>% 
+    filter(region %in% canton) %>%
+    filter(pathogen_type %in% pathogen) %>%
     filter(data_type %in% source)
   
   data_ends <- new_data %>% filter(data_type != 'Wastewater') %>% group_by(data_type) %>% filter(row_number()==n())
@@ -259,7 +203,7 @@ re_plotter <- function(source, canton, pathogen, date_range, i18n = NA) {
   # Add layers to plot for data generated under older protocols
   if (pathogen == "COVID" & 'Wastewater' %in% source) {
     
-    pmg <- plotData %>% filter(region %in% canton) %>%
+    pmg <- plotDataRe %>% filter(region %in% canton) %>%
       filter(data_type == 'Wastewater (PMG2)') %>% filter(date >= date_range[1])
     
     if (range((ww_data_all %>% filter(region == canton) %>%
@@ -302,15 +246,15 @@ re_plotter2 <- function(source, canton, date_range, i18n = NA) {
   source_canton <- source[source %in% c('Confirmed (Canton)')]
   source_without_canton <- source[! source %in% c('Confirmed (Canton)')]
 
-  bern_confirmed <- plotData %>% filter(region == "BE") %>%
+  bern_confirmed <- plotDataRe %>% filter(region == "BE") %>%
     filter(data_type == "Confirmed (Canton)") %>%
     mutate(data_type = recode_factor(data_type, 'Confirmed (Canton)' = 'Confirmed (Bern)'))
 
-  fribourg_confirmed <- plotData %>% filter(region == "FR") %>%
+  fribourg_confirmed <- plotDataRe %>% filter(region == "FR") %>%
     filter(data_type == "Confirmed (Canton)") %>%
     mutate(data_type = recode_factor(data_type, 'Confirmed (Canton)' = 'Confirmed (Fribourg)'))
 
-  new_data <- plotData %>% filter(region %in% canton) %>%
+  new_data <- plotDataRe %>% filter(region %in% canton) %>%
     filter(data_type %in% source_without_canton) %>% filter(date >= date_range[1])
 
   if (length(source_canton)>0) {
@@ -390,7 +334,7 @@ re_plotter2 <- function(source, canton, date_range, i18n = NA) {
    
   # would have to change once we are over the threshold
   if ('Wastewater' %in% source) {
-    pmg <- plotData %>% filter(region %in% canton) %>%
+    pmg <- plotDataRe %>% filter(region %in% canton) %>%
       filter(data_type == 'Wastewater (PMG2)') %>% filter(date >= date_range[1])
     
     
@@ -452,14 +396,14 @@ canton_plotter <- function(source, canton, date_range, i18n = NA) {
   
   
   if (source == 'Wastewater') {
-    CH_data <- plotData %>% filter(region %in% canton) %>%
+    CH_data <- plotDataRe %>% filter(region %in% canton) %>%
       filter(data_type %in% source) %>%
-      bind_rows(plotData %>% filter(region %in% canton) %>%
+      bind_rows(plotDataRe %>% filter(region %in% canton) %>%
                   filter(data_type == 'Wastewater (PMG2)') %>%
                   filter(date > (transition_period[2] - 10))) %>% 
       filter(date >= date_range[1] & date <= date_range[2])
   } else {
-    CH_data <- plotData %>% filter(region %in% canton) %>%
+    CH_data <- plotDataRe %>% filter(region %in% canton) %>%
       filter(data_type %in% source) %>% filter(date >= date_range[1] & date <= date_range[2])
   }
   
