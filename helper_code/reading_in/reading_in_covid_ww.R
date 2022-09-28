@@ -60,13 +60,13 @@ load_covid_ww_data <- function() {
     mutate(pathogen_type = "COVID") %>%
     mutate(protocol_status = case_when(protocol == "PMG2" ~ "latest", T ~ "older")) %>%
     rename(data_type = measurement_type, observation = measurement) %>%
-    select(region, pathogen_type, data_type, date, observation, orig_data, protocol_status)
+    select(region, pathogen_type, data_type, date, observation, orig_data, protocol_status, protocol, quantification_flag)
   
   covid_cantonal_data <- case_data %>%
     mutate(pathogen_type = "COVID", data_type = "Confirmed (Canton)") %>%
     rename(observation = cases, observation_smooth = cases_smooth)
   
-  return(list(covid_ww_data, covid_cantonal_data))
+  return(list("ww" = covid_ww_data, "cantonal_cases" = covid_cantonal_data))
 }
 
 #' Helper function to download and transform wastewater load data for COVID

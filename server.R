@@ -26,10 +26,34 @@ function(input, output, session) {
         i18n$t('Catchments')
     })
     
+    # update available pathogens based on region --------
+    observeEvent(input$region, {
+      options_enabled <- c()
+      options_disabled <- c()
+      
+      covid_regions <- c("ZH", "SG", "GR", "FR", "TI", "GE")
+      if (input$region %in% covid_regions) {
+        options_enabled <- c(options_enabled, "SARS-CoV-2" = "COVID")
+      }
+      
+      flu_regions <- c("ZH", "BS", "GE")
+      if (input$region %in% flu_regions) {
+        options_enabled <- c(options_enabled, "Influenza A Virus" = "IAV", "Influenza B Virus" = "IBV")
+      }
+      
+      output$pathogen <- renderUI({
+        
+        selectInput(inputId = "pathogen",
+                   label = i18n$t("Pathogen:"),
+                   choices = options_enabled,
+                   selected = options_enabled[1])
+        
+      })
+      
+    })
     
     # update available data types based on pathogen --------
     observeEvent(input$pathogen, {
-      # Here is where we update data types available
       if (input$pathogen == "COVID") {
         options_enabled <- c("Wastewater", "Confirmed (Canton)", "Confirmed (Catchment)")
         names(options_enabled) <- c("Wastewater", "Confirmed cases (in canton)", "Confirmed cases (in catchment area)")
@@ -49,7 +73,7 @@ function(input, output, session) {
                            selected = "Wastewater")  # this assumes wastewater is an available data type for all pathogens
       })
       
-      output$disabled <- renderUI({
+      output$disabled_data_types <- renderUI({
         
         disabled(checkboxGroupInput(inputId = "data_type_disabled",
                                     label = NULL,
@@ -60,27 +84,15 @@ function(input, output, session) {
     })
 
     # control slider dates --------
-
-    # what is causing the problem of selection
-    # observe({
-    # })
-
-    # for Chur, no catchment selection ------
     observeEvent(input$region, {
         # Control the value, min, max according to region selected
         # min according to ww data min for catchment area
-        date_range <- c(range((ww_data %>% filter(region == input$region) %>%
+        date_range <- c(range((plotDataWW %>% filter(region == input$region) %>%
                                    select(date))[["date"]])[1],
                         Sys.Date())
         # this is what is causing flickering for region
         updateSliderInput(session, "slider_dates", value = date_range,
                          min = date_range[1], max = Sys.Date())
-
-        # if(input$region == 'GR'){
-        #     shinyjs::disable(id = "catchment_selection")
-        # }else{
-        #     shinyjs::enable(id = "catchment_selection")
-        # }
     })
 
     # Plotting cases -------
@@ -88,15 +100,17 @@ function(input, output, session) {
         {
             # from all the case plots, it picks region
             # as per drop down menu
-            case <- case_plotter(case_data, input$region, input$slider_dates, i18n)
+            case <- case_plotter(data = plotDataObs, canton = input$region, pathogen = input$pathogen, date_range = input$slider_dates, i18n = i18n)
             case
         }
     )
     # Hover info
     output$hover_info_case <- renderUI({
         hover_case <- input$plot_hover_case
-        point <- nearPoints(case_data %>% filter(region == input$region) %>% 
-                                filter(date >= input$slider_dates[1] & date <= input$slider_dates[2]),
+        select_data <- plotDataObs %>%
+          filter(region == input$region, pathogen_type == input$pathogen) %>%
+          filter(date >= input$slider_dates[1] & date <= input$slider_dates[2]) 
+        point <- nearPoints(select_data,
                             hover_case, threshold = 4, maxpoints = 1, addDist = TRUE)
         if (nrow(point) == 0) return(NULL)
         
@@ -113,13 +127,13 @@ function(input, output, session) {
         wellPanel(
             style = style,
             p(HTML(paste0("<i>", point$date, "</i>", "<br/>",
-                          "<b>", i18n$t("Confirmed cases"),"</b>: ", round(point$cases, 2), "<br/>")))
+                          "<b>", i18n$t("Observation"),"</b>: ", round(point$observation, 2), "<br/>")))
         )
     })
     # Plotting raw RNA copies -------
     output$raw_plots <- renderPlot(
         {
-            raw <- raw_plotter(ww_data_all, input$region, input$pathogen, input$slider_dates, i18n)
+            raw <- raw_plotter(data = plotDataWW, canton = input$region, pathogen = input$pathogen, date_range = input$slider_dates, i18n = i18n)
             raw
         }
     )
@@ -128,13 +142,13 @@ function(input, output, session) {
         hover_raw <- input$plot_hover_raw
         # TODO
         # this would need to change based on reading_in changes
-        select_data <- ww_data_all %>% 
-            mutate(measurement = measurement/10^12) %>% filter(region == input$region, pathogen_type == input$pathogen)  %>%
+        select_data <- plotDataWW %>% 
+            mutate(observation = observation/10^12) %>% filter(region == input$region, pathogen_type == input$pathogen)  %>%
             filter(date >= input$slider_dates[1] & date <= input$slider_dates[2]) 
         
         point <- nearPoints(select_data,
                             hover_raw, threshold = 8, maxpoints = 1, addDist = TRUE,
-                            xvar = 'date', yvar = 'measurement')
+                            xvar = 'date', yvar = 'observation')
         if (nrow(point) == 0) return(NULL)
         
         left_px <- hover_raw$coords_css$x
@@ -147,7 +161,7 @@ function(input, output, session) {
         wellPanel(
             style = style,
             p(HTML(paste0("<i>", point$date, "</i>", "<br/>",
-                          "<b>", i18n$t("Gene copies"),"</b> (x10<sup>12</sup>): ", round(point$measurement, 2), "<br/>",
+                          "<b>", i18n$t("Gene copies"),"</b> (x10<sup>12</sup>): ", round(point$observation, 2), "<br/>",
                           "<i>(", i18n$t(as.character(point$quantification_flag)), ")</i>", "<br/>",
                           "<i>(",'Protocol: ',point$protocol ,")</i>")))
         )
@@ -159,7 +173,7 @@ function(input, output, session) {
                 re <- re_plotter2(c(input$data_type, input$catchment_selection), input$region, input$slider_dates, i18n) # call plotter 2: 2 cantons!
             }
             else {
-                re <- re_plotter(source = c(input$data_type, input$catchment_selection), canton = input$region, 
+                re <- re_plotter(data = plotDataRe, source = c(input$data_type, input$catchment_selection), canton = input$region, 
                                 pathogen = input$pathogen, date_range = input$slider_dates, i18n = i18n)
             }
             re
@@ -168,7 +182,7 @@ function(input, output, session) {
     
     output$hover_info_re <- renderUI({
         hover <- input$plot_hover_re
-        date_range <- range((ww_data_all %>% filter(region == input$region) %>% select(date))[["date"]]) # only look at valid region.
+        date_range <- range((plotDataRe %>% filter(region == input$region, pathogen_type == input$pathogen) %>% select(date))[["date"]]) # only look at valid region.
         # NB as some places have chunks cut out... Chur and Lugano.
         # special treatment: Laupen - has both Fribourg and Bern! ------
         if (input$region == "FR") {
@@ -197,11 +211,11 @@ function(input, output, session) {
         }
         else {
             if (! 'Wastewater' %in% input$data_type) {
-                selected_data <- plotDataRe %>% filter(region == input$region) %>%
+                selected_data <- plotDataRe %>% filter(region == input$region, pathogen_type == input$pathogen) %>%
                     filter(data_type %in% c(input$data_type, input$catchment_selection)) %>% 
                     filter(date >= input$slider_dates[1] & date <= input$slider_dates[2])
             } else {
-                selected_data <- plotDataRe %>% filter(region == input$region) %>%
+                selected_data <- plotDataRe %>% filter(region == input$region, pathogen_type == input$pathogen) %>%
                     filter(data_type %in% c(input$data_type, input$catchment_selection)) %>% 
                     bind_rows(plotDataRe %>% filter(region %in% input$region) %>%
                     filter(data_type == 'Wastewater (PMG2)'))  %>%                   
@@ -458,9 +472,9 @@ function(input, output, session) {
                  "SG"="Altenrhein", "GR"="Chur",
                  "FR"="Laupen", "TI"="Lugano")
         hover <- input$plot_hover_rww
-        CH_data <- plotDataRe %>% filter(region %in% input$canton) %>%
+        CH_data <- plotDataWW %>% filter(region %in% input$canton) %>%
             filter(data_type %in% 'Wastewater') %>%
-            bind_rows(plotDataRe %>% filter(region %in% input$canton) %>%
+            bind_rows(plotDataWW %>% filter(region %in% input$canton) %>%
                           filter(data_type == 'Wastewater (PMG2)') %>%
                           filter(date > (transition_period[2] - 10))) %>% 
             filter(date >= input$slider_dates_cantonal[1] & date <= input$slider_dates_cantonal[2])
@@ -597,12 +611,12 @@ function(input, output, session) {
         },
         # content is a function with argument file. content writes the plot to the device
         content = function(file) {
-            case <- case_plotter(case_data, input$region, input$slider_dates, i18n)
-            raw <- raw_plotter(ww_data_all, input$region, input$pathogen, input$slider_dates, i18n)
+            case <- case_plotter(plotDataObs, input$region, input$pathogen, input$slider_dates, i18n)
+            raw <- raw_plotter(plotDataWW, input$region, input$pathogen, input$slider_dates, i18n)
             if (input$region == "FR") {
                 re <- re_plotter2(c(input$data_type, input$catchment_selection), input$region, input$slider_dates, i18n) # call plotter 2: 2 cantons!
             } else {
-                re <- re_plotter(c(input$data_type, input$catchment_selection), input$region, input$pathogen, input$slider_dates, i18n)
+                re <- re_plotter(plotDataRe, c(input$data_type, input$catchment_selection), input$region, input$pathogen, input$slider_dates, i18n)
             }
             p <- patchwork::wrap_plots(case,raw,re, nrow = 3)+
                 plot_annotation(caption = paste0('Generated on: ',Sys.Date(),
