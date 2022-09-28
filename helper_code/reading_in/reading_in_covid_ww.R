@@ -16,7 +16,7 @@ load_covid_ww_re <- function(
   covid_ww_re <- Re_ww_needed %>% 
     mutate(data_type = factor(data_type)) %>%
     mutate(data_type = recode_factor(data_type, "infection_norm_n1" = "Wastewater")) %>%
-    bind_rows(Re_ww_needed_pmg %>% mutate(data_type = 'Wastewater (PMG2)')) %>%
+    bind_rows(Re_ww_needed_pmg %>% mutate(data_type = 'Wastewater')) %>%
     mutate(pathogen_type = "COVID")
   
   return(covid_ww_re)  # formerly called Re_cc_needed
@@ -80,8 +80,7 @@ ww_read_in <- function(data_url, region) {
   
   new_case_data <- raw_data %>% select(date, cases, cases_smooth) %>% 
     complete(date = seq.Date(min(date), max(date), by = 'days')) %>% # 
-    mutate(region = region) #%>%  # no interpolation
-  #mutate(cases = ifelse(!is.na(cases), cases, 0))
+    mutate(region = region)
   
   new_ww_data <- raw_data %>% filter(!is.na(n1)) %>%
     mutate(orig_data = TRUE) %>%

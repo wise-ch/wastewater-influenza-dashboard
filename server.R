@@ -169,13 +169,8 @@ function(input, output, session) {
     # Plotting Rww+Re for other sources --------
     output$re_plots <- renderPlot(
         {
-            if (input$region == "FR") {
-                re <- re_plotter2(c(input$data_type, input$catchment_selection), input$region, input$slider_dates, i18n) # call plotter 2: 2 cantons!
-            }
-            else {
-                re <- re_plotter(data = plotDataRe, source = c(input$data_type, input$catchment_selection), canton = input$region, 
+            re <- re_plotter(data = plotDataRe, source = input$data_type, canton = input$region, 
                                 pathogen = input$pathogen, date_range = input$slider_dates, i18n = i18n)
-            }
             re
         }
     )
@@ -186,7 +181,7 @@ function(input, output, session) {
         # NB as some places have chunks cut out... Chur and Lugano.
         # special treatment: Laupen - has both Fribourg and Bern! ------
         if (input$region == "FR") {
-            source <- c(input$data_type, input$catchment_selection)
+            source <- input$data_type
             source_canton <- source[source %in% c('Confirmed (Canton)')]
             source_without_canton <- source[! source %in% c('Confirmed (Canton)')]
             
@@ -212,11 +207,11 @@ function(input, output, session) {
         else {
             if (! 'Wastewater' %in% input$data_type) {
                 selected_data <- plotDataRe %>% filter(region == input$region, pathogen_type == input$pathogen) %>%
-                    filter(data_type %in% c(input$data_type, input$catchment_selection)) %>% 
+                    filter(data_type %in% input$data_type) %>% 
                     filter(date >= input$slider_dates[1] & date <= input$slider_dates[2])
             } else {
                 selected_data <- plotDataRe %>% filter(region == input$region, pathogen_type == input$pathogen) %>%
-                    filter(data_type %in% c(input$data_type, input$catchment_selection)) %>% 
+                    filter(data_type %in% input$data_type) %>% 
                     bind_rows(plotDataRe %>% filter(region %in% input$region) %>%
                     filter(data_type == 'Wastewater (PMG2)'))  %>%                   
                 filter(date >= input$slider_dates[1] & date <= input$slider_dates[2])
@@ -310,7 +305,7 @@ function(input, output, session) {
                           "<br/>",
                           "Source: ", point$source, 
                           "<br/>",
-                          "<i>(", ref[[point$region]], ")</i>")))
+                          "<i>(", canton_to_catchment[[point$region]], ")</i>")))
         )
     })
     output$hover_info_variant_sg <- renderUI({
@@ -337,7 +332,7 @@ function(input, output, session) {
                           "<br/>",
                           "Source: ", point$source, 
                           "<br/>",
-                          "<i>(", ref[[point$region]], ")</i>")))
+                          "<i>(", canton_to_catchment[[point$region]], ")</i>")))
         )
     })
     output$hover_info_variant_gr <- renderUI({
@@ -364,7 +359,7 @@ function(input, output, session) {
                           "<br/>",
                           "Source: ", point$source, 
                           "<br/>",
-                          "<i>(", ref[[point$region]], ")</i>")))
+                          "<i>(", canton_to_catchment[[point$region]], ")</i>")))
         )
     })
     output$hover_info_variant_fr <- renderUI({
@@ -391,7 +386,7 @@ function(input, output, session) {
                           "<br/>",
                           "Source: ", point$source, 
                           "<br/>",
-                          "<i>(", ref[[point$region]], ")</i>")))
+                          "<i>(", canton_to_catchment[[point$region]], ")</i>")))
         )
     })
     output$hover_info_variant_ti <- renderUI({
@@ -418,7 +413,7 @@ function(input, output, session) {
                           "<br/>",
                           "Source: ", point$source, 
                           "<br/>",
-                          "<i>(", ref[[point$region]], ")</i>")))
+                          "<i>(", canton_to_catchment[[point$region]], ")</i>")))
         )
     })
     output$hover_info_variant_ge <- renderUI({
@@ -445,7 +440,7 @@ function(input, output, session) {
                           "<br/>",
                           "Source: ", point$source, 
                           "<br/>",
-                          "<i>(", ref[[point$region]], ")</i>")))
+                          "<i>(", canton_to_catchment[[point$region]], ")</i>")))
         )
     })
     
@@ -469,23 +464,12 @@ function(input, output, session) {
     )
     
     output$hover_info_rww <- renderUI({
-        ref <- c("ZH"="Zurich" ,  "GE"="Geneva",
-                 "SG"="Altenrhein", "GR"="Chur",
-                 "FR"="Laupen", "TI"="Lugano")
         hover <- input$plot_hover_rww
-        CH_data <- plotDataRe %>% filter(region %in% input$canton, pathogen_type == input$pathogen) %>%
-            filter(data_type %in% 'Wastewater')
-        if (input$pathogen == "COVID") {
-          CH_data <- CH_data %>%
-            bind_rows(plotDataRe %>% filter(region %in% input$canton, pathogen_type == input$pathogen) %>%
-                          filter(data_type == 'Wastewater (PMG2)') %>%
-                          filter(date > (transition_period[2] - 10)))
-        }
-        CH_data <- CH_data %>% 
+        select_data <- plotDataRe %>% filter(region %in% input$canton, pathogen_type == input$pathogen) %>%
+            filter(data_type %in% 'Wastewater') %>% 
             filter(date >= input$slider_dates_cantonal[1] & date <= input$slider_dates_cantonal[2])
         
-        
-        point <- nearPoints(CH_data, hover, threshold = 5, maxpoints = 1, addDist = TRUE)
+        point <- nearPoints(select_data, hover, threshold = 5, maxpoints = 1, addDist = TRUE)
         if (nrow(point) == 0) return(NULL)
         
         left_px <- hover$coords_css$x
@@ -501,7 +485,7 @@ function(input, output, session) {
                           "<b> R<sub>e</sub>: </b>", round(point$median_R_mean, 2),
                           " (", round(point$median_R_lowHPD, 2),", ", round(point$median_R_highHPD, 2), ")",
                           "<br/>",
-                          "<i>(", ref[[point$region]], ")</i>")))
+                          "<i>(", canton_to_catchment[[point$region]], ")</i>")))
         )
     })
     
@@ -522,9 +506,6 @@ function(input, output, session) {
     )
     
     output$hover_info_rcc <- renderUI({
-        ref <- c("ZH"="Zurich" ,  "GE"="Geneva",
-                 "SG"="Altenrhein", "GR"="Chur",
-                 "FR"="Laupen", "TI"="Lugano")
         hover <- input$plot_hover_rcc
         point <- nearPoints(plotDataRe %>% filter(region %in% input$canton) %>%
                                 filter(data_type =='Confirmed (Catchment)'), hover, threshold = 5, maxpoints = 1, addDist = TRUE)
@@ -543,15 +524,9 @@ function(input, output, session) {
                           "<b> R<sub>e</sub>: </b>", round(point$median_R_mean, 2),
                           " (", round(point$median_R_lowHPD, 2),", ", round(point$median_R_highHPD, 2), ")",
                           "<br/>",
-                          "<i>(", ref[[point$region]], ")</i>")))
+                          "<i>(", canton_to_catchment[[point$region]], ")</i>")))
         )
     })
-    
-    # output$chur_catchment_disc <- renderUI({
-    #     p(HTML(paste0(strong('NB: '),
-    #                   i18n$t('The estimated R<sub>e</sub> for confirmed cases in the Chur catchment area is currently not available due to a potential data quality issue.'))),
-    #       style="font-size: 95%;")
-    # })
     
     output$death_hosp_info <- renderUI({
       p(
@@ -560,7 +535,6 @@ function(input, output, session) {
                 ) ) # i18 the disc
     })
     
-    #disc_protocol <- 'The grey shaded regions represent a switch in protocol used for the wastewater sample preparation. During this period, the old and new protocols (v3.1 and Promega respectively) were run simultaneously (10-11-2021 to 30-11-2021). The R<sub>e</sub> for the new protocol takes around 3 weeks to stabilise (31-10-2021 to 20-11-2021). Further details of the protocol switch are described '
     disc_protocol <- "The grey shaded regions represent a switch in protocol used for the wastewater sample preparation. During this period, the old and new protocols (v3.1 and Promega respectively) were run simultaneously (10-11-2021 to 30-11-2021). The R<sub>e</sub> for the new protocol takes around 3 weeks to stabilise (31-10-2021 to 20-11-2021). Further details of the protocol switch are described <a href='https://sensors-eawag.ch/sars/overview.html'>here</a>."
     output$other_disclaimers <- renderUI({
         p(
@@ -573,11 +547,8 @@ function(input, output, session) {
     # text below plot for more info ---------
     output$link <- renderUI({
         
-        disc_omicron <- p(strong('NB: '),HTML(i18n$t("We are currently investigating potential data inconsistencies in recent wastewater data due to differences in the shedding load of Omicron, therefore interpret recent wastewater R<sub>e</sub> estimates with caution. Further details can be found <a href='https://lfpress.com/news/local-news/omicron-not-showing-up-in-wastewater-the-way-delta-did-despite-surging-case-counts'>here</a>.")),
-                  .noWS = c("after-begin", "before-end"), style="margin-bottom:0;font-size: 95%;font-weight: normal;")
-        
         link <- p(i18n$t("The raw measurements of SARS-CoV-2 in wastewater for this location are available "),
-                  a(href = paste0("https://sensors-eawag.ch/sars/",tolower(ref[[input$region]]),".html"), i18n$t("here"), .noWS = "outside"),
+                  a(href = paste0("https://sensors-eawag.ch/sars/",tolower(canton_to_catchment[[input$region]]),".html"), i18n$t("here"), .noWS = "outside"),
                   ".",
                   .noWS = c("after-begin", "before-end"), style="margin-bottom:0;font-size: 95%;")
         
@@ -588,14 +559,7 @@ function(input, output, session) {
                               .noWS = c("after-begin", "before-end"), style="margin-bottom:0;font-size: 95%;")
         }
         
-        lod_loq <- p(i18n$t("**Limit of detection (LOD) represents concentration levels at which SARS-CoV-2 can be reliably detected, while limit of quantification (LOQ) represents concentration levels with prespecified precision of detection. <LOD indicates values below the LOD; >LOD represents values below the LOQ, but above the LOD. These values have higher uncertainty, as the number of gene copies is very low. >LOQ indicates reliable values which are above the LOQ."),
-                     style = 'margin-bottom:0;font-size: 95%;')
-        
-        
-        #chur_catchment <- p(strong('NB: '),'The estimated R<sub>e</e> for confirmed cases in the Chur catchment area is
-        #                    currently not available due to a potential data quality issue.', style="margin-bottom:0;font-size: 95%;")
-        
-        exclude_lod <- p(HTML(paste0(strong('NB: '),i18n$t('Wastewater measurements from 02.2021 to 07.03.2021 for '), ref[[input$region]],
+        exclude_lod <- p(HTML(paste0(strong('NB: '),i18n$t('Wastewater measurements from 02.2021 to 07.03.2021 for '), canton_to_catchment[[input$region]],
                                      i18n$t(' have been excluded due to multiple consecutive measurements falling below the limit of quantification and/or detection, which affects the reliability of the raw measurements and the wastewater R<sub>e</sub> estimates.'))),
                          style="margin-bottom:0;font-size: 95%;")
         
@@ -603,25 +567,25 @@ function(input, output, session) {
                              style="margin-bottom:0;font-size: 95%;")
         
         
-        if (input$region == 'GR') HTML(paste(disc_omicron, link, lod_loq, exclude_lod, sep = ""))
-        else if (input$region == 'FR') HTML(paste(disc_omicron, link, lod_loq, laupen_2cantons, sep = ""))
-        else if (input$region == 'TI') HTML(paste(disc_omicron, link, lod_loq, exclude_lod, sep = ""))
-        else HTML(paste(disc_omicron, link, lod_loq, sep = ""))
+        if (input$region == 'GR') HTML(paste(link, exclude_lod, sep = ""))
+        else if (input$region == 'FR') HTML(paste(link, laupen_2cantons, sep = ""))
+        else if (input$region == 'TI') HTML(paste(link, exclude_lod, sep = ""))
+        else HTML(paste(link, sep = ""))
     })
     
     # download the plot ------
     output$downloadPlot <- downloadHandler(
         filename =  function() {
-            paste0("Catchment_", ref[[input$region]], ".pdf")
+            paste0("Catchment_", canton_to_catchment[[input$region]], ".pdf")
         },
         # content is a function with argument file. content writes the plot to the device
         content = function(file) {
             case <- case_plotter(plotDataObs, input$region, input$pathogen, input$slider_dates, i18n)
             raw <- raw_plotter(plotDataWW, input$region, input$pathogen, input$slider_dates, i18n)
             if (input$region == "FR") {
-                re <- re_plotter2(c(input$data_type, input$catchment_selection), input$region, input$slider_dates, i18n) # call plotter 2: 2 cantons!
+                re <- re_plotter2(input$data_type, input$region, input$slider_dates, i18n) # call plotter 2: 2 cantons!
             } else {
-                re <- re_plotter(plotDataRe, c(input$data_type, input$catchment_selection), input$region, input$pathogen, input$slider_dates, i18n)
+                re <- re_plotter(plotDataRe, input$data_type, input$region, input$pathogen, input$slider_dates, i18n)
             }
             p <- patchwork::wrap_plots(case,raw,re, nrow = 3)+
                 plot_annotation(caption = paste0('Generated on: ',Sys.Date(),

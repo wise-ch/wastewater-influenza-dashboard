@@ -18,7 +18,7 @@ navbarPageWithInputs <- function(..., inputs) {
   navbar
 }
 
-navbarPageWithInputs("Covid-19: Wastewater Re",
+navbarPageWithInputs("Wastewater Re",
            # a page with a navigation bar
            # HOME ####
            tabPanel(title = uiOutput("title_panel"),
@@ -84,8 +84,8 @@ navbarPageWithInputs("Covid-19: Wastewater Re",
                                 shinyWidgets::setSliderColor(color = rep("#5dc863FF", 2), 1:2), # for some reason, this is not working?
                                 #shinyWidgets::chooseSliderSkin("Flat", color = "#5dc863FF"),
                                 sliderInput("slider_dates", label = NULL, width = '950px',
-                                            min = global_date_range[1], max = Sys.Date(), 
-                                            value = c(global_date_range[1], Sys.Date())
+                                            min = min(plotDataRe$date), max = Sys.Date(), 
+                                            value = c(min(plotDataRe$date), Sys.Date())
                                 ),
                                 p(HTML(paste0('<em>', i18n$t('(The start and end date of the time interval to be displayed can be changed by moving the slider above.)'),'</em>')),
                                   style = 'margin-bottom:0;font-size: 90%;'),
@@ -104,8 +104,10 @@ navbarPageWithInputs("Covid-19: Wastewater Re",
                                                label = i18n$t("Catchment (select to compare):"),
                                                choices = c("Zurich" = "ZH",
                                                            "Geneva" = "GE",
-                                                           "Altenrhein" = "SG", "Chur" = "GR",
-                                                           "Laupen" = "FR", "Lugano" = "TI"),
+                                                           "Altenrhein" = "SG",
+                                                           "Chur" = "GR",
+                                                           "Laupen" = "FR",
+                                                           "Lugano" = "TI"),
                                                selected = c('ZH', 'GE',
                                                             'SG', 'GR',
                                                             'FR', 'TI')),
