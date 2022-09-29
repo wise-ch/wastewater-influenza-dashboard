@@ -112,17 +112,20 @@ function(input, output, session) {
     # Plotting cases -------
     output$case_plots <- renderPlot(
         {
-            # from all the case plots, it picks region
-            # as per drop down menu
-            case <- case_plotter(data = plotDataObs, canton = input$region, 
-                                 pathogen = input$pathogen, date_range = input$slider_dates,
-                                 i18n = i18n)
-            case
+          # Make sure pathogen has been selected
+          req(input$pathogen)
+          # from all the case plots, it picks region
+          # as per drop down menu
+          case <- case_plotter(data = plotDataObs, canton = input$region, 
+                               pathogen = input$pathogen, date_range = input$slider_dates,
+                               i18n = i18n)
+          case
         }
     )
     
     # Hover info
     output$hover_info_case <- renderUI({
+        req(input$pathogen)
         hover_case <- input$plot_hover_case
         select_data <- plotDataObs %>%
           filter(region == input$region, pathogen_type == input$pathogen) %>%
@@ -151,12 +154,14 @@ function(input, output, session) {
     # Plotting raw RNA copies -------
     output$raw_plots <- renderPlot(
         {
+          req(input$pathogen)
             raw <- raw_plotter(data = plotDataWW, canton = input$region, pathogen = input$pathogen, date_range = input$slider_dates, i18n = i18n)
             raw
         }
     )
     
     output$hover_info_raw <- renderUI({
+      req(input$pathogen)
         hover_raw <- input$plot_hover_raw
 
         select_data <- plotDataWW %>% 
@@ -187,6 +192,7 @@ function(input, output, session) {
     # Plotting Rww+Re for other sources --------
     output$re_plots <- renderPlot(
         {
+          req(input$pathogen)
             re <- re_plotter(data = plotDataRe, source = input$data_type, canton = input$region, 
                                 pathogen = input$pathogen, date_range = input$slider_dates, i18n = i18n)
             re
@@ -194,6 +200,7 @@ function(input, output, session) {
     )
     
     output$hover_info_re <- renderUI({
+      req(input$pathogen)
         hover <- input$plot_hover_re
 
         select_data <- plotDataRe %>% 
