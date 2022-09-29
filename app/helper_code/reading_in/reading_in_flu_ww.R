@@ -6,7 +6,7 @@ load_flu_ww_all <- function() {
 
 #' Read in IAV and IBV Re based on wastewater
 #' @return Data frame with columns: region, pathogen_type, data_type, date, median_R_mean, median_R_highHPD, median_R_lowHPD
-load_flu_ww_re <- function(path_to_data = "rww_data_flu/ww_re_estimates.csv") {
+load_flu_ww_re <- function(path_to_data = "data/influenza/ww_re_estimates.csv") {
   flu_ww_re <- read_csv(path_to_data) %>%
     mutate(data_type = "Wastewater") %>%
     mutate(region = case_when(
@@ -29,7 +29,7 @@ load_flu_ww_re <- function(path_to_data = "rww_data_flu/ww_re_estimates.csv") {
 
 #' Read in data on IAV and IBV from wastewater
 #' @return Data frame with columns: region, pathogen_type, data_type, date, observation, (optional: observation_smooth, orig_data, protocol_status)
-load_flu_ww_data <- function(path_to_data = "rww_data_flu/ww_loads.csv") {
+load_flu_ww_data <- function(path_to_data = "data/influenza/ww_loads.csv") {
   flu_ww_data_raw <- read_csv(path_to_data)
   flu_ww_data <- flu_ww_data_raw %>%
     rename(date = sample_date, orig_data = is_observation) %>%

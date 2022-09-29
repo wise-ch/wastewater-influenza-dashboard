@@ -1,6 +1,6 @@
 #' Read in COVID Re based on confirmed cases in the catchment
 #' @return Data frame with columns: region, pathogen_type, data_type, date, median_R_mean, median_R_highHPD, median_R_lowHPD
-load_covid_catchment_cases_re <- function(path_to_data = "rww_data/Rcc_catchment.csv") {
+load_covid_catchment_cases_re <- function(path_to_data = "data/sars_cov_2/Rcc_catchment.csv") {
   covid_catchment_re <- read_csv(path_to_data) %>%
     mutate(pathogen_type = "COVID") %>%
     mutate(data_type = factor(data_type)) %>%

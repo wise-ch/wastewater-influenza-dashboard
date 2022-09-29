@@ -6,7 +6,7 @@ load_flu_ili_all <- function() {
 
 #' Read in infuenza Re based on doctor consultations for influenza-like-ilnness reported in the national Sentinella system
 #' @return Data frame with columns: region, pathogen_type, data_type, date, median_R_mean, median_R_highHPD, median_R_lowHPD
-load_flu_ili_re <- function(path_to_data = "rww_data_flu/case_re_estimates.csv") {
+load_flu_ili_re <- function(path_to_data = "data/influenza/case_re_estimates.csv") {
   flu_ili_re_tmp <- read_csv(path_to_data) %>%
     mutate(data_type = "Influenza-like illness consultations (National)") %>%
     rename(
@@ -32,7 +32,7 @@ load_flu_ili_re <- function(path_to_data = "rww_data_flu/case_re_estimates.csv")
 
 #' Read in data on IAV and IBV from wastewater
 #' @return Data frame with columns: region, pathogen_type, data_type, date, observation, (optional: observation_smooth, orig_data, protocol_status)
-load_flu_ili_data <- function(path_to_data = "rww_data_flu/Inzidenz_Grippeverdacht.csv") {
+load_flu_ili_data <- function(path_to_data = "data/influenza/Inzidenz_Grippeverdacht.csv") {
   flu_ili_data_raw <- read_csv(path_to_data)
   flu_ili_data_tmp <- flu_ili_data_raw %>%
     mutate(year_week = paste(Jahr, `Sentinella Woche`, "0", sep = "-")) %>%

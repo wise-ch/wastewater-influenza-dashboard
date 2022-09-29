@@ -6,8 +6,8 @@ load_covid_ww_all <- function() {
 
 #' Read in COVID Re based on wastewater
 #' @return Data frame with columns: region, pathogen_type, data_type, date, median_R_mean, median_R_highHPD, median_R_lowHPD
-load_covid_ww_re <- function(path_to_data = "rww_data/Rww_cantonal.csv",
-                             path_to_pmg_data = "rww_data/Rww_cantonal_pmg.csv") {
+load_covid_ww_re <- function(path_to_data = "data/sars_cov_2/Rww_cantonal.csv",
+                             path_to_pmg_data = "data/sars_cov_2/Rww_cantonal_pmg.csv") {
   Re_ww_needed <- read_csv(path_to_data)
   Re_ww_needed_pmg <- read_csv(path_to_pmg_data) # estimates after switching to promega kit
 
