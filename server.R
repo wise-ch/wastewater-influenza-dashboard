@@ -10,7 +10,7 @@ i18n <- Translator$new(translation_json_path = "texts/translations.json")
 
 Sys.setlocale("LC_TIME", "en_GB.UTF-8")
 function(input, output, session) {
-    # update language based on setting --------
+    # Update language based on setting --------
     observeEvent(input$lang, {
         # Here is where we update language in session
         shiny.i18n::update_lang(session, input$lang)
@@ -21,12 +21,12 @@ function(input, output, session) {
         Sys.setlocale("LC_TIME", lang_ref[[input$lang]])
 
     })
-    # update title translation
+    # Update title translation
     output$title_panel = renderText({
         i18n$t('Catchments')
     })
     
-    # update available pathogens based on region --------
+    # Update available pathogens based on region --------
     observeEvent(input$region, {
       options_enabled <- c()
       options_disabled <- c()
@@ -44,7 +44,7 @@ function(input, output, session) {
       output$pathogen <- renderUI({
         
         selectInput(inputId = "pathogen",
-                   label = i18n$t("Pathogen:"),
+                   label = i18n$t("Select pathogen:"),
                    choices = options_enabled,
                    selected = options_enabled[1])
         
@@ -52,23 +52,37 @@ function(input, output, session) {
       
     })
     
-    # update available data types based on pathogen --------
+    # Update available data types based on pathogen --------
     observeEvent(input$pathogen, {
       if (input$pathogen == "COVID") {
-        options_enabled <- c("Wastewater", "Confirmed (Canton)", "Confirmed (Catchment)")
-        names(options_enabled) <- c("Wastewater", "Confirmed cases (in canton)", "Confirmed cases (in catchment area)")
-        options_disabled <- c('Deaths', 'Hospitalized patients')
-        names(options_disabled) <- i18n$t(c('Deaths*', 'Hospitalized patients*'))
+        options_enabled <- c(
+          "Wastewater",
+          "Confirmed (Canton)",
+          "Confirmed (Catchment)")
+        names(options_enabled) <- c(
+          "Wastewater",
+          "Confirmed cases (in canton)",
+          "Confirmed cases (in catchment area)")
+        options_disabled <- c(
+          'Deaths',
+          'Hospitalized patients')
+        names(options_disabled) <- i18n$t(c(
+          'Deaths*',
+          'Hospitalized patients*'))
       } else if (input$pathogen %in% c("IAV", "IBV")) {
-        options_enabled <- c("Wastewater", "Influenza-like illness consultations (National)")
-        names(options_enabled) <- c("Wastewater", "Influenza-like illness consultations (National)")
+        options_enabled <- c(
+          "Wastewater",
+          "Influenza-like illness consultations (National)")
+        names(options_enabled) <- c(
+          "Wastewater",
+          "Influenza-like illness consultations (National)")
         options_disabled <- c()
       }
       
       output$data_type <- renderUI({
         
         checkboxGroupInput(inputId = "data_type",
-                           label = i18n$t("Data Source (select to compare):"),
+                           label = i18n$t("Data source (select to compare):"),
                            choices = options_enabled,
                            selected = "Wastewater")  # this assumes wastewater is an available data type for all pathogens
       })
@@ -83,7 +97,7 @@ function(input, output, session) {
       
     })
 
-    # control slider dates --------
+    # Control slider dates --------
     observeEvent(input$region, {
         # Control the value, min, max according to region selected
         # min according to ww data min for catchment area
@@ -100,10 +114,13 @@ function(input, output, session) {
         {
             # from all the case plots, it picks region
             # as per drop down menu
-            case <- case_plotter(data = plotDataObs, canton = input$region, pathogen = input$pathogen, date_range = input$slider_dates, i18n = i18n)
+            case <- case_plotter(data = plotDataObs, canton = input$region, 
+                                 pathogen = input$pathogen, date_range = input$slider_dates,
+                                 i18n = i18n)
             case
         }
     )
+    
     # Hover info
     output$hover_info_case <- renderUI({
         hover_case <- input$plot_hover_case
@@ -130,6 +147,7 @@ function(input, output, session) {
                           "<b>", i18n$t("Observation"),"</b>: ", round(point$observation, 2), "<br/>")))
         )
     })
+    
     # Plotting raw RNA copies -------
     output$raw_plots <- renderPlot(
         {
@@ -140,8 +158,7 @@ function(input, output, session) {
     
     output$hover_info_raw <- renderUI({
         hover_raw <- input$plot_hover_raw
-        # TODO
-        # this would need to change based on reading_in changes
+
         select_data <- plotDataWW %>% 
             mutate(observation = observation/10^12) %>% filter(region == input$region, pathogen_type == input$pathogen)  %>%
             filter(date >= input$slider_dates[1] & date <= input$slider_dates[2]) 
@@ -166,6 +183,7 @@ function(input, output, session) {
                           "<i>(",'Protocol: ',point$protocol ,")</i>")))
         )
     })
+    
     # Plotting Rww+Re for other sources --------
     output$re_plots <- renderPlot(
         {
@@ -177,50 +195,14 @@ function(input, output, session) {
     
     output$hover_info_re <- renderUI({
         hover <- input$plot_hover_re
-        date_range <- range((plotDataRe %>% filter(region == input$region, pathogen_type == input$pathogen) %>% select(date))[["date"]]) # only look at valid region.
-        # NB as some places have chunks cut out... Chur and Lugano.
-        # special treatment: Laupen - has both Fribourg and Bern! ------
-        if (input$region == "FR") {
-            source <- input$data_type
-            source_canton <- source[source %in% c('Confirmed (Canton)')]
-            source_without_canton <- source[! source %in% c('Confirmed (Canton)')]
-            
-            bern_confirmed <- plotDataRe %>% filter(region == "BE") %>%
-                filter(data_type == "Confirmed (Canton)") %>%
-                mutate(data_type = recode_factor(data_type, 'Confirmed (Canton)' = 'Confirmed (Bern)'))
-            
-            fribourg_confirmed <- plotDataRe %>% filter(region == "FR") %>%
-                filter(data_type == "Confirmed (Canton)") %>%
-                mutate(data_type = recode_factor(data_type, 'Confirmed (Canton)' = 'Confirmed (Fribourg)'))
-            
-            new_data <- plotDataRe %>% filter(region %in% c("BE", "FR")) %>%
-                filter(data_type %in% source_without_canton) %>% 
-                filter(date >= input$slider_dates[1] & date <= input$slider_dates[2])
-            
-            if (length(source_canton)>0) {
-                new_data <- new_data %>% bind_rows(bern_confirmed) %>% bind_rows(fribourg_confirmed)
-            }
-            
-            point <- nearPoints(new_data,
-                                hover, threshold = 5, maxpoints = 1, addDist = TRUE)
-        }
-        else {
-            if (! 'Wastewater' %in% input$data_type) {
-                selected_data <- plotDataRe %>% filter(region == input$region, pathogen_type == input$pathogen) %>%
-                    filter(data_type %in% input$data_type) %>% 
-                    filter(date >= input$slider_dates[1] & date <= input$slider_dates[2])
-            } else {
-                selected_data <- plotDataRe %>% filter(region == input$region, pathogen_type == input$pathogen) %>%
-                    filter(data_type %in% input$data_type) %>% 
-                    bind_rows(plotDataRe %>% filter(region %in% input$region) %>%
-                    filter(data_type == 'Wastewater (PMG2)'))  %>%                   
-                filter(date >= input$slider_dates[1] & date <= input$slider_dates[2])
 
-            }
-            point <- nearPoints(selected_data,
-                                hover, threshold = 5, maxpoints = 1, addDist = TRUE)
-        }
-        
+        select_data <- plotDataRe %>% 
+          filter(region %in% catchment_to_cantons[[input$region]]) %>%
+          filter(pathogen_type == input$pathogen) %>%
+          filter(data_type %in% input$data_type) %>% 
+          filter(date >= input$slider_dates[1] & date <= input$slider_dates[2])
+                
+        point <- nearPoints(select_data, hover, threshold = 5, maxpoints = 1, addDist = TRUE)
         if (nrow(point) == 0) return(NULL)
         
         left_px <- hover$coords_css$x
@@ -458,8 +440,8 @@ function(input, output, session) {
                 title_p3 <- gsub("R","",title_p1)
             }
             
-            rww + theme(legend.position = "none") +
-                ggtitle(bquote(.(title_p1)['e']*.(title_p3)~.(title_p2)))
+            rww + guides(fill = "none", color = "none") +
+              ggtitle(bquote(.(title_p1)['e']*.(title_p3)~.(title_p2)))
         }
     )
     
@@ -526,22 +508,6 @@ function(input, output, session) {
                           "<br/>",
                           "<i>(", canton_to_catchment[[point$region]], ")</i>")))
         )
-    })
-    
-    output$death_hosp_info <- renderUI({
-      p(
-        tags$ul(style="padding-left:10px;font-size: 95%;",
-                tags$li(HTML(paste0(i18n$t("The R<sub>e</sub> for hospitalised patients and deaths are currently not displayed because the low case incidence results in large confidence intervals and low usefulness."))))
-                ) ) # i18 the disc
-    })
-    
-    disc_protocol <- "The grey shaded regions represent a switch in protocol used for the wastewater sample preparation. During this period, the old and new protocols (v3.1 and Promega respectively) were run simultaneously (10-11-2021 to 30-11-2021). The R<sub>e</sub> for the new protocol takes around 3 weeks to stabilise (31-10-2021 to 20-11-2021). Further details of the protocol switch are described <a href='https://sensors-eawag.ch/sars/overview.html'>here</a>."
-    output$other_disclaimers <- renderUI({
-        p(
-            tags$ul(style="padding-left:10px;font-size: 95%;",
-                    tags$li(HTML(paste0(i18n$t("The R<sub>e</sub> for wastewater is informed by infections in the catchment area, and will correspond best to the R<sub>e</sub> based on confirmed cases from that area. All other R<sub>e</sub> traces show the cantonal results, so there may be some dissonance. For instance, canton Zurich is about 3.4x the size of the catchment area served by the Werdhölzli wastewater treatment plant.")))),
-                    tags$li(HTML((i18n$t(disc_protocol) )) 
-                            ) ) ) # i18 the disc
     })
     
     # text below plot for more info ---------

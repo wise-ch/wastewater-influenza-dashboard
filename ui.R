@@ -42,16 +42,10 @@ navbarPageWithInputs("Wastewater Re",
                             uiOutput('pathogen'),
                             uiOutput('data_type'),
                             uiOutput('disabled_data_types'),
-                            uiOutput('death_hosp_info'),
-                            
                             conditionalPanel(
                                 condition = "input.region == 'GR'",
                                 uiOutput('chur_catchment_disc')
-                                
                             ),
-                            
-                            uiOutput('other_disclaimers'),
-
                             width = 3
                         ),
                         
@@ -81,8 +75,7 @@ navbarPageWithInputs("Wastewater Re",
                                     uiOutput("hover_info_re")
                                 ),
                                 # slider input for date range -----
-                                shinyWidgets::setSliderColor(color = rep("#5dc863FF", 2), 1:2), # for some reason, this is not working?
-                                #shinyWidgets::chooseSliderSkin("Flat", color = "#5dc863FF"),
+                                shinyWidgets::setSliderColor(color = rep("darkgrey", 2), 1:2),
                                 sliderInput("slider_dates", label = NULL, width = '950px',
                                             min = min(plotDataRe$date), max = Sys.Date(), 
                                             value = c(min(plotDataRe$date), Sys.Date())
@@ -90,7 +83,7 @@ navbarPageWithInputs("Wastewater Re",
                                 p(HTML(paste0('<em>', i18n$t('(The start and end date of the time interval to be displayed can be changed by moving the slider above.)'),'</em>')),
                                   style = 'margin-bottom:0;font-size: 90%;'),
                                 htmlOutput("link"),
-                                downloadButton('downloadPlot', i18n$t('Download results'))
+                                # downloadButton('downloadPlot', i18n$t('Download results'))  # TODO: re-implement download function
                                 
                             ) # fluid row
                         ) # main panel

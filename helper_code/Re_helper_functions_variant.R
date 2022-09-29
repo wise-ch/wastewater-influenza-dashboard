@@ -107,7 +107,7 @@ plot_Re <- function(data, location, var, data_source = 'source', lab = c('Wastew
                     aes(x = beg_date, y = 3.75, label = variant), colour = 'black')+ 
     coord_cartesian(ylim = c(0, 4), 
                     xlim = range(plotData$date)) +
-    labs( x = ref[location], y = bquote("Estimated R"['e']~" (95% CI)"),
+    labs( x = canton_to_catchment[location], y = bquote("Estimated R"['e']~" (95% CI)"),
           colour = 'Source', fill = 'Source') +
     scale_colour_manual(values = c(viridis(1), viridis(5)[4]),
                         labels = lab,

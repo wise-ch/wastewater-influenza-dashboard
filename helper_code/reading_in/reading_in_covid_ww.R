@@ -14,9 +14,9 @@ load_covid_ww_re <- function(
   Re_ww_needed_pmg <- read_csv(path_to_pmg_data)  # estimates after switching to promega kit
   
   covid_ww_re <- Re_ww_needed %>% 
-    mutate(data_type = factor(data_type)) %>%
+    mutate(data_type = factor(data_type), protocol = "v3.1") %>%
     mutate(data_type = recode_factor(data_type, "infection_norm_n1" = "Wastewater")) %>%
-    bind_rows(Re_ww_needed_pmg %>% mutate(data_type = 'Wastewater')) %>%
+    bind_rows(Re_ww_needed_pmg %>% mutate(data_type = 'Wastewater', protocol = "PMG2")) %>%
     mutate(pathogen_type = "COVID")
   
   return(covid_ww_re)  # formerly called Re_cc_needed

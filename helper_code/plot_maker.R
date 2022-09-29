@@ -5,7 +5,7 @@ library(viridis)
 library(zoo)
 
 # Reading in data: each helper script has function(s) to read in data set(s) ####
-# Columns in Re data sets must be: region, pathogen_type, data_type, date, median_R_mean, median_R_highHPD, median_R_lowHPD
+# Columns in Re data sets must be: region, pathogen_type, data_type, date, median_R_mean, median_R_highHPD, median_R_lowHPD, (optional: protocol)
 # Columns in observation and WW data sets must be: region, pathogen_type, data_type, date, observation, (optional: observation_smooth, orig_data, protocol_status, protocol, quantification_flag)
 
 source("helper_code/reading_in/reading_in_flu_ili.R")
@@ -43,7 +43,11 @@ canton_colors <- c(viridis(6)[1:5], "#f4bc1c")
 canton_labels <- c('Zurich', 'Geneva', 'Altenrhein', 'Chur', 'Laupen', 'Lugano')
 canton_breaks <- c('ZH', 'GE', 'SG','GR', 'FR', 'TI')
 
-# Catchment names and sizes
+# WW quantification protocol alpha levels
+protocol_alphas <- c(0.6, 0.8)
+names(protocol_alphas) <- c("v3.1", "PMG2")
+
+# Catchment region/canton abbreviations to WWTP name
 canton_to_catchment <- c(
   "BS" = "Basel",
   "ZH"="Zurich" ,
@@ -54,16 +58,18 @@ canton_to_catchment <- c(
   "TI"="Lugano"
 )
 
+# Catchment region/canton abbreviations to cantons to show in Re plot
 catchment_to_cantons <- list(
   "BS" = "BS",
   "ZH" = "ZH",
   "GE" = "GE",
   "SG" = "SG",
   "GR" = "GR",
-  "FR" = c("FR", "BE"),
+  "FR" = c("FR", "BE"),  # WWTP covers communities in both cantons
   "TI" = "TI"
 )
 
+# Approximate number of people in each catchment area
 catchment_sizes <- c(
   "BS" = "260'000",
   "ZH"="471'000",
@@ -157,13 +163,15 @@ raw_plotter <- function(data = plotDataWW, canton, pathogen, date_range, i18n = 
   
   p <- ggplot() +  
     geom_point(data = data_filtered %>% filter(orig_data), 
-               aes(x = date, y = observation), alpha = 0.5, color = data_type_colors['Wastewater']) +
+               aes(x = date, y = observation, alpha = protocol), color = data_type_colors['Wastewater']) +
     geom_line(data = data_filtered %>% filter(!is.na(observation)),
-              aes(x = date, y= observation, colour = 'black'), linetype = 'dotted', colour = "black") +
+              aes(x = date, y= observation, colour = 'black', alpha = protocol), linetype = 'dashed', colour = "black") +
     scale_x_date(limits = c(date_range[1], date_range[2]),
                  date_breaks = "months", date_labels = "%b") +
     scale_y_continuous(labels = function(label) sprintf('%4.1f', label)) +
+    scale_alpha_manual(values = protocol_alphas, na.value = 0.7) +
     labs(x = i18n$t("Date"), y = get_ww_label(i18n)) +
+    guides(alpha = "none") +
     theme_minimal() +
     shared_theme
   
@@ -182,25 +190,30 @@ re_plotter <- function(data = plotDataRe, source, canton, pathogen, date_range, 
   ylimits <- c(0, 2)  # TODO: re-implement reactive y limits
   
   p <- ggplot(data = data_filtered) +
-    geom_line(aes(x = date, y = median_R_mean, colour = data_type, linetype = region),
-              alpha = 0.7, lwd = 0.8) +
+    geom_line(aes(x = date, y = median_R_mean, colour = data_type, linetype = region, alpha = protocol),
+              lwd = 0.8) +
     geom_ribbon(aes(x = date, ymin = median_R_lowHPD,
-                    ymax = median_R_highHPD, fill = data_type, linetype = region),
-                alpha = 0.2, show.legend = F) +
+                    ymax = median_R_highHPD, fill = data_type, linetype = region, alpha = protocol),
+                show.legend = F) +
     geom_hline(yintercept = 1) +
     scale_color_manual(values = data_type_colors, aesthetics = c("color", "fill"), breaks = source) +
+    scale_alpha_manual(values = protocol_alphas, na.value = 0.7) +
     scale_x_date(limits = c(date_range[1], date_range[2]),
                  date_breaks = "months", date_labels = "%b") +
     scale_y_continuous(labels = function(label) sprintf('%6.1f', label)) +
     coord_cartesian(ylim = ylimits) + # change this? Autoadjust? but how?
     labs(x = i18n$t("Date"), y = get_re_label(i18n),
-        colour = i18n$t('Source'), fill = i18n$t('Source'), linetype = "Canton") +
+        colour = i18n$t('Source'), fill = i18n$t('Source'), linetype = "Canton", alpha = "Protocol") +
     theme_minimal() +
     shared_theme
   
   # Remove linetype legend unless catchment encompasses multiple cantons (like Laupen)
   if (length(catchment_to_cantons[[canton]]) == 1) {
     p <- p + guides(linetype = "none")
+  }
+  # Remove alpha legend unless protocol changed
+  if (length(unique(data_filtered$protocol)) == 1) {
+   p <- p + guides(alpha = "none") 
   }
   
   p
@@ -219,23 +232,30 @@ canton_plotter <- function(source, canton, pathogen, date_range, i18n = NA) {
   ylimits <- c(0, 2)  # TODO: re-implement reactive y limits
   
   p <- ggplot(data = data_filtered) +
-    geom_line(aes(x = date, y = median_R_mean, colour = region),
-              alpha = 0.7, lwd = 0.8) +
+    geom_line(aes(x = date, y = median_R_mean, colour = region,
+              alpha = protocol), lwd = 0.8) +
     geom_ribbon(aes(x = date, ymin = median_R_lowHPD,
-                    ymax = median_R_highHPD, fill = region),
-                alpha = 0.2, show.legend = F) +
+                    ymax = median_R_highHPD, fill = region,
+                alpha = protocol)) +
     geom_hline(yintercept = 1) +
     scale_color_manual(values = canton_colors,
                        labels = canton_labels,
                        breaks = canton_breaks,
                        aesthetics = c("color", "fill")) +
+    scale_alpha_manual(values = protocol_alphas - 0.5, na.value = 0.2) +  # reduce alpha for busier plots
     scale_x_date(limits = c(date_range[1], date_range[2]),
                  date_breaks = "months", date_labels = "%b") +
     coord_cartesian(ylim = ylimits) +
     labs( x = i18n$t('Date'), y = get_re_label(i18n),
-          colour = i18n$t('Catchment area'), fill = i18n$t('Canton')) +
+          fill = i18n$t('Catchment area'), alpha = "Protocol") +
     theme_minimal() +
-    shared_theme
+    shared_theme +
+    guides(color = "none")
+  
+  # Remove alpha legend unless protocol changed
+  if (length(unique(data_filtered$protocol)) == 1) {
+    p <- p + guides(alpha = "none") 
+  }
   
   p
 }
