@@ -15,11 +15,15 @@ load_flu_ww_re <- function(path_to_data = "rww_data_flu/ww_re_estimates.csv") {
       observation_type == "STEP Aire" ~ "GE"
     )) %>%
     mutate(pathogen_type = influenza_type) %>%
-    rename(median_R_mean = Re_estimate, median_R_highHPD = CI_up_Re_estimate, 
-           median_R_lowHPD = CI_down_Re_estimate) %>%
-    select(region, data_type, date, median_R_mean, median_R_highHPD, median_R_lowHPD,
-           pathogen_type)
-  
+    rename(
+      median_R_mean = Re_estimate, median_R_highHPD = CI_up_Re_estimate,
+      median_R_lowHPD = CI_down_Re_estimate
+    ) %>%
+    select(
+      region, data_type, date, median_R_mean, median_R_highHPD, median_R_lowHPD,
+      pathogen_type
+    )
+
   return(flu_ww_re)
 }
 
@@ -42,6 +46,6 @@ load_flu_ww_data <- function(path_to_data = "rww_data_flu/ww_loads.csv") {
       data_type == "IBV_(gc/day)" ~ "IBV"
     )) %>%
     mutate(protocol_status = "latest")
-  
+
   return(flu_ww_data)
 }
