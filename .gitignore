@@ -1,5 +1,6 @@
 .DS_Store
 .Rhistory
-rww_data/Rww_cantonal.csv
-rww_data/Rcc_catchment.csv
 .Rproj.user
+*.Rproj
+app/data
+deploy_notes.txt
