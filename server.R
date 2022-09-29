@@ -427,10 +427,72 @@ function(input, output, session) {
     })
     
     # plotting all Rww ---------
+    
+    # Update available cantons based on pathogen --------
+    observeEvent(input$pathogen_switzerland, {
+      if (input$pathogen_switzerland == "COVID") {
+        options_enabled <- c(
+          "ZH",
+          "GE",
+          "SG",
+          "GR",
+          "FR",
+          "TI")
+        names(options_enabled) <- c(
+          "Zurich",
+          "Geneva",
+          "Altenrhein",
+          "Chur",
+          "Laupen",
+          "Lugano")
+        options_disabled <- c(
+          'BS')
+        names(options_disabled) <- i18n$t(c(
+          'Basel'))
+      } else if (input$pathogen_switzerland %in% c("IAV", "IBV")) {
+        options_enabled <- c(
+          "ZH",
+          "GE",
+          "BS")
+        names(options_enabled) <- c(
+          "Zurich",
+          "Geneva",
+          "Basel")
+        options_disabled <- c(
+          "SG",
+          "GR",
+          "FR",
+          "TI")
+        names(options_disabled) <- c(
+          "Altenrhein",
+          "Chur",
+          "Laupen",
+          "Lugano")
+      }
+      
+      output$region_switzerland <- renderUI({
+        
+        checkboxGroupInput(inputId = "region_switzerland",
+                           label = i18n$t("Catchment (select to compare):"),
+                           choices = options_enabled,
+                           selected = "ZH")  # this assumes wastewater is an available data type for all pathogens
+      })
+      
+      output$region_switzerland_disabled <- renderUI({
+        
+        disabled(checkboxGroupInput(inputId = "region_switzerland_disabled",
+                                    label = NULL,
+                                    choices = options_disabled))
+        
+      })
+      
+    })
+    
+    
     output$rww_plots <- renderPlot(
         {
-            rww <- canton_plotter(source = 'Wastewater', canton = input$canton, 
-                                  pathogen = input$pathogen,
+            rww <- canton_plotter(source = 'Wastewater', canton = input$region_switzerland, 
+                                  pathogen = input$pathogen_switzerland,
                                   date_range = input$slider_dates_cantonal, i18n)
             title_p1 <- i18n$t("Estimated Wastewater R")
             title_p2 <- i18n$t("for different catchment areas")
@@ -447,7 +509,7 @@ function(input, output, session) {
     
     output$hover_info_rww <- renderUI({
         hover <- input$plot_hover_rww
-        select_data <- plotDataRe %>% filter(region %in% input$canton, pathogen_type == input$pathogen) %>%
+        select_data <- plotDataRe %>% filter(region %in% input$region_switzerland, pathogen_type == input$pathogen_switzerland) %>%
             filter(data_type %in% 'Wastewater') %>% 
             filter(date >= input$slider_dates_cantonal[1] & date <= input$slider_dates_cantonal[2])
         
@@ -473,7 +535,7 @@ function(input, output, session) {
     
     output$rcc_plots <- renderPlot(
         {
-            rcc <- canton_plotter(canton = input$canton, source = 'Confirmed (Catchment)', pathogen = input$pathogen,
+            rcc <- canton_plotter(canton = input$region_switzerland, source = 'Confirmed (Catchment)', pathogen = input$pathogen_switzerland,
                                   date_range = input$slider_dates_cantonal, i18n = i18n)
             title_p1 <- i18n$t("Estimated R")
             title_p2 <- i18n$t(" using catchment specific confirmed cases for different catchment areas")
@@ -489,8 +551,9 @@ function(input, output, session) {
     
     output$hover_info_rcc <- renderUI({
         hover <- input$plot_hover_rcc
-        point <- nearPoints(plotDataRe %>% filter(region %in% input$canton) %>%
-                                filter(data_type =='Confirmed (Catchment)'), hover, threshold = 5, maxpoints = 1, addDist = TRUE)
+        point <- nearPoints(plotDataRe %>% filter(region %in% input$pathogen_switzerland) %>%
+                                filter(data_type =='Confirmed (Catchment)', pathogen == input$pathogen_switzerland),
+                            hover, threshold = 5, maxpoints = 1, addDist = TRUE)
         if (nrow(point) == 0) return(NULL)
         
         left_px <- hover$coords_css$x

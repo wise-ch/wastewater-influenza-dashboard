@@ -93,17 +93,16 @@ navbarPageWithInputs("Wastewater Re",
            tabPanel(i18n$t("Switzerland"),
                     sidebarLayout(
                         sidebarPanel(
-                            checkboxGroupInput(inputId = "canton",
-                                               label = i18n$t("Catchment (select to compare):"),
-                                               choices = c("Zurich" = "ZH",
-                                                           "Geneva" = "GE",
-                                                           "Altenrhein" = "SG",
-                                                           "Chur" = "GR",
-                                                           "Laupen" = "FR",
-                                                           "Lugano" = "TI"),
-                                               selected = c('ZH', 'GE',
-                                                            'SG', 'GR',
-                                                            'FR', 'TI')),
+                            selectInput(inputId = "pathogen_switzerland", 
+                                        label = i18n$t("Select pathogen:"),
+                                        choices = c("SARS-CoV-2" = "COVID",
+                                                    "Influenza A Virus" = "IAV",
+                                                    "Influenza B Virus" = "IBV"),
+                                        selected = "COVID"
+                            ),
+                            shinyjs::useShinyjs(),
+                            uiOutput('region_switzerland'),
+                            uiOutput('region_switzerland_disabled'),
                             width = 3
                         ),
                         mainPanel(

@@ -3,6 +3,7 @@ library(tidyverse)
 library(lubridate)
 library(viridis)
 library(zoo)
+library(RColorBrewer)
 
 # Reading in data: each helper script has function(s) to read in data set(s) ####
 # Columns in Re data sets must be: region, pathogen_type, data_type, date, median_R_mean, median_R_highHPD, median_R_lowHPD, (optional: protocol)
@@ -39,9 +40,9 @@ data_type_colors <- viridis(length(unique(plotDataRe$data_type)))
 names(data_type_colors) <- unique(plotDataRe$data_type)
 
 # Canton colors
-canton_colors <- c(viridis(6)[1:5], "#f4bc1c")
-canton_labels <- c('Zurich', 'Geneva', 'Altenrhein', 'Chur', 'Laupen', 'Lugano')
-canton_breaks <- c('ZH', 'GE', 'SG','GR', 'FR', 'TI')
+canton_colors <- RColorBrewer::brewer.pal(name = "Dark2", n = 7)
+canton_labels <- c('Zurich', 'Geneva', 'Basel', 'Altenrhein', 'Chur', 'Laupen', 'Lugano')
+canton_breaks <- c('ZH', 'GE', 'BS', 'SG', 'GR', 'FR', 'TI')
 
 # WW quantification protocol alpha levels
 protocol_alphas <- c(0.6, 0.8)
@@ -49,9 +50,9 @@ names(protocol_alphas) <- c("v3.1", "PMG2")
 
 # Catchment region/canton abbreviations to WWTP name
 canton_to_catchment <- c(
-  "BS" = "Basel",
   "ZH"="Zurich" ,
   "GE"="Geneva",
+  "BS" = "Basel",
   "SG"="Altenrhein",
   "GR"="Chur",
   "FR"="Laupen",
@@ -60,9 +61,9 @@ canton_to_catchment <- c(
 
 # Catchment region/canton abbreviations to cantons to show in Re plot
 catchment_to_cantons <- list(
-  "BS" = "BS",
   "ZH" = "ZH",
   "GE" = "GE",
+  "BS" = "BS",
   "SG" = "SG",
   "GR" = "GR",
   "FR" = c("FR", "BE"),  # WWTP covers communities in both cantons
@@ -71,9 +72,9 @@ catchment_to_cantons <- list(
 
 # Approximate number of people in each catchment area
 catchment_sizes <- c(
-  "BS" = "260'000",
   "ZH"="471'000",
   "GE"="454'000",
+  "BS" = "260'000",
   "SG"="64'000",
   "GR"="55'000",
   "FR"="62'000",
