@@ -10,6 +10,16 @@ The methods used to estimate the R<sub>e</sub> are described [here](https://www.
 
 ## Docker image
 The app can be reproduced using the docker image specified by `Dockerfile`.
+```
+docker build -t ww-shiny .
+docker run --rm -p 8080:3838 ww-shiny
+```
+
+The app can be published using the docker image as well:
+```
+docker build -t registry.ethz.ch/nadeaus/wastewater_re_shiny .
+docker push registry.ethz.ch/nadeaus/wastewater_re_shiny
+```
 
 ## R Scripts
 
