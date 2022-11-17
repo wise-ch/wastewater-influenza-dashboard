@@ -2,11 +2,15 @@
 
 name: calculate-re-daily
 
-on: [push]  # TODO: switch to daily
-  # schedule:
-  # - cron: "0 0 * * *"
+on:
+  push:
+    branches: 
+      - 'master'
+    paths:
+      - 'estimate_re/data/*.csv'  # workflow only runs with new data is pushed
 
 jobs:
+        
   estimate-re:
     runs-on: macOS-latest  
     env:
