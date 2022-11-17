@@ -8,7 +8,7 @@ on: [push]  # TODO: switch to daily
 
 jobs:
   estimate-re:
-    runs-on: macOS-latest
+    runs-on: macOS-latest  
     env:
       GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
   
@@ -22,3 +22,13 @@ jobs:
       - name: Estimate Re
         run: Rscript estimate_re/estimate_wastewater_re.R
     
+      # Commit new files to data folder
+      - name: Commit files
+        run: |
+          git config --local user.name actions-user
+          git config --local user.email "actions@github.com"
+          git add app/data/ww_loads.csv
+          git add app/data/ww_re_estimates.csv
+          git commit -am "GH ACTION estimate-re $(date)"
+          git push origin master
+          

@@ -1,6 +1,6 @@
+archived/
 .DS_Store
 .Rhistory
 .Rproj.user
 *.Rproj
-app/data
 deploy_notes.txt
