@@ -1,17 +1,17 @@
-# This workflow is to re-generate Re estimates each day
+# This workflow is to re-generate case-based Re estimates
 
-name: calculate-re-daily
+name: calculate-case-based-re
 
 on:
   push:
     branches: 
       - 'master'
     paths:
-      - 'estimate_re/data/*.csv'  # workflow only runs with new data is pushed
+      - 'data/clean_data_cases_che.csv'  # workflow only runs with new data is pushed
 
 jobs:
         
-  estimate-re:
+  estimate-case-re:
     runs-on: macOS-latest  
     env:
       GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
@@ -24,15 +24,14 @@ jobs:
       
       # Run R script
       - name: Estimate Re
-        run: Rscript estimate_re/estimate_wastewater_re.R
+        run: Rscript estimate_re/estimate_confirmed_case_re.R
     
       # Commit new files to data folder
       - name: Commit files
         run: |
           git config --local user.name actions-user
           git config --local user.email "actions@github.com"
-          git add app/data/ww_loads.csv
-          git add app/data/ww_re_estimates.csv
+          git add app/data/confirmed_case_re_estimates.csv
           git commit -am "GH ACTION estimate-re $(date)"
           git push origin master
           
