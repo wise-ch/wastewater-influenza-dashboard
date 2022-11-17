@@ -1,0 +1,17 @@
+Package: wastewaterr
+Title: Estimates reproductive number based on wastewater
+Version: 0.0.0.9000
+Authors@R: 
+    person("Sarah", "Nadeau", , "sarahnadeau266@gmail.com", role = c("aut", "cre"))
+Description: This package is for estimating the reproductive number and hosting estimates on a shiny app.
+License: `use_gpl3_license()`
+Encoding: UTF-8
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 7.2.1
+Imports:
+    dplyr,
+    estimateR,
+    readr,
+    tidyr
+Remotes:
+    covid-19-Re/estimateR
