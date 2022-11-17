@@ -18,7 +18,7 @@ estimation_window <- 3  # 3 is EpiEstim default
 n_bootstrap_reps <- 100  # TODO: increase?
 
 # Import data
-case_data <- read_csv("raw_data/clean_data_cases_che.csv", col_types = cols(date = "D"))
+case_data <- read_csv("data/clean_data_cases_che.csv", col_types = cols(date = "D"))
 
 # Estimate Re for each data stream
 is_first <- T
