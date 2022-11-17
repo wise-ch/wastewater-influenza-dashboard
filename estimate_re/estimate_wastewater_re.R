@@ -4,7 +4,8 @@
 # Load dependencies
 library(dplyr)
 library(tidyr)
-library(estimateR)  # https://github.com/covid-19-Re/estimateR
+library(readr)
+library(estimateR)
 
 source("estimate_re/helper_scripts/functions.R")
 source("estimate_re/helper_scripts/parameters.R")
