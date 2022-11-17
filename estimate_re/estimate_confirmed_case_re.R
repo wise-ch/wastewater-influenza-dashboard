@@ -15,7 +15,7 @@ delay_dist_info <- influenza_distribution_infection_to_symptoms_moments
 mean_serial_interval <- influenza_mean_serial_interval_days / 7
 std_serial_interval <- influenza_std_serial_interval_days / 7
 estimation_window <- 3  # 3 is EpiEstim default
-n_bootstrap_reps <- 100  # TODO: increase?
+n_bootstrap_reps <- 50  # TODO: increase?
 
 # Import data
 case_data <- read_csv("data/clean_data_cases_che.csv", col_types = cols(date = "D"))

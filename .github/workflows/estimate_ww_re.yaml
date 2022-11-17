@@ -7,8 +7,11 @@ on:
     branches: 
       - 'master'
     paths:
+      # Only run when a relevant file is updated
       - 'data/clean_data_bs.csv'
-      - 'data/clean_data_ge_zh.csv'  # workflow only runs with new data is pushed
+      - 'data/clean_data_ge_zh.csv'
+      - '.github/workflows/estimate_ww_re.yaml'
+      - 'estimate_re/estimate_wastewater_re.R'
 
 jobs:
         
@@ -34,6 +37,6 @@ jobs:
           git config --local user.email "actions@github.com"
           git add app/data/ww_loads.csv
           git add app/data/ww_re_estimates.csv
-          git commit -am "GH ACTION estimate-re $(date)"
+          git commit -am "GH ACTION calculate-ww-re $(date)"
           git push origin master
           
