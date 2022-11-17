@@ -12,6 +12,7 @@ Imports:
     dplyr,
     estimateR,
     readr,
-    tidyr
+    tidyr,
+    zoo
 Remotes:
     covid-19-Re/estimateR
