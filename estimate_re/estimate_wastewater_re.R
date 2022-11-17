@@ -83,13 +83,13 @@ data_all <- rbind(
   ww_data_interp_bs %>% mutate(wwtp = "ARA Basel"),
   ww_data_interp_ge %>% mutate(wwtp = "STEP Aire"),
   ww_data_interp_zh %>% mutate(wwtp = "ARA Werdhölzli")
-) %>% pivot_longer(
-  cols = c(IAV_gc_per_day, IBV_gc_per_day),
-  values_to = "genome_copies_per_day",
-  names_to = "influenza_type"
-) %>% mutate(
-  influenza_type = recode(influenza_type, IAV_gc_per_day = "IAV", IBV_gc_per_day = "IBV")
-) %>% select(sample_date, wwtp, n_measurements, is_observation, influenza_type, genome_copies_per_day)
+) %>%
+  pivot_longer(
+  cols = c(IAV_gc_per_day, IBV_gc_per_day, IAV_gc_per_day_norm, IBV_gc_per_day_norm),
+  values_to = "observation",
+  names_to = c("influenza_type", "observation_units"),
+  names_pattern = "([A-Z]{3})_(.*)"
+) %>% select(sample_date, wwtp, n_measurements, is_observation, influenza_type, observation, observation_units)
 
 # Write out data used for Re inference
 write.csv(x = data_all, file = "app/data/ww_loads.csv")
@@ -102,11 +102,11 @@ for (wwtp_i in unique(data_all$wwtp)) {
     
     # Get appropriate data
     data_filtered <- data_all %>%
-      filter(wwtp == wwtp_i, influenza_type == influenza_type_j) %>%
+      filter(wwtp == wwtp_i, influenza_type == influenza_type_j, observation_units == "gc_per_day_norm") %>%
       arrange(sample_date)
     
     measurements = list(
-      values = data_filtered$genome_copies_per_day,
+      values = data_filtered$observation,
       index_offset = 0)
     
     # Try to estimate Re (handling case where not enough incidence observed to calculate)
@@ -134,7 +134,7 @@ for (wwtp_i in unique(data_all$wwtp)) {
       # Make observation data frame anyways
       return(data.frame(
         date = data_filtered$sample_date,
-        observed_incidence = data_filtered$genome_copies_per_day,
+        observed_incidence = data_filtered$observation,
         CI_down_observed_incidence = NA,    
         CI_up_observed_incidence = NA,
         smoothed_incidence = NA,
