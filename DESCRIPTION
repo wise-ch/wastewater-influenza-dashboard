@@ -11,6 +11,7 @@ RoxygenNote: 7.2.1
 Imports:
     dplyr,
     estimateR,
+    RColorBrewer,
     readr,
     tidyr,
     zoo
