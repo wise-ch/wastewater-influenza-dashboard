@@ -1,3 +1,6 @@
+figures/
+proposals/
+data/raw_data/
 archived/
 .DS_Store
 .Rhistory

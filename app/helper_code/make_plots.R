@@ -4,9 +4,9 @@ library(readr)
 library(RColorBrewer)
 
 # Read in data
-ww_loads <- read_csv("app/data/ww_loads.csv", col_types = cols(sample_date = "D"), )
-ww_re_estimates <- read_csv("app/data/ww_re_estimates.csv", col_types = cols(date = "D"))
-case_re_estimates <- read_csv("app/data/confirmed_case_re_estimates.csv", col_types = c(date = "D"))
+ww_loads <- read_csv("data/ww_loads.csv", col_types = cols(sample_date = "D"), )  # path relative to app directory
+ww_re_estimates <- read_csv("data/ww_re_estimates.csv", col_types = cols(date = "D"))
+case_re_estimates <- read_csv("data/confirmed_case_re_estimates.csv", col_types = c(date = "D"))
 
 # Clean load data
 ww_loads <- ww_loads %>%

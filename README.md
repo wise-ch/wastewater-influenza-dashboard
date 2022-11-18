@@ -1,15 +1,18 @@
-# Dashboard for wastewater R<sub>e</sub> estimation
+# Scripts to calculate Re for influenza and a shiny app to display estimates
 
 <!--- Link to published dashboard: [https://ibz-shiny.ethz.ch/wastewaterRe](https://ibz-shiny.ethz.ch/wastewaterRe) --->
 
-An R Shiny dashboard to visualise R<sub>e</sub> estimates for viruses monitored in wastewater from six different wastewater treatment plants in Switzerland. These estimates are shown together with available data on clinical cases and raw measurements from wastewater. Note that wastewater catchment areas do not correspond one-to-one to specific cantons, though often we compare estimates based on wastewater to case data in the most relevant canton.
+## Repository overview
+Wastewater data is provided by EAWAG and Canton Basel-Stadt, case data is provided by the Swiss FOPH. The raw data is expected to be in `data/raw_data`.
+The pre-processing scripts in `R/helper_scripts` generate generate clean versions of these raw data files and save them to `data`. 
 
-The six wastewater treatment plants we look at are: Zurich, Altenrhein, Chur, Laupen, Lugano and Lausanne. Currently, we have not included the Lausanne plant in the dashboard due to data quality issues.
+The Re estimation scripts `R/estimate_wastewater_re.R` and `R/estimate_confirmed_case_re.R` run automatically via Github actions when the clean versions of the data files are updated.
+These scripts save Re estimates to `app/data`.
 
-The methods used to estimate the R<sub>e</sub> are described [here](https://www.medrxiv.org/content/10.1101/2021.04.29.21255961v1).
+The shiny app can then be run to visualize the Re estimates.
 
 ## Docker image
-The app can be reproduced using the docker image specified by `Dockerfile`.
+The shinyapp can be reproduced using the docker image specified by `Dockerfile`.
 ```
 docker build -t ww-shiny .
 docker run --rm -p 8080:3838 ww-shiny
@@ -21,16 +24,6 @@ docker build -t registry.ethz.ch/nadeaus/wastewater_re_shiny .
 docker push registry.ethz.ch/nadeaus/wastewater_re_shiny
 ```
 
-## R Scripts
-
-Core scripts:  
-* `app/server.R`: Links the user interface with the instructions required to build and run the app.
-* `app/ui.R`: Defines the user interface for the dashboard.<br>
-
-Helper scripts:
-* `app/helper_code/reading_in/*.R`: Defines functions for reading in the raw wastewater and case data as well as R<sub>e</sub> estimates from various sources. SARS-CoV-2 data is from [EAWAG pages](https://sensors-eawag.ch/sars/overview.html). 
-* `app/helper_code/plot_maker.R`: Calls the functions to read in the data. Further defines functions to plot cases, raw wastewater data and the estimated R<sub>e</sub>.
-
 ## Attribution
 
-This app was created by Taru Singhal based on work by Jana Huisman. It was modified by Sarah Nadeau. The data on which this app is based is generated and provided by collaborators at EAWAG.
+The code and app are based on prior work by Taru Singhal and Jana Huisman for SARS-CoV-2. The data on which this app is based is generated and provided by collaborators at EAWAG, the Canton Basel-Stadt, and the Swiss Federal Office of Public Health.
