@@ -26,39 +26,58 @@ case_data_by_catchment <- case_data_clean %>%
     left_join(catchment_data, by = c("ptplz" = "PLZ")) %>%
     mutate(scaled_cases = count * `WEIGHT..as.percentage.` / 100) %>%
     group_by(typ, date, ARA.Name) %>%
-    summarize(total_scaled_cases = sum(scaled_cases), .groups = "drop")
+    summarize(total_cases = sum(scaled_cases), .groups = "drop")
+
+# Aggregate data across all provided PLZ (take the most data possible)
+case_data_all_provided <- case_data_clean %>%
+  group_by(typ, date) %>%
+  summarize(total_cases = sum(count), .groups = "drop") %>%
+  mutate(ARA.Name = "All provided data")
+
+case_data_all <- rbind(
+  case_data_by_catchment,
+  case_data_all_provided
+)
 
 # Fill missing weeks with 0 (according to FOPH, no entry for a postal code means no cases)
 all_dates <- seq.Date(
-      min(case_data_by_catchment$date),
-      max(case_data_by_catchment$date),
+      min(case_data_all$date),
+      max(case_data_all$date),
       by = "weeks")
-all_wwtps <- unique(case_data_by_catchment$ARA.Name)
+all_wwtps <- unique(case_data_all$ARA.Name)
 
-full_df <- data.frame(
-    date = rep(all_dates, length(all_wwtps)),
-    ARA.Name = rep(all_wwtps, length(all_dates))
-  ) %>% arrange(date, ARA.Name)
+is_first <- T
+for (wwtp in all_wwtps) {
+  if (is_first) {
+    full_df <- data.frame(date = all_dates, ARA.Name = wwtp)
+    is_first <- F
+  } else {
+    full_df <- rbind(
+      full_df,
+      data.frame(date = all_dates, ARA.Name = wwtp)
+    )
+  }
+}
 full_df_w_typ <- rbind(full_df %>% mutate(typ = "A"), full_df %>% mutate(typ = "B"))
 
 if (any(full_df_w_typ %>% duplicated())) {
     stop("Daily date data frame has duplicate entries, rethink fill missing values strategy!")
 }
   
-case_data_by_catchment_complete <- case_data_by_catchment %>%
+case_data_all_complete <- case_data_all %>%
     right_join(full_df_w_typ, by = c("date", "ARA.Name", "typ")) %>%
-    mutate(total_scaled_cases = replace_na(total_scaled_cases, 0))
+    mutate(total_cases = replace_na(total_cases, 0))
 
 # Write out cleaned data for re estimation
-case_data_by_catchment_complete_renamed <- case_data_by_catchment_complete %>%
+case_data_all_complete_renamed <- case_data_all_complete %>%
     rename("influenza_type" = "typ", "wwtp" = "ARA.Name")
 
-write.csv(case_data_by_catchment_complete_renamed, "data/clean_data_cases_che.csv", row.names = F)
+write.csv(case_data_all_complete_renamed, "data/clean_data_cases_che.csv", row.names = F)
 
 # Plot data
-ggplot(data = case_data_by_catchment_complete, aes(x = date, y = total_scaled_cases)) + 
+ggplot(data = case_data_all_complete_renamed, aes(x = date, y = total_cases)) + 
     geom_point() +
-    facet_grid(ARA.Name ~ typ) +
+    facet_grid(wwtp ~ influenza_type) +
     scale_x_date(date_breaks = "2 months", date_labels = "%b %y")
 
 ggsave("figures/cases_by_catchment.png", width = 9, height = 9, units = "in")
