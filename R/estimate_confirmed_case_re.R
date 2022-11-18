@@ -33,7 +33,7 @@ for (wwtp_i in unique(case_data$wwtp)) {
         
         # Interpolate weekly data to daily data (linear interpolation)
         case_data_interpolated <- interpolate_measurements(
-          data_frame = case_data_filtered %>% mutate(daily_avg_cases = total_scaled_cases / 7), 
+          data_frame = case_data_filtered %>% mutate(daily_avg_cases = total_cases / 7), 
           date_col = "date", 
           measurement_cols = "daily_avg_cases")
 
@@ -66,7 +66,7 @@ for (wwtp_i in unique(case_data$wwtp)) {
             # Make observation data frame anyways
             return(data.frame(
                 date = case_data_filtered$date,
-                observed_incidence = case_data_filtered$total_scaled_cases,
+                observed_incidence = case_data_filtered$total_cases,
                 CI_down_observed_incidence = NA,    
                 CI_up_observed_incidence = NA,
                 smoothed_incidence = NA,
