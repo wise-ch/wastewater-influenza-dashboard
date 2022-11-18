@@ -4,9 +4,9 @@ library(readr)
 library(RColorBrewer)
 
 # Read in data
-ww_loads <- read_csv("data/ww_loads.csv", col_types = cols(sample_date = "D"), )
-ww_re_estimates <- read_csv("data/ww_re_estimates.csv", col_types = cols(date = "D"))
-case_re_estimates <- read_csv("data/confirmed_case_re_estimates.csv", col_types = c(date = "D"))
+ww_loads <- read_csv("app/data/ww_loads.csv", col_types = cols(sample_date = "D"), )
+ww_re_estimates <- read_csv("app/data/ww_re_estimates.csv", col_types = cols(date = "D"))
+case_re_estimates <- read_csv("app/data/confirmed_case_re_estimates.csv", col_types = c(date = "D"))
 
 # Clean load data
 ww_loads <- ww_loads %>%
@@ -71,8 +71,8 @@ date_range <- range(ww_loads$sample_date)
 #' Plot wastewater loads
 plot_ww_loads <- function(data = ww_loads, wwtp_to_plot, date_range) {
   data_filtered <- data %>%
-    filter(is_observation) %>%
-    mutate(observation = genome_copies_per_day / 10^12) %>%
+    filter(is_observation, observation_units == "gc_per_day") %>%
+    mutate(observation = observation / 10^12) %>%
     filter(wwtp == wwtp_to_plot) %>%
     filter(sample_date >= date_range[1] & sample_date <= date_range[2])
 
