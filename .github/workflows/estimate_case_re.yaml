@@ -10,7 +10,7 @@ on:
       # Only run when a relevant file is updated
       - 'data/clean_data_cases_che.csv'
       - '.github/workflows/estimate_case_re.yaml'
-      - 'estimate_re/estimate_confirmed_case_re.R'
+      - 'R/estimate_confirmed_case_re.R'
 
 jobs:
         
@@ -27,7 +27,7 @@ jobs:
       
       # Run R script
       - name: Estimate Re
-        run: Rscript estimate_re/estimate_confirmed_case_re.R
+        run: Rscript R/estimate_confirmed_case_re.R
     
       # Commit new files to data folder
       - name: Commit files
