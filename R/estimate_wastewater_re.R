@@ -20,19 +20,19 @@ n_bootstrap_reps <- 50  # TODO: increase
 # Import data
 ww_data_bs <- read_csv("data/clean_data_bs.csv", col_types = cols(sample_date = "D")) %>%
   pivot_wider(
-    id_cols = c("sample_date", "wwtp", "n_measurements"), 
+    id_cols = c("sample_date", "wwtp"), 
     names_from = "measurement_type", 
     values_from = "mean")
 ww_data_ge <- read_csv("data/clean_data_ge_zh.csv", col_types = cols(sample_date = "D")) %>%
   filter(wwtp == "STEP Aire") %>%
   pivot_wider(
-    id_cols = c("sample_date", "wwtp", "n_measurements"), 
+    id_cols = c("sample_date", "wwtp"), 
     names_from = "measurement_type", 
     values_from = "mean")
 ww_data_zh <- read_csv("data/clean_data_ge_zh.csv", col_types = cols(sample_date = "D")) %>%
   filter(wwtp == "ARA Werdhölzli") %>%
   pivot_wider(
-    id_cols = c("sample_date", "wwtp", "n_measurements"), 
+    id_cols = c("sample_date", "wwtp"), 
     names_from = "measurement_type", 
     values_from = "mean")
 
@@ -41,15 +41,18 @@ ww_data_zh <- read_csv("data/clean_data_ge_zh.csv", col_types = cols(sample_date
 # TODO: using lowest non-zero measurement - any other strategy to consider?
 normalization_factor_bs <- min(
   ww_data_bs$IAV_gc_per_day[ww_data_bs$IAV_gc_per_day > 0],
-  ww_data_bs$IBV_gc_per_day[ww_data_bs$IBV_gc_per_day > 0]
+  ww_data_bs$IBV_gc_per_day[ww_data_bs$IBV_gc_per_day > 0],
+  na.rm = T
 )
 normalization_factor_ge <- min(
   ww_data_ge$IAV_gc_per_day[ww_data_ge$IAV_gc_per_day > 0],
-  ww_data_ge$IBV_gc_per_day[ww_data_ge$IBV_gc_per_day > 0]
+  ww_data_ge$IBV_gc_per_day[ww_data_ge$IBV_gc_per_day > 0],
+  na.rm = T
 )
 normalization_factor_zh <- min(
   ww_data_zh$IAV_gc_per_day[ww_data_zh$IAV_gc_per_day > 0],
-  ww_data_zh$IBV_gc_per_day[ww_data_zh$IBV_gc_per_day > 0]
+  ww_data_zh$IBV_gc_per_day[ww_data_zh$IBV_gc_per_day > 0],
+  na.rm = T
 )
 ww_data_bs <- ww_data_bs %>%
   mutate(IAV_gc_per_day_norm = IAV_gc_per_day / normalization_factor_bs) %>%
@@ -89,7 +92,7 @@ data_all <- rbind(
   values_to = "observation",
   names_to = c("influenza_type", "observation_units"),
   names_pattern = "([A-Z]{3})_(.*)"
-) %>% select(sample_date, wwtp, n_measurements, is_observation, influenza_type, observation, observation_units)
+) %>% select(sample_date, wwtp, is_observation, influenza_type, observation, observation_units)
 
 # Write out data used for Re inference
 write.csv(x = data_all, file = "app/data/ww_loads.csv")
