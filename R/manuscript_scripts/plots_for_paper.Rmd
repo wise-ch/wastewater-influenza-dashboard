@@ -1,0 +1,635 @@
+This script is to make plots for the manuscript. It is adapted from `plots_for_poster.Rmd`.
+
+```{r, setup, include=FALSE}
+knitr::opts_knit$set(root.dir = '/Users/nadeaus/Documents/Repos/wastewater-influenza')
+remake_map <- F
+```
+
+Load packages
+```{r}
+library(ggplot2)
+library(dplyr)
+library(tidyr)
+library(xlsx)
+library(cowplot)
+library(RColorBrewer)
+library(scales)
+
+# Spatial packages
+if (remake_map) {
+  library(rgdal)     # for reading and writing data, note how it also loads "sp" package
+  library(rgeos)     # for reading and writing data
+  library(tmap)      # for visualization and plotting
+  library(tmaptools) # for visualization and plotting
+}
+```
+
+Specify colors and theme elements
+```{r}
+influenza_type_colors <- brewer.pal(n = 8, name = "Set2")[c(1, 2, 5)]
+names(influenza_type_colors) <- c("IBV", "IAV", "ILI")
+influenza_type_color_scale <- scale_color_manual(values = influenza_type_colors, aesthetics = c("color", "fill"))
+
+catchment_area_colors <- brewer.pal(n = 8, name = "Set2")[c(4, 6, 3)]
+background_plot_color <- brewer.pal(n = 8, name = "Set2")[7]
+
+data_type_colors <- brewer.pal(n = 8, name = "Set1")[1:2]
+names(data_type_colors) <- c("Cases", "Wastewater")
+data_type_color_scale <- scale_color_manual(name = element_blank(), values = data_type_colors, aesthetics = c("color", "fill"))
+
+delay_dist_colors <- brewer.pal(n = 8, name = "Set1")[c(2, 8)]
+names(delay_dist_colors) <- c("Fecal", "Respiratory")
+delay_dist_color_scale <- scale_color_manual(name = element_blank(), values = delay_dist_colors, aesthetics = c("color", "fill"))
+
+shared_theme <- theme_bw()
+shared_date_scale <- scale_x_date(date_breaks = "1 month", date_labels = "%b %y", expand = c(0, 0))
+shared_date_scale_coarse <- scale_x_date(date_breaks = "1 month", date_labels = "%b\n%y", expand = c(0, 0))
+
+catchment_factor_levels <- c("Zurich", "Geneva", "Basel")
+
+line_size <- 1
+```
+
+Load data
+```{r}
+# Re estimates
+# suffix <- "_fecal_sld_22-10-26_clean_data"
+# suffix_resp_dist <- "_resp_sld_22-10-26_clean_data"
+# ww_re <- read.csv(paste0("results/ww_re_estimates", suffix, ".csv"))
+# ww_re_resp_dist <- read.csv(paste0("results/ww_re_estimates", suffix_resp_dist, ".csv"))
+# ww_re_scale_sensitivity <- read.csv("results/ww_re_scaling_sensitivity.csv")
+# confirmed_case_re <- read.csv("results/confirmed_case_re_estimates.csv")
+
+ww_re <- read.csv("/Users/nadeaus/Documents/Repos/wastewaterr/app/data/ww_re_estimates.csv")
+confirmed_case_re <- read.csv("/Users/nadeaus/Documents/Repos/wastewaterr/app/data/confirmed_case_re_estimates.csv")
+
+# Catchment area data
+catchment_area_data <- read.xlsx("proposals/commune_list.xlsx", sheetIndex = 2)
+
+# Wastewater concentration and load data
+# ww_measurements <- rbind(
+#   read.csv("tmp/clean_data_bs.csv"),
+#   read.csv("tmp/clean_data_ge_zh.csv"))  # summarized raw measurement data
+ww_measurements <- rbind(
+  read.csv("/Users/nadeaus/Documents/Repos/wastewaterr/data/clean_data_bs.csv"),
+  read.csv("/Users/nadeaus/Documents/Repos/wastewaterr/data/clean_data_ge_zh.csv")
+)
+
+# Delay distribution data
+fecal_delay_data <- read.csv("data/data_for_fecal_shedding_dist.csv")
+resp_delay_data <- read.csv("data/shedding_profile_carrat_2008.csv")
+symptoms_delay_data <- read.csv("data/symptoms_score_carrat_2008.csv")
+fecal_delay_dist <- read.csv("data/shedding_profile_fit_fecal.csv")
+resp_delay_dist <- read.csv("data/shedding_profile_fit.csv")
+symptoms_delay_dist <- read.csv("data/symptom_score_fit.csv")
+```
+
+Clean catchment area data
+```{r}
+catchment_area_data <- catchment_area_data %>%
+  drop_na(KURZTEXT) %>% # remove all-NA last line
+  mutate(commune = recode(KURZTEXT, 
+                               "A´re" = "Vernier",
+                               "Bruderholz" = "Basel",
+                               "Carouge GE" = "Carouge",
+                               "ChambÚsy" = "Pregny-Chambésy",
+                               "ChÔtelaine" = "Vernier",
+                               "ChÛne-Bougeries" = "Chêne-Bougeries",
+                               "Cointrin" = "Meyrin",
+                               "Collex" = "Collex-Bossy",
+                               "Conches" = "Chêne-Bougeries",
+                               "GenÞve" = "Genève",
+                               "Glattbrugg" = "Opfikon",
+                               "Glattpark(Opfikon)" = "Opfikon",
+                               "Grand-Lancy" = "Lancy",
+                               "Kilchberg ZH" = "Kilchberg",  # TODO: this finds one in Argau
+                               "La Croix-de-Rozon" = "Bardonnex",
+                               "Le Grand-Saconnex" = "Grand-Saconnex",
+                               "Le Lignon" = "Vernier",
+                               "Les Acacias" = "Carouge",
+                               "Les Avanchets" = "Vernier",
+                               "Oberwil BL" = "Oberwil",
+                               "Perly" = "Perly-Certoux",
+                               "Petit-Lancy" = "Lancy",
+                               "R³mlang" = "Rümlang",
+                               "Sch÷nenbuch" = "Arlesheim",
+                               "Uitikon Waldegg" = "Uitikon",
+                               "Vandoeuvres" = "Vandœuvres",
+                               "Vessy" = "Veyrier",
+                               "VÚsenaz" = "Collonge-Bellerive",
+                               "Z³rich" = "Zürich",
+                               "Zollikerberg" = "Zollikon"))
+
+catchment_area_summary <- catchment_area_data %>% 
+  group_by(ARA_NAMEN, commune) %>%
+  summarize(n_plz = n(), per_plz_mean = mean(Per_PLZ), per_plz_sd = sd(Per_PLZ), .groups = "drop") %>%
+  mutate(`Wastewater facility` = recode(
+    .x = ARA_NAMEN,
+    "BASEL" = "Basel (270,000 residents)",
+    "VERNIER/AIRE" = "Geneva (445,000 residents)",
+    "ZUERICH(WERDHOELZLI)" = "Zurich (670,000 residents)"
+  )) %>%
+  mutate(district = case_when(commune == "Zürich" ~ "Zürich"))
+```
+
+Make map
+```{r}
+if (remake_map) {
+  # Load admin boundaries shapefile
+  adm1 <- readOGR(dsn = "./data/spatial_data/gadm41_CHE_shp", layer = "gadm41_CHE_1")  # cantons
+  adm3 <- readOGR(dsn = "./data/spatial_data/gadm41_CHE_shp", layer = "gadm41_CHE_3")  # municipalities
+  
+  # Get municipalities to plot
+  data_to_plot <- rbind(
+    adm3@data %>%
+      filter(NAME_2 != "Zürich") %>%
+      left_join(catchment_area_summary, by = c("NAME_3" = "commune")) %>%
+      select(-district),
+    adm3@data %>%
+      filter(NAME_2 == "Zürich") %>%
+      left_join(catchment_area_summary, by = c("NAME_2" = "district")) %>%
+      select(-commune)
+  )
+  
+  # Fix duplicate commune name (set values to NA for not-meant commune)
+  data_to_plot[data_to_plot$NAME_3 == "Kilchberg" & data_to_plot$NAME_2 == "Sissach", 
+               c("ARA_NAMEN", "n_plz", "per_plz_mean", "per_plz_sd", "Wastewater facility")] <- NA
+  
+  # Check no more duplicates
+  tmp <- data_to_plot %>% 
+    group_by(NAME_3) %>% 
+    summarize(n_entries = sum(!is.na(n_plz))) %>% 
+    filter(n_entries > 1)
+  if (nrow(tmp) > 0) {
+    warning("Duplicate commune names remain!")
+  }
+  
+  adm3@data <- data_to_plot
+  
+  # Set mapping mode to "plot"
+  tmap_mode("plot")
+  
+  # Create base map of one color, then add another shape that is subset to the region of interest
+  map_plot <- tm_shape(adm1) + 
+      tm_polygons(col = background_plot_color, lwd = 1, alpha = 0.3) + 
+    tm_shape(adm3[!is.na(adm3$`Wastewater facility`), ]) +
+      tm_polygons("Wastewater facility", palette = catchment_area_colors, lwd = 0) +
+    tm_layout(
+      frame = FALSE, 
+      bg.color = "transparent", 
+      legend.title.size = 1,
+      legend.text.size =  0.6,
+      legend.position = c("right", "bottom")) +
+    tm_scale_bar(position = c("left", "bottom"), width = .125)
+  
+  map_plot
+  
+  tmap_save(
+    map_plot,
+    file = "figures/sites_map.tiff",
+    device = tiff,
+    width = 6,
+    height = 4, 
+    units = "in",
+    bg = "white")
+  # tmap_save(map_plot, filename = "figures/sites_map.png", device = png, bg = "transparent")
+}
+```
+
+Merge Re output data
+```{r}
+all_re <- rbind(
+  ww_re %>% 
+    select(-X) %>%
+    mutate(data_type = "Wastewater", delay_dist = "Fecal"), 
+  # ww_re_resp_dist %>% 
+  #   select(-X) %>%
+  #   mutate(data_type = "Wastewater", delay_dist = "Respiratory"), 
+  confirmed_case_re %>% 
+    mutate(data_type = "Cases", delay_dist = "Symptoms") %>% 
+    mutate(influenza_type = recode(influenza_type, "A" = "IAV", "B" = "IBV"))
+  )
+all_re_clean <- all_re %>% 
+  mutate(observation_type = recode(
+    observation_type,
+    "ARA Basel" = "Basel",
+    "ARA Werdhölzli" = "Zurich",
+    "STEP Aire" = "Geneva",
+    "BASEL" = "Basel",
+    "ZUERICH(WERDHOELZLI)" = "Zurich",
+    "VERNIER/AIRE" = "Geneva",
+    "CHUR" = "Chur",
+    "BIOGGIO(LUGANO)" = "Lugano",
+    "THAL/ALTENRHEIN" = "Altenrhein",
+    "LAUPEN(SENSETAL)" = "Laupen")) %>%
+  mutate(observation_type = factor(
+    observation_type, 
+    levels = c("Zurich", "Geneva", "Basel", "Lugano", "Altenrhein", "Laupen", "Chur")))  # decreasing size order
+```
+
+Plot Re input data: interpolated, scaled wastewater data and case count data
+```{r}
+input_data_plot <- ggplot(
+  data = all_re_clean %>% filter(delay_dist != "Respiratory"),
+  aes(x = as.Date(date), y = observed_incidence, color = influenza_type)) +
+  geom_line(size = 0.5) +
+  geom_point(size = 0.5) +
+  facet_grid(observation_type ~ data_type, scales = "free_y") +
+  scale_x_date(date_breaks = "2 months", date_labels = "%b\n%y") +
+  influenza_type_color_scale +
+  shared_theme + 
+  theme(legend.position = "none") +
+  labs(x = element_blank(), y = "Incidence")
+
+input_data_plot
+
+ggsave("figures/re_input_data2.png", height = 9, width = 8, units = "in")
+```
+
+Plot deconvolved incidence estimates
+```{r}
+estimated_incidence_plot <- ggplot(
+  data = all_re_clean %>% 
+    filter(!(data_type == "Wastewater" & observation_type == "Basel")) %>%  # remove Basel wastewater estimates because they make the case data scale way too big, uninterpretable
+    filter(delay_dist != "Respiratory"),  # use fecal delay dist
+  aes(x = as.Date(date), y = deconvolved_incidence, color = influenza_type)) +
+  geom_line(size = 0.5) +
+  geom_ribbon(
+    aes(ymin = CI_down_deconvolved_incidence, ymax = CI_up_deconvolved_incidence, fill = influenza_type),
+    alpha = 0.3,
+    linetype = 0) +
+  facet_grid(observation_type ~ data_type, scales = "free_y") +
+  scale_x_date(date_breaks = "2 months", date_labels = "%b\n%y") +
+  influenza_type_color_scale +
+  shared_theme +
+  theme(legend.position = "none") +
+  labs(x = element_blank(), y = "Deconvolved incidence")
+
+estimated_incidence_plot
+
+ggsave(filename = "figures/deconvolved_incidence.png", height = 9, width = 8, units = "in")
+```
+
+Plot Re estimates
+```{r}
+estimated_re_plot <- ggplot(
+  data = all_re_clean %>% filter(delay_dist != "Respiratory"), 
+  aes(x = as.Date(date), y = Re_estimate, color = influenza_type)) +
+  geom_hline(aes(yintercept = 1), linetype = "solid", color = "darkgray") +
+  geom_line(size = 0.5) +
+  geom_ribbon(
+    aes(ymin = CI_down_Re_estimate, ymax = CI_up_Re_estimate, fill = influenza_type),
+    alpha = 0.3,
+    linetype = 0) +
+  facet_grid(observation_type ~ data_type, scales = "free_y") +
+  scale_x_date(date_breaks = "2 months", date_labels = "%b\n%y") +
+  influenza_type_color_scale +
+  shared_theme +
+  theme(legend.position = "none") +
+  labs(x = element_blank(), y = "Reproductive number") +
+  scale_y_continuous(limits = c(0, 2.5), oob = oob_squish, breaks = c(0, 1, 2))
+
+estimated_re_plot
+
+ggsave(filename = "figures/re_all.png", height = 9, width = 8, units = "in")
+```
+
+Get data to plot in main text
+```{r}
+measurement_data_to_plot <- ww_measurements %>%
+  filter(measurement_type %in% c("IAV_gc_per_day", "IBV_gc_per_day")) %>%
+  mutate(influenza_type = recode(
+    measurement_type,
+    "IAV_gc_per_day" = "IAV",
+    "IBV_gc_per_day" = "IBV",
+  )) %>%
+  mutate(observation_type = recode(
+    wwtp,
+    "ARA Basel" = "Basel",
+    "STEP Aire" = "Geneva",
+    "ARA Werdhölzli" = "Zurich"
+  )) %>%
+  filter(sample_date >= as.Date("2021-12-01"), sample_date < as.Date("2022-05-01")) %>%
+  mutate(observation_type = factor(observation_type, levels = catchment_factor_levels))
+
+re_data_to_plot <- all_re_clean %>%
+  filter(observation_type %in% c("Zurich", "Geneva")) %>%
+  filter(date >= as.Date("2021-12-01"), date < as.Date("2022-05-01")) %>%
+  filter(delay_dist != "Respiratory") %>%
+  mutate(observation_type = factor(observation_type, levels = catchment_factor_levels))
+
+highlight_data <- data.frame(
+  re_threshold = 1,
+  influenza_type = c("IAV", "IAV", "IAV", "IAV", "IBV", "IBV", "IBV", "IBV"),
+  observation_type = rep(c("Geneva", "Zurich"), 4),
+  data_type = c("Cases", "Cases", "Wastewater", "Wastewater", "Cases", "Cases", "Wastewater", "Wastewater")
+) %>%
+  filter(!(influenza_type == "IBV" & data_type == "Cases")) %>%  # remove highlight for panels without Re
+  mutate(observation_type = factor(observation_type, levels = catchment_factor_levels))
+```
+
+Make main text figure for wastewater ww_measurements
+```{r}
+ggplot(
+  data = measurement_data_to_plot %>% filter(mean > 0),
+  aes(x = as.Date(sample_date), y = mean, color = "Wastewater")) + 
+  geom_point(size = 0.5) +
+  geom_point(data = measurement_data_to_plot %>% filter(mean == 0), size = 0.5, shape = 4) +
+  geom_errorbar(
+    data = measurement_data_to_plot %>% filter(mean > 0, n_measurements > 1),
+    aes(ymin = min, ymax = max), 
+    size = 0.5, width = 5) +
+  facet_grid(influenza_type ~ observation_type) +
+  shared_theme + 
+  shared_date_scale_coarse +
+  data_type_color_scale +
+  theme(legend.position = "none") +
+  labs(x = element_blank(), y = "Genome copies per day")
+
+ggsave("figures/ww_data_focus.png", width = 6.5, height = 4, units = "in")
+```
+
+Make main text figure comparing case- and wasetwater-based estimates around the time of Omicron measures
+```{r}
+ggplot(data = re_data_to_plot) +
+  geom_rect(
+    data = highlight_data %>% filter(data_type == "Wastewater"),
+    aes(
+      ymin = -Inf, ymax = Inf, 
+      xmin = as.Date("2021-12-06"), xmax = as.Date("2022-02-16")),  # work from home reccommendation
+    alpha = 0.15) +
+  geom_rect(
+    data = highlight_data %>% filter(data_type == "Wastewater"),  # prevent double-plotting
+    aes(
+      ymin = -Inf, ymax = Inf, 
+      xmin = as.Date("2021-12-20"), xmax = as.Date("2022-02-03")),  # work from home mandate
+    alpha = 0.15) +
+  geom_line(aes(x = as.Date(date), y = deconvolved_incidence, color = data_type), size = 0.5) +
+  geom_ribbon(
+    aes(
+      x = as.Date(date),
+      ymin = CI_down_deconvolved_incidence, ymax = CI_up_deconvolved_incidence,
+      fill = data_type),
+    alpha = 0.2) +
+  facet_grid(influenza_type ~ observation_type) +
+  data_type_color_scale +
+  shared_theme +
+  theme(legend.position = "bottom") +
+  shared_date_scale +
+  labs(x = element_blank(), y = "Deconvolved incidence")
+
+ggsave("figures/deconvolved_incidence_comparision_focus.png", width = 6.5, height = 4, units = "in")
+```
+
+Make main text figure comparing case- and wasetwater-based estimates around the time of Omicron measures
+```{r}
+ggplot(data = re_data_to_plot) +
+  geom_hline(data = highlight_data, aes(yintercept = re_threshold), color = "darkgray") +
+  geom_rect(
+    data = highlight_data %>% filter(data_type == "Wastewater"),
+    aes(
+      ymin = -Inf, ymax = Inf, 
+      xmin = as.Date("2021-12-06"), xmax = as.Date("2022-02-16")),  # work from home reccommendation
+    alpha = 0.15) +
+  geom_rect(
+    data = highlight_data %>% filter(data_type == "Wastewater"),  # prevent double-plotting
+    aes(
+      ymin = -Inf, ymax = Inf, 
+      xmin = as.Date("2021-12-20"), xmax = as.Date("2022-02-03")),  # work from home mandate
+    alpha = 0.15) +
+  geom_line(aes(x = as.Date(date), y = Re_estimate, color = data_type), size = 0.5) +
+  geom_ribbon(
+    aes(
+      x = as.Date(date), y = Re_estimate,
+      ymin = CI_down_Re_estimate, ymax = CI_up_Re_estimate,
+      fill = data_type),
+    alpha = 0.3,
+    linetype = 0) +
+  facet_grid(influenza_type ~ observation_type) +
+  data_type_color_scale +
+  shared_theme +
+  theme(legend.position = "bottom") +
+  shared_date_scale +
+  labs(x = element_blank(), y = "Reproductive number") +
+  scale_y_continuous(limits = c(0, 3), oob = oob_squish, breaks = c(0, 1, 2, 3))
+
+ggsave("figures/re_comparision_focus.png", width = 6.5, height = 4, units = "in")
+```
+
+Basel incidence and Re estimates for supplement
+```{r}
+basel_re_data_to_plot <- all_re_clean %>%
+  filter(observation_type == c("Basel"), data_type == "Wastewater", influenza_type == "IAV") %>%
+  filter(delay_dist != "Respiratory") %>%
+  filter(date >= as.Date("2021-12-01"), date < as.Date("2022-05-01"))
+
+basel_incidence_plot <- ggplot(data = basel_re_data_to_plot) +
+  geom_line(aes(x = as.Date(date), y = deconvolved_incidence, color = data_type), size = 0.5) +
+  geom_ribbon(
+    aes(
+      x = as.Date(date),
+      ymin = CI_down_deconvolved_incidence, ymax = CI_up_deconvolved_incidence,
+      fill = data_type),
+    alpha = 0.2) +
+  facet_grid(influenza_type ~ observation_type) +
+  data_type_color_scale +
+  shared_theme +
+  theme(legend.position = "none") +
+  shared_date_scale +
+  labs(x = element_blank(), y = "Deconvolved incidence")
+
+basel_re_plot <- ggplot(data = basel_re_data_to_plot) +
+  geom_hline(aes(yintercept = 1), color = "darkgray") +
+  geom_line(aes(x = as.Date(date), y = Re_estimate, color = data_type), size = 0.5) +
+  geom_ribbon(
+    aes(
+      x = as.Date(date), y = Re_estimate,
+      ymin = CI_down_Re_estimate, ymax = CI_up_Re_estimate,
+      fill = data_type),
+    alpha = 0.3,
+    linetype = 0) +
+  facet_grid(influenza_type ~ observation_type) +
+  data_type_color_scale +
+  shared_theme +
+  theme(legend.position = "none") +
+  shared_date_scale +
+  labs(x = element_blank(), y = "Reproductive number") +
+  scale_y_continuous(limits = c(0, 3), oob = oob_squish, breaks = c(0, 1, 2, 3))
+
+cowplot::plot_grid(basel_incidence_plot, basel_re_plot, labels = c('A', 'B'), nrow = 2, align = "v")
+
+ggsave("figures/basel_incidence_re.png", width = 4, height = 5, units = "in")
+```
+
+Plot various delay distributions for supplement
+```{r}
+fecal_delay_plot <- ggplot(
+    data = fecal_delay_data %>% filter(measurement < 4E6),  # filter outlier for plotting only, was used for fitting
+    aes(x = measurement.day, y = measurement)) + 
+    geom_point(aes(shape = "Empirical data")) +
+    geom_line(
+        data = data.frame(measurement.day = seq(to = 35, by = 0.5)) %>% 
+            mutate(measurement = fecal_delay_dist$empirical_dist_integral * dgamma(
+              x = measurement.day, shape = fecal_delay_dist$shape, scale = fecal_delay_dist$scale)),
+        aes(linetype = "Gamma fit")) + 
+    theme_bw() +
+    theme(legend.position = "bottom", legend.title = element_blank(), legend.spacing.x = unit(0.1, 'cm')) +
+    labs(x = "Days after symptom onset + 2", y = "Genome copies\nper gram feces")
+
+resp_delay_plot <- ggplot(
+    data = resp_delay_data %>% mutate(viral_titer = 10^log_viral_titer),
+    aes(x = days_after_innoculation, y = viral_titer)) + 
+    geom_point(aes(shape = "Carrat 2008 data")) +
+    geom_line(
+        data = data.frame(days_after_innoculation = seq(from = 0, to = 10, by = 0.1)) %>% 
+            mutate(viral_titer = resp_delay_dist$empirical_dist_integral[2] * dgamma(
+              x = days_after_innoculation, shape = resp_delay_dist$shape[2], scale = resp_delay_dist$scale[2])),
+        aes(linetype = "Gamma fit")) +
+    labs(x = "Days after innoculation", y = "Viral RNA\nin respiratory sample") +
+    theme_bw() +
+    scale_x_continuous(breaks = seq(0, 10, 1)) +
+    scale_y_continuous(limits = c(0, NA), oob = scales::oob_keep) +
+    theme(legend.position = "bottom", legend.title = element_blank(), legend.spacing.x = unit(0.1, 'cm'))
+
+symptom_delay_plot <- ggplot(
+    data = symptoms_delay_data,
+    aes(x = days_after_innoculation, y = symptom_score)) + 
+    geom_point(aes(shape = "Carrat 2008 data")) +
+    geom_line(
+        data = data.frame(days_after_innoculation = seq(from = 0, to = 10, by = 0.1)) %>% 
+            mutate(symptom_score = symptoms_delay_dist$empirical_dist_integral * dgamma(
+              x = days_after_innoculation, shape = symptoms_delay_dist$shape, scale = symptoms_delay_dist$scale)),
+        aes(linetype = "Gamma fit")) +
+    labs(x = "Days after innoculation", y = "Symptoms score") +
+    theme_bw() +
+    scale_x_continuous(breaks = seq(0, 10, 1)) +
+    scale_y_continuous(limits = c(0, NA), oob = scales::oob_keep) +
+    theme(legend.position = "bottom", legend.title = element_blank(), legend.spacing.x = unit(0.1, 'cm'))
+
+cowplot::plot_grid(
+  symptom_delay_plot,
+  fecal_delay_plot,
+  resp_delay_plot,
+  align = "hv",
+  labels = c("A", "B", "C"))
+
+ggsave("figures/delay_distributions.png", width = 6.5, height = 5.5, units = "in")
+```
+
+Plot sensitivity analysis with respiratory delay distribution for supplement
+```{r}
+delay_dist_incidence_plot <- ggplot(
+  data = all_re_clean %>% 
+    filter(data_type == "Wastewater", observation_type != "Basel")) +
+  geom_hline(aes(yintercept = 1), color = "darkgray") +
+  geom_line(aes(x = as.Date(date), y = deconvolved_incidence, color = delay_dist), size = 0.5) +
+  geom_ribbon(
+    aes(
+      x = as.Date(date), y = deconvolved_incidence,
+      ymin = CI_down_deconvolved_incidence, ymax = CI_up_deconvolved_incidence,
+      fill = delay_dist),
+    alpha = 0.3,
+    linetype = 0) +
+  facet_grid(influenza_type ~ observation_type) +
+  delay_dist_color_scale +
+  shared_theme +
+  theme(legend.position = "none") +
+  shared_date_scale +
+  labs(x = element_blank(), y = "Deconvolved incidence")
+
+delay_dist_re_plot <- ggplot(
+  data = all_re_clean %>% 
+    filter(data_type == "Wastewater", observation_type != "Basel")) +
+  geom_hline(aes(yintercept = 1), color = "darkgray") +
+  geom_line(aes(x = as.Date(date), y = Re_estimate, color = delay_dist), size = 0.5) +
+  geom_ribbon(
+    aes(
+      x = as.Date(date), y = Re_estimate,
+      ymin = CI_down_Re_estimate, ymax = CI_up_Re_estimate,
+      fill = delay_dist),
+    alpha = 0.3,
+    linetype = 0) +
+  facet_grid(influenza_type ~ observation_type) +
+  delay_dist_color_scale +
+  shared_theme +
+  theme(legend.position = "bottom") +
+  shared_date_scale +
+  labs(x = element_blank(), y = "Reproductive number") +
+  scale_y_continuous(limits = c(0, 3), oob = oob_squish, breaks = c(0, 1, 2, 3))
+
+cowplot::plot_grid(delay_dist_incidence_plot, delay_dist_re_plot, labels = c('A', 'B'), nrow = 2, align = "vh", axis = "tblr")
+
+ggsave("figures/delay_dist_incidence_re.png", width = 6.5, height = 6, units = "in")
+```
+
+Plot sensitivity analysis for wastewater measurement scaling for supplement
+```{r}
+ggplot(
+    data = ww_re_scale_sensitivity,
+    aes(x = as.Date(date), y = Re_estimate, color = influenza_type, fill = influenza_type)
+) + facet_grid(scaling_type ~ influenza_type, labeller = label_wrap_gen(width = 20)) +
+    geom_line() +
+    geom_ribbon(aes(ymax = CI_up_Re_estimate, ymin = CI_down_Re_estimate), alpha = 0.45, colour = NA) +
+    influenza_type_color_scale +
+    shared_theme +
+    theme(legend.position = "none") +
+    shared_date_scale +
+    labs(x = element_blank(), y = "Reproductive number") +
+    scale_y_continuous(limits = c(0, 3), oob = oob_squish, breaks = c(0, 1, 2, 3))
+
+ggsave("figures/sensitivity_analysis_scaling.png", width = 6.5, height = 6, units = "in")
+```
+
+Get statistics for for paper
+```{r}
+ww_measurements_load <- ww_measurements %>%
+  filter(endsWith(x = measurement_type, suffix = "gc_per_day")) %>%
+  filter(sample_date >= as.Date("2021-12-01"), sample_date < as.Date("2022-05-01"))
+
+# Number of days per week sampled
+ww_measurements_load %>%
+  mutate(week = format(as.Date(sample_date), "%Y-%V")) %>%
+  group_by(wwtp, measurement_type, week) %>%
+  summarize(n_samples_per_week = n(), .groups = "drop") %>%
+  group_by(wwtp, measurement_type) %>%
+  summarize(avg_n_samples_per_week = mean(n_samples_per_week), n_weeks = n())
+
+# Number of replicates
+ww_measurements_load %>%
+  group_by(wwtp, measurement_type) %>%
+  summarize(mean_n_replicates = mean(n_measurements))
+
+# Number of days when IAV and IBV detected
+ww_measurements_load %>%
+  group_by(wwtp, measurement_type) %>%
+  summarize(n_samples = n(), n_detect = sum(mean != 0), n_non_detect = sum(mean == 0)) %>%
+  mutate(frac_non_detect = n_non_detect / n_samples)
+
+# IAV and IBV confirmed cases
+re_data_to_plot %>%
+  filter(data_type == "Cases") %>%
+  group_by(observation_type, influenza_type) %>%
+  summarize(n_observations = sum(observed_incidence))
+all_re_clean %>%
+  filter(observation_type == c("Basel"), data_type == "Cases") %>%
+  filter(delay_dist != "Respiratory") %>%
+  filter(date >= as.Date("2021-12-01"), date < as.Date("2022-05-01")) %>%
+  filter(data_type == "Cases") %>%
+  group_by(observation_type, influenza_type) %>%
+  summarize(n_observations = sum(observed_incidence))
+
+# Time shift based on respiratory distribution
+all_re_clean %>%
+  group_by(observation_type, data_type, influenza_type, delay_dist) %>%
+  filter(deconvolved_incidence == max(deconvolved_incidence, na.rm = T)) %>%
+  select(observation_type, data_type, influenza_type, delay_dist, date, deconvolved_incidence)
+
+# Cumulative estimated infection incidence
+re_data_to_plot %>%
+  group_by(observation_type, data_type, influenza_type) %>%
+  summarise(
+    deconvolved_incidence_total = sum(deconvolved_incidence, na.rm = T),
+    CI_down_deconvolved_incidence_total = sum(CI_down_deconvolved_incidence, na.rm = T),
+    CI_up_deconvolved_incidence_total = sum(CI_up_deconvolved_incidence, na.rm = T),
+    min_date = min(date), max_date = max(date))
+```
