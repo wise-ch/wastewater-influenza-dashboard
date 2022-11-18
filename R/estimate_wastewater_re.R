@@ -7,8 +7,8 @@ library(tidyr)
 library(readr)
 library(estimateR)
 
-source("estimate_re/helper_scripts/functions.R")
-source("estimate_re/helper_scripts/parameters.R")
+source("R/helper_scripts/functions.R")
+source("R/helper_scripts/parameters.R")
 
 # Set variables
 delay_dist_info <- influenza_distribution_infection_to_shedding_fecal_moments
