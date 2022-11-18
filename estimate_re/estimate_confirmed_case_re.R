@@ -12,8 +12,8 @@ source("estimate_re/helper_scripts/parameters.R")
 
 # Set variables
 delay_dist_info <- influenza_distribution_infection_to_symptoms_moments
-mean_serial_interval <- influenza_mean_serial_interval_days / 7
-std_serial_interval <- influenza_std_serial_interval_days / 7
+mean_serial_interval <- influenza_mean_serial_interval_days
+std_serial_interval <- influenza_std_serial_interval_days
 estimation_window <- 3  # 3 is EpiEstim default
 n_bootstrap_reps <- 50  # TODO: increase?
 
@@ -30,9 +30,15 @@ for (wwtp_i in unique(case_data$wwtp)) {
         case_data_filtered <- case_data %>%
             filter(wwtp == wwtp_i, influenza_type == influenza_type_j) %>%
             arrange(date)
+        
+        # Interpolate weekly data to daily data (linear interpolation)
+        case_data_interpolated <- interpolate_measurements(
+          data_frame = case_data_filtered %>% mutate(daily_avg_cases = total_scaled_cases / 7), 
+          date_col = "date", 
+          measurement_cols = "daily_avg_cases")
 
         measurements = list(
-            values = case_data_filtered$total_scaled_cases,
+            values = case_data_interpolated$daily_avg_cases,
             index_offset = 0)
 
         # Try to estimate Re (handling case where not enough incidence observed to calculate)
@@ -50,7 +56,7 @@ for (wwtp_i in unique(case_data$wwtp)) {
                 mean_serial_interval = mean_serial_interval,
                 std_serial_interval = std_serial_interval,
                 ref_date = min(case_data_filtered$date),
-                time_step = "week",
+                time_step = "day",
                 output_Re_only = F) %>% 
                 mutate(observation_type = wwtp_i, influenza_type = influenza_type_j)
         },

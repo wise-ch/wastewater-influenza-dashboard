@@ -46,12 +46,12 @@ influenza_distribution_infection_to_shedding_fecal_moments <- list(
     shape = 1.769032,
     scale = 5.74016)
 
-## Influenza Delay between infection and symptom score in weeks
+## Influenza Delay between infection and symptom score
 # Ref: get_symptom_score_distribution.R
 influenza_distribution_infection_to_symptoms_moments <- list(
   name = "gamma",
-  shape = 4.469965356,
-  scale = 0.117523934)
+  shape = 4.471365702,
+  scale = 0.822408011)
 
 influenza_mean_serial_interval_days <- 2.6  # EpiEstim example (from Ferguson et al. 2005, Nature)
 influenza_std_serial_interval_days <- 1.5  # EpiEstim example (from Ferguson et al. 2005, Nature)
