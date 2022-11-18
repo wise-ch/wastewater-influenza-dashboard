@@ -36,5 +36,6 @@ jobs:
           git config --local user.email "actions@github.com"
           git add app/data/confirmed_case_re_estimates.csv
           git commit -am "GH ACTION calculate-case-based-re $(date)"
+          git fetch; git merge
           git push origin master
           

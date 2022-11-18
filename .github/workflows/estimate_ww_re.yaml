@@ -38,5 +38,6 @@ jobs:
           git add app/data/ww_loads.csv
           git add app/data/ww_re_estimates.csv
           git commit -am "GH ACTION calculate-ww-re $(date)"
+          git fetch; git merge
           git push origin master
           
