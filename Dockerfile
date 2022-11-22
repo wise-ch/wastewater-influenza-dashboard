@@ -3,21 +3,18 @@ FROM rocker/shiny-verse:4.2.0
 
 # Install app's R dependencies
 RUN install2.r --error --skipinstalled \
-  ggrepel \
-  lubridate \
-  patchwork \
+  dplyr \
   RColorBrewer \
+  readr \
   shiny \
   shinyBS \
   shinycssloaders \
   shinyjs \
-  shinyWidgets \
-  shiny.i18n \
-  viridis \
-  zoo
+  shinyWidgets
 
 # Copy app code into container
 COPY ./app/ /srv/shiny-server/
+RUN echo "preserve_logs true;" >> /etc/shiny-server/shiny-server.conf  # will save logs to /var/log/shiny-server inside container
 
 USER shiny
 
