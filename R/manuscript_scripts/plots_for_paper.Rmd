@@ -1,7 +1,7 @@
 This script is to make plots for the manuscript. It is adapted from `plots_for_poster.Rmd`.
 
 ```{r, setup, include=FALSE}
-knitr::opts_knit$set(root.dir = '/Users/nadeaus/Documents/Repos/wastewater-influenza')
+knitr::opts_knit$set(root.dir = '/Users/nadeaus/Documents/Repos/wastewaterr')
 remake_map <- F
 ```
 
@@ -60,28 +60,25 @@ Load data
 # ww_re_scale_sensitivity <- read.csv("results/ww_re_scaling_sensitivity.csv")
 # confirmed_case_re <- read.csv("results/confirmed_case_re_estimates.csv")
 
-ww_re <- read.csv("/Users/nadeaus/Documents/Repos/wastewaterr/app/data/ww_re_estimates.csv")
-confirmed_case_re <- read.csv("/Users/nadeaus/Documents/Repos/wastewaterr/app/data/confirmed_case_re_estimates.csv")
+ww_re <- read.csv("app/data/ww_re_estimates.csv")
+confirmed_case_re <- read.csv("app/data/confirmed_case_re_estimates.csv")
 
 # Catchment area data
 catchment_area_data <- read.xlsx("proposals/commune_list.xlsx", sheetIndex = 2)
 
 # Wastewater concentration and load data
-# ww_measurements <- rbind(
-#   read.csv("tmp/clean_data_bs.csv"),
-#   read.csv("tmp/clean_data_ge_zh.csv"))  # summarized raw measurement data
 ww_measurements <- rbind(
-  read.csv("/Users/nadeaus/Documents/Repos/wastewaterr/data/clean_data_bs.csv"),
-  read.csv("/Users/nadeaus/Documents/Repos/wastewaterr/data/clean_data_ge_zh.csv")
+  read.csv("data/clean_data_bs.csv"),
+  read.csv("data/clean_data_ge_zh.csv")  # summarized raw measurement data
 )
 
 # Delay distribution data
-fecal_delay_data <- read.csv("data/data_for_fecal_shedding_dist.csv")
-resp_delay_data <- read.csv("data/shedding_profile_carrat_2008.csv")
-symptoms_delay_data <- read.csv("data/symptoms_score_carrat_2008.csv")
-fecal_delay_dist <- read.csv("data/shedding_profile_fit_fecal.csv")
-resp_delay_dist <- read.csv("data/shedding_profile_fit.csv")
-symptoms_delay_dist <- read.csv("data/symptom_score_fit.csv")
+fecal_delay_data <- read.csv("data/raw_data/data_for_fecal_shedding_dist.csv")
+resp_delay_data <- read.csv("data/raw_data/shedding_profile_carrat_2008.csv")
+symptoms_delay_data <- read.csv("data/raw_data/symptoms_score_carrat_2008.csv")
+fecal_delay_dist <- read.csv("data/raw_data/shedding_profile_fit_fecal.csv")
+resp_delay_dist <- read.csv("data/raw_data/shedding_profile_fit.csv")
+symptoms_delay_dist <- read.csv("data/raw_data/symptom_score_fit.csv")
 ```
 
 Clean catchment area data
@@ -224,7 +221,7 @@ all_re_clean <- all_re %>%
     "LAUPEN(SENSETAL)" = "Laupen")) %>%
   mutate(observation_type = factor(
     observation_type, 
-    levels = c("Zurich", "Geneva", "Basel", "Lugano", "Altenrhein", "Laupen", "Chur")))  # decreasing size order
+    levels = c("Zurich", "Geneva", "Basel", "Lugano", "Altenrhein", "Laupen", "Chur", "All provided data")))  # decreasing size order
 ```
 
 Plot Re input data: interpolated, scaled wastewater data and case count data
@@ -234,7 +231,7 @@ input_data_plot <- ggplot(
   aes(x = as.Date(date), y = observed_incidence, color = influenza_type)) +
   geom_line(size = 0.5) +
   geom_point(size = 0.5) +
-  facet_grid(observation_type ~ data_type, scales = "free_y") +
+  facet_grid(observation_type + measuring_period ~ data_type, scales = "free_y") +
   scale_x_date(date_breaks = "2 months", date_labels = "%b\n%y") +
   influenza_type_color_scale +
   shared_theme + 
@@ -243,7 +240,7 @@ input_data_plot <- ggplot(
 
 input_data_plot
 
-ggsave("figures/re_input_data2.png", height = 9, width = 8, units = "in")
+ggsave("figures/re_input_data.png", height = 9, width = 8, units = "in")
 ```
 
 Plot deconvolved incidence estimates
@@ -313,7 +310,7 @@ measurement_data_to_plot <- ww_measurements %>%
   mutate(observation_type = factor(observation_type, levels = catchment_factor_levels))
 
 re_data_to_plot <- all_re_clean %>%
-  filter(observation_type %in% c("Zurich", "Geneva")) %>%
+  filter(observation_type %in% c("Zurich", "Geneva", "All provided data")) %>%
   filter(date >= as.Date("2021-12-01"), date < as.Date("2022-05-01")) %>%
   filter(delay_dist != "Respiratory") %>%
   mutate(observation_type = factor(observation_type, levels = catchment_factor_levels))
@@ -408,7 +405,7 @@ ggplot(data = re_data_to_plot) +
   facet_grid(influenza_type ~ observation_type) +
   data_type_color_scale +
   shared_theme +
-  theme(legend.position = "bottom") +
+  theme(legend.position = "bottom") + 
   shared_date_scale +
   labs(x = element_blank(), y = "Reproductive number") +
   scale_y_continuous(limits = c(0, 3), oob = oob_squish, breaks = c(0, 1, 2, 3))

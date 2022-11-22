@@ -20,19 +20,19 @@ n_bootstrap_reps <- 50  # TODO: increase
 # Import data
 ww_data_bs <- read_csv("data/clean_data_bs.csv", col_types = cols(sample_date = "D")) %>%
   pivot_wider(
-    id_cols = c("sample_date", "wwtp"), 
+    id_cols = c("sample_date", "measuring_period", "wwtp"), 
     names_from = "measurement_type", 
     values_from = "mean")
 ww_data_ge <- read_csv("data/clean_data_ge_zh.csv", col_types = cols(sample_date = "D")) %>%
   filter(wwtp == "STEP Aire") %>%
   pivot_wider(
-    id_cols = c("sample_date", "wwtp"), 
+    id_cols = c("sample_date", "measuring_period", "wwtp"), 
     names_from = "measurement_type", 
     values_from = "mean")
 ww_data_zh <- read_csv("data/clean_data_ge_zh.csv", col_types = cols(sample_date = "D")) %>%
   filter(wwtp == "ARA Werdhölzli") %>%
   pivot_wider(
-    id_cols = c("sample_date", "wwtp"), 
+    id_cols = c("sample_date", "measuring_period", "wwtp"), 
     names_from = "measurement_type", 
     values_from = "mean")
 
@@ -64,109 +64,104 @@ ww_data_zh <- ww_data_zh %>%
   mutate(IAV_gc_per_day_norm = IAV_gc_per_day / normalization_factor_zh) %>%
   mutate(IBV_gc_per_day_norm = IBV_gc_per_day / normalization_factor_zh)
 
-# Interpolate measurements to daily values
-ww_data_interp_bs <- interpolate_measurements(
-  data_frame = ww_data_bs,
-  date_col = "sample_date",
-  measurement_cols = c("IAV_gc_per_day", "IAV_gc_per_mL_WW", "IBV_gc_per_day", "IBV_gc_per_mL_WW", "IAV_gc_per_day_norm", "IBV_gc_per_day_norm")
-)
-ww_data_interp_ge <- interpolate_measurements(
-  data_frame = ww_data_ge,
-  date_col = "sample_date",
-  measurement_cols = c("IAV_gc_per_day", "IAV_gc_per_mL_WW", "IBV_gc_per_day", "IBV_gc_per_mL_WW", "IAV_gc_per_day_norm", "IBV_gc_per_day_norm")
-)
-ww_data_interp_zh <- interpolate_measurements(
-  data_frame = ww_data_zh,
-  date_col = "sample_date",
-  measurement_cols = c("IAV_gc_per_day", "IAV_gc_per_mL_WW", "IBV_gc_per_day", "IBV_gc_per_mL_WW", "IAV_gc_per_day_norm", "IBV_gc_per_day_norm")
-)
-
-# Put data in long format
-data_all <- rbind(
-  ww_data_interp_bs %>% mutate(wwtp = "ARA Basel"),
-  ww_data_interp_ge %>% mutate(wwtp = "STEP Aire"),
-  ww_data_interp_zh %>% mutate(wwtp = "ARA Werdhölzli")
-) %>%
-  pivot_longer(
-  cols = c(IAV_gc_per_day, IBV_gc_per_day, IAV_gc_per_day_norm, IBV_gc_per_day_norm),
-  values_to = "observation",
-  names_to = c("influenza_type", "observation_units"),
-  names_pattern = "([A-Z]{3})_(.*)"
-) %>% select(sample_date, wwtp, is_observation, influenza_type, observation, observation_units)
-
-# Write out data used for Re inference
-write.csv(x = data_all, file = "app/data/ww_loads.csv")
-
 # Estimate Re for each data stream
 is_first <- T
-for (wwtp_i in unique(data_all$wwtp)) {
-  for (influenza_type_j in unique(data_all$influenza_type)) {
-    writeLines(paste("\nEstimating Re for", wwtp_i, "influenza", influenza_type_j))
-    
-    # Get appropriate data
-    data_filtered <- data_all %>%
-      filter(wwtp == wwtp_i, influenza_type == influenza_type_j, observation_units == "gc_per_day_norm") %>%
-      arrange(sample_date)
-    
-    measurements = list(
-      values = data_filtered$observation,
-      index_offset = 0)
-    
-    # Try to estimate Re (handling case where not enough incidence observed to calculate)
-    estimates_bootstrap <- tryCatch({
-      get_block_bootstrapped_estimate(
-        measurements$values,
-        N_bootstrap_replicates = n_bootstrap_reps,
-        smoothing_method = "LOESS",
-        deconvolution_method = "Richardson-Lucy delay distribution",
-        estimation_method = "EpiEstim sliding window",
-        uncertainty_summary_method = "original estimate - CI from bootstrap estimates",
-        combine_bootstrap_and_estimation_uncertainties = TRUE,
-        delay = delay_dist_info,
-        estimation_window = estimation_window,
-        mean_serial_interval = mean_serial_interval,
-        std_serial_interval = std_serial_interval,
-        ref_date = min(data_filtered$sample_date),
-        time_step = "day",
-        output_Re_only = F) %>% 
-        mutate(observation_type = wwtp_i, influenza_type = influenza_type_j)
-    },
-    error = function(cond) {
-      message(paste("Couldn't calculate Re for", wwtp_i, "influenza", influenza_type_j))
-      message(cond)
-      # Make observation data frame anyways
-      return(data.frame(
-        date = data_filtered$sample_date,
-        observed_incidence = data_filtered$observation,
-        CI_down_observed_incidence = NA,    
-        CI_up_observed_incidence = NA,
-        smoothed_incidence = NA,
-        CI_down_smoothed_incidence = NA,
-        CI_up_smoothed_incidence = NA,
-        deconvolved_incidence = NA,
-        CI_down_deconvolved_incidence = NA,
-        CI_up_deconvolved_incidence = NA,
-        Re_estimate = NA,
-        CI_down_Re_estimate = NA,
-        CI_up_Re_estimate = NA,
-        Re_highHPD = NA,
-        Re_lowHPD = NA,
-        bootstrapped_CI_down_Re_estimate = NA,
-        bootstrapped_CI_up_Re_estimate = NA,
-        observation_type = wwtp_i,
-        influenza_type = influenza_type_j
-      ))
-    })
-    
-    # Aggregate Re estimates
-    if (is_first) {
-      estimates_bootstrap_all <- estimates_bootstrap
-      is_first <- F
-    } else {
-      estimates_bootstrap_all <- rbind(estimates_bootstrap_all, estimates_bootstrap)
-    } 
+for (data in list(ww_data_bs, ww_data_ge, ww_data_zh)) {
+  
+  data_long <- data %>% pivot_longer(
+    cols = c(IAV_gc_per_day, IBV_gc_per_day, IAV_gc_per_day_norm, IBV_gc_per_day_norm),
+    values_to = "observation",
+    names_to = c("influenza_type", "observation_units"),
+    names_pattern = "([A-Z]{3})_(.*)"
+  )
+  wwtp_i <- unique(data$wwtp)  # should be single plant
+  
+  for (influenza_type_j in unique(data_long$influenza_type)) {
+    for (measuring_period_k in unique(data_long$measuring_period)) {
+      writeLines(paste("\nEstimating Re for", wwtp_i, "influenza", influenza_type_j, "in period", measuring_period_k))
+
+      # Get appropriate data
+      data_filtered <- data_long %>%
+        filter(influenza_type == influenza_type_j, measuring_period == measuring_period_k, observation_units == "gc_per_day_norm") %>%
+        filter(!is.na(observation)) %>%  # this is just to remove leading NA measurements for ZH IBV
+        arrange(sample_date)
+      
+      # Interpolate measurements to daily values
+      data_interpolated <- interpolate_measurements_cubic_spline(
+        data_frame = data_filtered,
+        date_col = "sample_date",
+        measurement_cols = c("observation")
+      )
+      
+      measurements = list(
+        values = data_interpolated$observation,
+        index_offset = 0)
+      
+      # Try to estimate Re (handling case where not enough incidence observed to calculate)
+      estimates_bootstrap <- tryCatch({
+        get_block_bootstrapped_estimate(
+          measurements$values,
+          N_bootstrap_replicates = n_bootstrap_reps,
+          smoothing_method = "LOESS",
+          deconvolution_method = "Richardson-Lucy delay distribution",
+          estimation_method = "EpiEstim sliding window",
+          uncertainty_summary_method = "original estimate - CI from bootstrap estimates",
+          combine_bootstrap_and_estimation_uncertainties = TRUE,
+          delay = delay_dist_info,
+          estimation_window = estimation_window,
+          mean_serial_interval = mean_serial_interval,
+          std_serial_interval = std_serial_interval,
+          ref_date = min(data_filtered$sample_date),
+          time_step = "day",
+          output_Re_only = F) %>% 
+          mutate(observation_type = wwtp_i, influenza_type = influenza_type_j, measuring_period = measuring_period_k)
+      },
+      error = function(cond) {
+        message(paste("Couldn't calculate Re for", wwtp_i, "influenza", influenza_type_j))
+        message(cond)
+        # Make observation data frame anyways
+        return(data.frame(
+          date = data_filtered$sample_date,
+          observed_incidence = data_filtered$observation,
+          CI_down_observed_incidence = NA,    
+          CI_up_observed_incidence = NA,
+          smoothed_incidence = NA,
+          CI_down_smoothed_incidence = NA,
+          CI_up_smoothed_incidence = NA,
+          deconvolved_incidence = NA,
+          CI_down_deconvolved_incidence = NA,
+          CI_up_deconvolved_incidence = NA,
+          Re_estimate = NA,
+          CI_down_Re_estimate = NA,
+          CI_up_Re_estimate = NA,
+          Re_highHPD = NA,
+          Re_lowHPD = NA,
+          bootstrapped_CI_down_Re_estimate = NA,
+          bootstrapped_CI_up_Re_estimate = NA,
+          observation_type = wwtp_i,
+          influenza_type = influenza_type_j, 
+          measuring_period = measuring_period_k
+        ))
+      })
+      
+      # Aggregate data and Re estimates
+      if (is_first) {
+        data_all <- data_interpolated
+        estimates_bootstrap_all <- estimates_bootstrap
+        is_first <- F
+      } else {
+        data_all <- rbind(data_all, data_interpolated)
+        estimates_bootstrap_all <- rbind(estimates_bootstrap_all, estimates_bootstrap)
+      } 
+    }
   }
 }
+
+# Write out data used for Re inference and results
+write.csv(
+  x = data_all, 
+  file = "app/data/ww_loads.csv"
+)
 
 write.csv(
   x = estimates_bootstrap_all,
