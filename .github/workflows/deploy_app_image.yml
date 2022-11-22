@@ -4,14 +4,11 @@
 name: build-and-publish-app-image
 
 on:
-  push:
-    branches: 
-      - 'master'
-    paths:
-      # Re-deploy when any data is updated
-      - 'data/clean_data_cases_che.csv'
-      - 'data/clean_data_bs.csv'
-      - 'data/clean_data_ge_zh.csv'
+  # Option to manually trigger deploy
+  workflow_dispatch:
+  # Automatic re-deploy at 3:07AM every Mon, Wed, and Fri
+  schedule:
+    - cron: '7 3 * * 1,3,5'
 
 env:
   REGISTRY: ghcr.io
@@ -25,22 +22,6 @@ jobs:
       packages: write
 
     steps:
-      - name: Wait for wastewater Re estimation workflow to finish
-        uses: lewagon/wait-on-check-action@v1.2.0
-        with:
-          ref: ${{ github.ref }}
-          running-workflow-name: 'calculate-ww-re'
-          repo-token: ${{ secrets.GITHUB_TOKEN }}
-          wait-interval: 30
-          
-      - name: Wait for case Re estimation workflow to finish
-        uses: lewagon/wait-on-check-action@v1.2.0
-        with:
-          ref: ${{ github.ref }}
-          running-workflow-name: 'calculate-case-based-re'
-          repo-token: ${{ secrets.GITHUB_TOKEN }}
-          wait-interval: 30
-          
       - name: Checkout repository
         uses: actions/checkout@v3
 
