@@ -10,8 +10,8 @@ on:
       # Only run when a relevant file is updated
       - 'data/clean_data_bs.csv'
       - 'data/clean_data_ge_zh.csv'
-      - '.github/workflows/estimate_ww_re.yaml'
-      - 'R/estimate_wastewater_re.R'
+      # - '.github/workflows/estimate_ww_re.yaml'
+      # - 'R/estimate_wastewater_re.R'
 
 jobs:
         
