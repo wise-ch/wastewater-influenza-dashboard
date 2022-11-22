@@ -1,5 +1,7 @@
 # This script is to make plots for the shiny app
 
+library(ggplot2)
+library(dplyr)
 library(readr)
 library(RColorBrewer)
 
@@ -71,8 +73,8 @@ date_range <- range(ww_loads$sample_date)
 #' Plot wastewater loads
 plot_ww_loads <- function(data = ww_loads, wwtp_to_plot, date_range) {
   data_filtered <- data %>%
-    filter(is_observation, observation_units == "gc_per_day") %>%
-    mutate(observation = observation / 10^12) %>%
+    filter(is_observation, observation_units == "gc_per_day_norm") %>%
+    mutate(observation = observation) %>%
     filter(wwtp == wwtp_to_plot) %>%
     filter(sample_date >= date_range[1] & sample_date <= date_range[2])
 
@@ -83,7 +85,7 @@ plot_ww_loads <- function(data = ww_loads, wwtp_to_plot, date_range) {
     ) +
     geom_line(
       data = data_filtered %>% filter(is_observation),
-      aes(x = sample_date, y = observation), linetype = "dashed", colour = "black"
+      aes(x = sample_date, y = observation, group = measuring_period), linetype = "dashed", colour = "black"
     ) +
     facet_grid(. ~ influenza_type) +
     scale_x_date(
@@ -91,7 +93,7 @@ plot_ww_loads <- function(data = ww_loads, wwtp_to_plot, date_range) {
       date_breaks = "months", date_labels = "%b"
     ) +
     scale_y_continuous(labels = function(label) sprintf("%4.1f", label)) +
-    labs(x = "Date", y = "Genome copies per day (x10^12)") +
+    labs(x = "Date", y = "Genome copies per day (normalized by minimum value)") +
     shared_theme
 
   p
@@ -108,7 +110,7 @@ plot_re <- function(data = re_to_plot, data_types, wwtp_to_plot, date_range) {
 
   p <- ggplot(data = data_filtered) +
     geom_line(aes(x = date, y = Re_estimate, colour = data_type), lwd = 0.8) +
-    geom_ribbon(aes(x = date, ymin = CI_down_Re_estimate, ymax = CI_up_Re_estimate, fill = data_type)) +
+    geom_ribbon(aes(x = date, ymin = CI_down_Re_estimate, ymax = CI_up_Re_estimate, fill = data_type), alpha = 0.5) +
     facet_grid(. ~ influenza_type) +
     geom_hline(yintercept = 1) +
     scale_color_manual(values = data_type_colors, aesthetics = c("color", "fill"), breaks = data_types) +

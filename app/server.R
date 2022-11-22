@@ -1,6 +1,4 @@
 library(shiny)
-library(patchwork)
-library(ggrepel)
 
 # zurich flicker: not present if no observe event language change
 
