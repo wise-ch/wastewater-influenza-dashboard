@@ -9,8 +9,8 @@ on:
     paths:
       # Only run when a relevant file is updated
       - 'data/clean_data_cases_che.csv'
-      - '.github/workflows/estimate_case_re.yaml'
-      - 'R/estimate_confirmed_case_re.R'
+      # - '.github/workflows/estimate_case_re.yaml'
+      # - 'R/estimate_confirmed_case_re.R'
 
 jobs:
         
