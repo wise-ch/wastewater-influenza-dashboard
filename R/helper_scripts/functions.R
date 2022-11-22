@@ -43,14 +43,13 @@ interpolate_measurements_cubic_spline <- function(data_frame, date_col, measurem
     mutate(x = 1:n())
   data_frame_all_dates_obs_only <- data_frame_all_dates %>% filter(is_observation)
   
-  interpolated_values <- pracma::cubicspline(
-    x = data_frame_all_dates_obs_only$x, 
-    y = data_frame_all_dates_obs_only$total_scaled_cases / 7, 
-    xi = data_frame_all_dates$x)
+  for (colname in measurement_cols) {
+    interpolated_values <- pracma::cubicspline(
+      x = data_frame_all_dates_obs_only$x, 
+      y = data_frame_all_dates_obs_only[[colname]], 
+      xi = data_frame_all_dates$x)
+    data_frame_all_dates[[colname]] <- case_when(interpolated_values < 0 ~ 0, T ~ interpolated_values)
+  }
   
-  data_frame_interp <- data_frame_all_dates %>% 
-    mutate(interp_daily_cases = case_when(interpolated_values < 0 ~ 0, T ~ interpolated_values)) %>%
-    select(-x)
-  
-  return(data_frame_interp)
+  return(data_frame_all_dates %>% select(-x))
 }
