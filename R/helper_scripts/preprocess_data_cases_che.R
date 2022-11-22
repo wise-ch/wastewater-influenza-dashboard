@@ -4,7 +4,19 @@ library(xlsx)
 library(dplyr)
 library(tidyr)
 
-case_data_raw <- read.xlsx("data/raw_data/foph_case_data/2022-11-15_Influenza_daten_nach_plz.xlsx", sheetIndex = 1)
+#' Get newest data file from FOPH.
+#' @param path_to_data The directory where FOPH data is stored.
+#' @return Path to newest data file.
+get_newest_data <- function(path_to_data = "data/raw_data/foph_case_data") {
+  files <- list.files(path = path_to_data, pattern = ".*Influenza_daten_nach_plz.xlsx$", full.names = T)
+  newest_data_file <- sort(files)[length(files)]
+  print(paste("Newest file found is:", newest_data_file))
+  newest_data <- read.xlsx("data/raw_data/foph_case_data/2022-11-15_Influenza_daten_nach_plz.xlsx", sheetIndex = 1)
+  return(newest_data)
+}
+
+print("Loading newest data from FOPH")
+case_data_raw <- get_newest_data()
 catchment_data <- read.xlsx("data/raw_data/plz_list.xlsx", sheetIndex = 1)
 
 # Wrangle data
@@ -68,6 +80,19 @@ case_data_all_complete <- case_data_all %>%
     right_join(full_df_w_typ, by = c("date", "ARA.Name", "typ")) %>%
     mutate(total_cases = replace_na(total_cases, 0))
 
+# Annotate different measuring periods (Re estimated for each separately)
+case_data_all_complete <- case_data_all_complete %>% mutate(
+  measuring_period = case_when(
+    date <= as.Date("2022-05-01") ~ "2021/22",
+    date >= as.Date("2022-10-01") & date <= as.Date("2023-05-01") ~ "2022/23",
+    T ~ "Outside of measuring period"
+  )
+)
+if (any(case_data_all_complete$measuring_period == "Outside of measuring period")) {
+  warning("Some data is outside of a known measuring period, have you started monitoring a new season? Add the date range to code if so. Currently filtering these data out.")
+  case_data_all_complete <- case_data_all_complete %>% filter(measuring_period != "Outside of measuring period")
+}
+
 # Write out cleaned data for re estimation
 case_data_all_complete_renamed <- case_data_all_complete %>%
     rename("influenza_type" = "typ", "wwtp" = "ARA.Name")
@@ -77,7 +102,7 @@ write.csv(case_data_all_complete_renamed, "data/clean_data_cases_che.csv", row.n
 # Plot data
 ggplot(data = case_data_all_complete_renamed, aes(x = date, y = total_cases)) + 
     geom_point() +
-    facet_grid(wwtp ~ influenza_type) +
+    facet_grid(wwtp + measuring_period ~ influenza_type) +
     scale_x_date(date_breaks = "2 months", date_labels = "%b %y")
 
 ggsave("figures/cases_by_catchment.png", width = 9, height = 9, units = "in")
