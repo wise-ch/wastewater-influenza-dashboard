@@ -1,6 +1,6 @@
 # This workflow is to re-generate wastewater Re estimates
 
-name: calculate-ww-re
+name: Calculate Wastewater-based Re
 
 on:
   push:

@@ -1,6 +1,6 @@
 # This workflow is to re-generate case-based Re estimates
 
-name: calculate-case-based-re
+name: Calculate case-based Re
 
 on:
   push:
