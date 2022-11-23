@@ -1,132 +1,115 @@
 # This script is to investigate how sensitive wastewater Re estimation is to the scaling factor applied to bring wastewater measurements on the same scale as case data
 
+# Load dependencies
 library(dplyr)
-library(estimateR)
-library(ggplot2)
+library(pracma)  # for cubic spline interpolation
 library(tidyr)
+library(readr)
+library(estimateR)
 
-source("code/R/helper_scripts/functions.R")
+source("R/helper_scripts/functions.R")
+source("R/helper_scripts/parameters.R")
 
-shedding_dist <- read.csv("data/shedding_profile_fit_fecal.csv")  # TODO: CHECK THIS BEFORE RUNNING!
-shedding_dist_to_use <- shedding_dist %>% filter(method == "Moments")
-shedding_dist_info <- list(name = "gamma", shape = shedding_dist_to_use$shape, scale = shedding_dist_to_use$scale)  # Shedding period (infection to viral shedding)
+# Set variables
+delay_dist_info <- influenza_distribution_infection_to_shedding_carrat2008_moments
+mean_serial_interval <- influenza_mean_serial_interval_days
+std_serial_interval <- influenza_std_serial_interval_days
+estimation_window <- 3  # 3 is EpiEstim default
+minimum_cumul_incidence <- 12  # minimum cumulative number of infections for Re to be estimated, EstimateR default is 12
+n_bootstrap_reps <- 500
 
-# Load influenza wastewater and case data
-ww_data_zh <- read.csv("tmp/clean_data_ge_zh.csv") %>%
+# Import data
+ww_data_zh <- read_csv("data/clean_data_ge_zh.csv", col_types = cols(sample_date = "D")) %>%
   filter(wwtp == "ARA Werdhölzli") %>%
   pivot_wider(
-    id_cols = c("sample_date", "wwtp", "n_measurements"), 
-    names_from = "measurement_type", 
-    values_from = "mean") %>%
-    filter(sample_date >= as.Date("2021-12-01"), sample_date < as.Date("2022-05-01"))
-
-case_data_zh <- read.csv("tmp/clean_data_cases_che.csv") %>%
-    filter(wwtp == "ZUERICH(WERDHOELZLI)") %>%
-    mutate(date = as.Date(date)) %>%
-    filter(date >= as.Date("2021-12-01"), date < as.Date("2022-05-01")) %>%
-    filter(influenza_type == "A")
-
-ww_data_interp_zh <- interpolate_measurements(
-  data_frame = ww_data_zh %>% mutate(sample_date = as.Date(sample_date)),
-  date_col = "sample_date",
-  measurement_cols = c("IAV_gc_per_day", "IBV_gc_per_day")
-)
-
-# Define scaling to try
-min_incidence <- min(case_data_zh$total_scaled_cases)  # 0, won't base anything on case data
+    id_cols = c("sample_date", "measuring_period", "wwtp"),
+    names_from = "measurement_type",
+    values_from = "mean")
 
 normalization_factor_zh <- min(
   ww_data_zh$IAV_gc_per_day[ww_data_zh$IAV_gc_per_day > 0],
-  ww_data_zh$IBV_gc_per_day[ww_data_zh$IBV_gc_per_day > 0]
+  ww_data_zh$IBV_gc_per_day[ww_data_zh$IBV_gc_per_day > 0],
+  na.rm = T
 )
 
 normalization_factors <- list(
-    # "No scaling" = 1,
-    "Minimum measurement is 1 case" = normalization_factor_zh,  # scaling used for main analysis
-    "Minimum measurement is 10 cases" = normalization_factor_zh / 10,
-    "Minimum measurement is 100 cases" = normalization_factor_zh / 100
-    # "Minimum measurement is 1000 cases" = normalization_factor_zh / 1000
+  "Minimum measurement is 1 case" = normalization_factor_zh,  # scaling used for main analysis
+  "Minimum measurement is 10 cases" = normalization_factor_zh / 10,
+  "Minimum measurement is 100 cases" = normalization_factor_zh / 100,
+  "Minimum measurement is 1000 cases" = normalization_factor_zh / 1000
 )
 
-# Set methodological parameters for Re estimation
-estimation_window = 3 # 3-day sliding window for the Re estimation
-N_bootstrap_replicates = 50 # we take this many replicates in the bootstrapping procedure
-
-# Do Re estimation
+# Estimate Re for each data stream
 is_first <- T
 for (i in 1:length(normalization_factors)) {
-    norm_factor <- normalization_factors[[i]]
-    ww_data_scaled <- ww_data_interp_zh %>%
-        mutate(obs_scaled = IAV_gc_per_day / norm_factor)
 
-    ref_date = min(ww_data_scaled$date, na.rm = T)
+  ww_data_zh_norm <- ww_data_zh %>%
+    mutate(IAV_gc_per_day_norm = IAV_gc_per_day / normalization_factors[[i]])
 
-    ww_estimates <- get_block_bootstrapped_estimate(
-        incidence_data = ww_data_scaled$obs_scaled,
-        N_bootstrap_replicates = N_bootstrap_replicates,
-        delay = list(shedding_dist_info),
-        estimation_window = estimation_window,
-        mean_serial_interval = 2.6,
-        std_serial_interval = 1.5,
-        ref_date = ref_date,
-        time_step = "day",
+  data_long <- ww_data_zh_norm %>% pivot_longer(
+    cols = c(IAV_gc_per_day, IAV_gc_per_day_norm),
+    values_to = "observation",
+    names_to = c("influenza_type", "observation_units"),
+    names_pattern = "([A-Z]{3})_(.*)"
+  )
+  wwtp_i <- "ARA Werdhölzli"
+
+  for (influenza_type_j in "IAV") {
+    for (measuring_period_k in "2021/22") {
+      writeLines(paste("\nEstimating Re for", wwtp_i, "influenza", influenza_type_j, "in period", measuring_period_k, "with scaling", normalization_factors[[i]]))
+
+      # Get appropriate data
+      data_filtered <- data_long %>%
+        filter(influenza_type == influenza_type_j, measuring_period == measuring_period_k, observation_units == "gc_per_day_norm") %>%
+        filter(!is.na(observation)) %>%  # this is just to remove leading NA measurements for ZH IBV
+        arrange(sample_date)
+
+      # Interpolate measurements to daily values
+      data_interpolated <- interpolate_measurements_cubic_spline(
+        data_frame = data_filtered,
+        date_col = "sample_date",
+        measurement_cols = c("observation")
+      )
+
+      measurements = list(
+        values = data_interpolated$observation,
+        index_offset = 0)
+
+      # Try to estimate Re (handling case where not enough incidence observed to calculate)
+      estimates_bootstrap <- get_block_bootstrapped_estimate(
+        measurements$values,
+        N_bootstrap_replicates = n_bootstrap_reps,
+        smoothing_method = "LOESS",
+        deconvolution_method = "Richardson-Lucy delay distribution",
+        estimation_method = "EpiEstim sliding window",
+        uncertainty_summary_method = "original estimate - CI from bootstrap estimates",
+        minimum_cumul_incidence = minimum_cumul_incidence,
         combine_bootstrap_and_estimation_uncertainties = TRUE,
-        output_Re_only = F
-    ) %>% mutate(
-        observation_type = "Zurich",
-        influenza_type = "IAV",
-        data_type = "Wastewater",
-        max_incidence = round(max(ww_data_scaled$obs_scaled), digits = 0),
-        max_est_incidence = round(max(deconvolved_incidence, na.rm = T), digits = 0),
-        scaling_type = names(normalization_factors)[i]
-    )
+        delay = delay_dist_info,
+        estimation_window = estimation_window,
+        mean_serial_interval = mean_serial_interval,
+        std_serial_interval = std_serial_interval,
+        ref_date = min(data_filtered$sample_date),
+        time_step = "day",
+        output_Re_only = F) %>%
+        mutate(observation_type = wwtp_i, influenza_type = influenza_type_j, measuring_period = measuring_period_k) %>%
+        mutate(
+          max_incidence = round(max(measurements$values), digits = 0),
+          scaling_type = names(normalization_factors)[i])
 
-    if (is_first) {
-        ww_estimates_all <- ww_estimates
+      # Aggregate data and Re estimates
+      if (is_first) {
+        estimates_bootstrap_all <- estimates_bootstrap
         is_first <- F
-    } else {
-        ww_estimates_all <- bind_rows(ww_estimates_all, ww_estimates)
+      } else {
+        estimates_bootstrap_all <- rbind(estimates_bootstrap_all, estimates_bootstrap)
+      }
     }
-
-    ww_data_scaled <- ww_data_interp_zh %>%
-        mutate(obs_scaled = IBV_gc_per_day / norm_factor)
-
-    ww_estimates <- get_block_bootstrapped_estimate(
-        incidence_data = ww_data_scaled$obs_scaled[18:length(ww_data_scaled$obs_scaled)],
-        N_bootstrap_replicates = N_bootstrap_replicates,
-        delay = list(shedding_dist_info),
-        estimation_window = estimation_window,
-        mean_serial_interval = 2.6,
-        std_serial_interval = 1.5,
-        ref_date = ref_date + 17,
-        time_step = "day",
-        combine_bootstrap_and_estimation_uncertainties = TRUE,
-        output_Re_only = F
-    ) %>% mutate(
-        observation_type = "Zurich",
-        influenza_type = "IBV",
-        data_type = "Wastewater",
-        max_incidence = round(max(ww_data_scaled$obs_scaled), digits = 0),
-        max_est_incidence = round(max(deconvolved_incidence, na.rm = T), digits = 0),
-        scaling_type = names(normalization_factors)[i]
-    )
-    ww_estimates_all <- bind_rows(ww_estimates_all, ww_estimates)
+  }
 }
 
 # Write out results
-write.csv(ww_estimates_all, "results/ww_re_scaling_sensitivity.csv", row.names = F)
-
-# # Plot results
-# ggplot(
-#     data = ww_estimates_all,
-#     aes(x = date, y = Re_estimate)
-# ) + facet_grid(scaling_type ~ influenza_type, labeller = label_both) +
-#     geom_line() +
-#     geom_ribbon(aes(ymax = CI_up_Re_estimate, ymin = CI_down_Re_estimate), alpha = 0.45, colour = NA) +
-#     scale_x_date(date_breaks = "1 month",
-#                 date_labels = '%b\n%y') +
-#     labs(y = "Reproductive number", x = element_blank()) +
-#     scale_y_continuous(limits = c(0, 3), oob = oob_squish, breaks = c(0, 1, 2, 3)) +
-#     theme_bw()
-
-# ggsave("figures/sensitivity_analysis_scaling.png", width = 7, height = 7, units = "in")
+write.csv(
+  x = estimates_bootstrap_all,
+  file = "data/data_used_in_manuscript/ww_re_scaling_sensitivity.csv"
+)

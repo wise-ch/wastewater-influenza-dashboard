@@ -12,8 +12,8 @@ source("R/helper_scripts/functions.R")
 source("R/helper_scripts/parameters.R")
 
 # Set variables
-output_suffix <- "" # Dashboard uses data with default output name, i.e. output_suffix = ""
-delay_dist_info <- influenza_distribution_infection_to_shedding_carrat2008_moments
+output_suffix <- "_fecal_sld" # Dashboard uses data with default output name, i.e. output_suffix = ""
+delay_dist_info <- influenza_distribution_infection_to_shedding_fecal_moments
 mean_serial_interval <- influenza_mean_serial_interval_days
 std_serial_interval <- influenza_std_serial_interval_days
 estimation_window <- 3  # 3 is EpiEstim default
@@ -22,12 +22,6 @@ seasons_to_calculate <- c("2021/22")  # list of seasons to calculate estimates f
 n_bootstrap_reps <- 500
 
 # Import data
-ww_data_bs <- read_csv("data/clean_data_bs.csv", col_types = cols(sample_date = "D")) %>%
-  filter(measuring_period %in% seasons_to_calculate) %>%
-  pivot_wider(
-    id_cols = c("sample_date", "measuring_period", "wwtp"),
-    names_from = "measurement_type",
-    values_from = "mean")
 ww_data_ge <- read_csv("data/clean_data_ge_zh.csv", col_types = cols(sample_date = "D")) %>%
   filter(measuring_period %in% seasons_to_calculate) %>%
   filter(wwtp == "STEP Aire") %>%
@@ -46,11 +40,6 @@ ww_data_zh <- read_csv("data/clean_data_ge_zh.csv", col_types = cols(sample_date
 # Normalize daily copies by minimum value to get observations on the same scale as case data
 # See Huisman et al. 2022 Environmental Health Perspectives - deconvolution algorithm seems to struggle when observations are too peaked
 # TODO: using lowest non-zero measurement - any other strategy to consider?
-normalization_factor_bs <- min(
-  ww_data_bs$IAV_gc_per_day[ww_data_bs$IAV_gc_per_day > 0],
-  ww_data_bs$IBV_gc_per_day[ww_data_bs$IBV_gc_per_day > 0],
-  na.rm = T
-)
 normalization_factor_ge <- min(
   ww_data_ge$IAV_gc_per_day[ww_data_ge$IAV_gc_per_day > 0],
   ww_data_ge$IBV_gc_per_day[ww_data_ge$IBV_gc_per_day > 0],
@@ -61,9 +50,6 @@ normalization_factor_zh <- min(
   ww_data_zh$IBV_gc_per_day[ww_data_zh$IBV_gc_per_day > 0],
   na.rm = T
 )
-ww_data_bs <- ww_data_bs %>%
-  mutate(IAV_gc_per_day_norm = IAV_gc_per_day / normalization_factor_bs) %>%
-  mutate(IBV_gc_per_day_norm = IBV_gc_per_day / normalization_factor_bs)
 ww_data_ge <- ww_data_ge %>%
   mutate(IAV_gc_per_day_norm = IAV_gc_per_day / normalization_factor_ge) %>%
   mutate(IBV_gc_per_day_norm = IBV_gc_per_day / normalization_factor_ge)
@@ -73,7 +59,7 @@ ww_data_zh <- ww_data_zh %>%
 
 # Estimate Re for each data stream
 is_first <- T
-for (data in list(ww_data_bs, ww_data_ge, ww_data_zh)) {
+for (data in list(ww_data_ge, ww_data_zh)) {
 
   data_long <- data %>% pivot_longer(
     cols = c(IAV_gc_per_day, IBV_gc_per_day, IAV_gc_per_day_norm, IBV_gc_per_day_norm),
@@ -168,10 +154,10 @@ for (data in list(ww_data_bs, ww_data_ge, ww_data_zh)) {
 # Write out data used for Re inference and results
 write.csv(
   x = data_all,
-  file = paste0("app/data/ww_loads", output_suffix, ".csv")
+  file = paste0("data/data_used_in_manuscript/ww_loads", output_suffix, ".csv")
 )
 
 write.csv(
   x = estimates_bootstrap_all,
-  file = paste0("app/data/ww_re_estimates", output_suffix, ".csv")
+  file = paste0("data/data_used_in_manuscript/ww_re_estimates", output_suffix, ".csv")
 )
