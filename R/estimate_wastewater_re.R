@@ -18,8 +18,8 @@ mean_serial_interval <- influenza_mean_serial_interval_days
 std_serial_interval <- influenza_std_serial_interval_days
 estimation_window <- 3  # 3 is EpiEstim default
 minimum_cumul_incidence <- 12  # minimum cumulative number of infections for Re to be estimated, EstimateR default is 12
-seasons_to_calculate <- c("2021/22")  # list of seasons to calculate estimates for
-n_bootstrap_reps <- 500
+seasons_to_calculate <- c("2021/22", "2022/23")  # list of seasons to calculate estimates for
+n_bootstrap_reps <- 50
 
 # Import data
 ww_data_bs <- read_csv("data/clean_data_bs.csv", col_types = cols(sample_date = "D")) %>%
