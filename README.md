@@ -30,6 +30,14 @@ docker run --rm -p 8080:3838 ghcr.io/wise-ch/wastewater-influenza-dashboard:mast
 # Open app in browser: https://localhost:8080
 ```
 
+## Server
+
+The dashboard is currently hosted on an AWS server managed by Chaoran.
+
+## Domain
+
+The app is currently tied to a domain name owned by Chaoran: wise.covidhub.science.
+
 ## Attribution
 
 The code and app are based on prior work by Taru Singhal and Jana Huisman for SARS-CoV-2. The data on which this app is based is generated and provided by collaborators at EAWAG, the Canton Basel-Stadt, and the Swiss Federal Office of Public Health.
