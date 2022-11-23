@@ -16,10 +16,13 @@ delay_dist_info <- influenza_distribution_infection_to_symptoms_moments
 mean_serial_interval <- influenza_mean_serial_interval_days
 std_serial_interval <- influenza_std_serial_interval_days
 estimation_window <- 3  # 3 is EpiEstim default
-n_bootstrap_reps <- 50  # TODO: increase?
+minimum_cumul_incidence <- 12  # minimum cumulative number of infections for Re to be estimated, EstimateR default is 12
+seasons_to_calculate <- c("2021/22")  # list of seasons to calculate estimates for
+n_bootstrap_reps <- 500
 
 # Import data
-case_data <- read_csv("data/clean_data_cases_che.csv", col_types = cols(date = "D"))
+case_data <- read_csv("data/clean_data_cases_che.csv", col_types = cols(date = "D")) %>%
+  filter(measuring_period %in% seasons_to_calculate)
 
 # Estimate Re for each data stream
 is_first <- T
@@ -27,22 +30,22 @@ for (wwtp_i in unique(case_data$wwtp)) {
     for (influenza_type_j in unique(case_data$influenza_type)) {
       for (measuring_period_k in unique(case_data$measuring_period)) {
         writeLines(paste("\nEstimating Re for", wwtp_i, "influenza", influenza_type_j, "in period", measuring_period_k))
-        
+
         # Get appropriate data
         case_data_filtered <- case_data %>%
           filter(wwtp == wwtp_i, influenza_type == influenza_type_j, measuring_period == measuring_period_k) %>%
           arrange(date)
-        
+
         # Interpolate weekly data to daily data (linear interpolation)
         case_data_interpolated <- interpolate_measurements_cubic_spline(
-          data_frame = case_data_filtered %>% mutate(daily_cases = total_cases / 7), 
-          date_col = "date", 
+          data_frame = case_data_filtered %>% mutate(daily_cases = total_cases / 7),
+          date_col = "date",
           measurement_cols = "daily_cases")
-        
+
         measurements = list(
           values = case_data_interpolated$daily_cases,
           index_offset = 0)
-        
+
         # Try to estimate Re (handling case where not enough incidence observed to calculate)
         estimates_bootstrap <- tryCatch({
           get_block_bootstrapped_estimate(
@@ -52,6 +55,7 @@ for (wwtp_i in unique(case_data$wwtp)) {
             deconvolution_method = "Richardson-Lucy delay distribution",
             estimation_method = "EpiEstim sliding window",
             uncertainty_summary_method = "original estimate - CI from bootstrap estimates",
+            minimum_cumul_incidence = minimum_cumul_incidence,
             combine_bootstrap_and_estimation_uncertainties = TRUE,
             delay = delay_dist_info,
             estimation_window = estimation_window,
@@ -59,7 +63,7 @@ for (wwtp_i in unique(case_data$wwtp)) {
             std_serial_interval = std_serial_interval,
             ref_date = min(case_data_filtered$date),
             time_step = "day",
-            output_Re_only = F) %>% 
+            output_Re_only = F) %>%
             mutate(observation_type = wwtp_i, influenza_type = influenza_type_j, measuring_period = measuring_period_k)
         },
         error = function(cond) {
@@ -69,7 +73,7 @@ for (wwtp_i in unique(case_data$wwtp)) {
           return(data.frame(
             date = case_data_filtered$date,
             observed_incidence = case_data_filtered$total_cases,
-            CI_down_observed_incidence = NA,    
+            CI_down_observed_incidence = NA,
             CI_up_observed_incidence = NA,
             smoothed_incidence = NA,
             CI_down_smoothed_incidence = NA,
@@ -85,18 +89,18 @@ for (wwtp_i in unique(case_data$wwtp)) {
             bootstrapped_CI_down_Re_estimate = NA,
             bootstrapped_CI_up_Re_estimate = NA,
             observation_type = wwtp_i,
-            influenza_type = influenza_type_j, 
+            influenza_type = influenza_type_j,
             measuring_period = measuring_period_k
           ))
         })
-        
+
         # Aggregate Re estimates
         if (is_first) {
           estimates_bootstrap_all <- estimates_bootstrap
           is_first <- F
         } else {
           estimates_bootstrap_all <- rbind(estimates_bootstrap_all, estimates_bootstrap)
-        } 
+        }
       }
     }
 }
