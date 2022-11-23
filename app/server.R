@@ -4,7 +4,7 @@ library(shiny)
 
 Sys.setlocale("LC_TIME", "en_GB.UTF-8")
 function(input, output, session) {
-  
+
   # Update title translation
   output$title_panel <- renderText({
     "Catchments"
@@ -42,7 +42,7 @@ function(input, output, session) {
       min = date_range[1], max = Sys.Date()
     )
   })
-# 
+#
 #   # Plotting cases -------
 #   output$case_plots <- renderPlot({
 #     # from all the case plots, it picks region
@@ -57,44 +57,6 @@ function(input, output, session) {
     raw
   })
 
-  # output$hover_info_raw <- renderUI({
-  #   req(input$pathogen)
-  #   hover_raw <- input$plot_hover_raw
-  # 
-  #   select_data <- plotDataWW %>%
-  #     mutate(observation = observation / 10^12) %>%
-  #     filter(region == input$region, pathogen_type == input$pathogen) %>%
-  #     filter(date >= input$slider_dates[1] & date <= input$slider_dates[2])
-  # 
-  #   point <- nearPoints(select_data,
-  #     hover_raw,
-  #     threshold = 8, maxpoints = 1, addDist = TRUE,
-  #     xvar = "date", yvar = "observation"
-  #   )
-  #   if (nrow(point) == 0) {
-  #     return(NULL)
-  #   }
-  # 
-  #   left_px <- hover_raw$coords_css$x
-  #   top_px <- hover_raw$coords_css$y
-  # 
-  #   style <- paste0(
-  #     "position:absolute; z-index:100; background-color: rgba(245, 245, 245, 0.9); ",
-  #     "left:", left_px + 2, "px; top:", top_px + 2, "px;"
-  #   )
-  # 
-  #   # actual tooltip created as wellPanel
-  #   wellPanel(
-  #     style = style,
-  #     p(HTML(paste0(
-  #       "<i>", point$date, "</i>", "<br/>",
-  #       "<b>", i18n$t("Gene copies"), "</b> (x10<sup>12</sup>): ", round(point$observation, 2), "<br/>",
-  #       "<i>(", i18n$t(as.character(point$quantification_flag)), ")</i>", "<br/>",
-  #       "<i>(", "Protocol: ", point$protocol, ")</i>"
-  #     )))
-  #   )
-  # })
-
   # Plotting Rww+Re for other sources --------
   output$re_plots <- renderPlot({
     re <- plot_re(
@@ -102,46 +64,6 @@ function(input, output, session) {
       date_range = input$slider_dates)
     re
   })
-
-  # output$hover_info_re <- renderUI({
-  #   req(input$pathogen)
-  #   hover <- input$plot_hover_re
-  # 
-  #   select_data <- plotDataRe %>%
-  #     filter(region %in% catchment_to_cantons[[input$region]]) %>%
-  #     filter(pathogen_type == input$pathogen) %>%
-  #     filter(data_type %in% input$data_type) %>%
-  #     filter(date >= input$slider_dates[1] & date <= input$slider_dates[2])
-  # 
-  #   point <- nearPoints(select_data, hover, threshold = 5, maxpoints = 1, addDist = TRUE)
-  #   if (nrow(point) == 0) {
-  #     return(NULL)
-  #   }
-  # 
-  #   left_px <- hover$coords_css$x
-  #   top_px <- hover$coords_css$y
-  # 
-  #   style <- paste0(
-  #     "position:absolute; z-index:100; background-color: rgba(245, 245, 245, 0.9); ",
-  #     "left:", left_px + 2, "px; top:", top_px + 2, "px;"
-  #   )
-  # 
-  #   point_data_type <- as.character(point$data_type)
-  #   point_data_type <- gsub("Confirmed", "Cases", point_data_type)
-  #   translated_source <- i18n$t(point_data_type)
-  # 
-  #   # actual tooltip created as wellPanel
-  #   wellPanel(
-  #     style = style,
-  #     p(HTML(paste0(
-  #       "<i>", point$date, "</i>", "<br/>",
-  #       "<b> R<sub>e</sub>: </b>", round(point$median_R_mean, 2),
-  #       " (", round(point$median_R_lowHPD, 2), ", ", round(point$median_R_highHPD, 2), ")",
-  #       "<br/>",
-  #       "<i>(", translated_source, ")</i>"
-  #     )))
-  #   )
-  # })
 
   # # download the plot ------
   # output$downloadPlot <- downloadHandler(
@@ -171,7 +93,7 @@ function(input, output, session) {
   #     dev.off() # turn the device off
   #   }
   # )
-  
+
   # add the about page --------
   output$about_page <- renderUI({
     # different for the different languages
