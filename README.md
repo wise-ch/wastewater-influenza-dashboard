@@ -21,7 +21,7 @@ docker run --rm -p 8080:3838 ww-shiny
 
 The app is actually deployed using this docker image. Another Github action workflow re-builds the image using the latest data in the repository every Monday, Wednesday, and Friday morning. This workflow can also be manually triggered from Github. The workflow pushes the re-built image to the Github package registry associated with this repository.
 
-TODO: the server on which the shiny app is hosted should watch for new versions of the image.
+The server that hosts the online dashboard continuously monitors the pacakge repository using [watchtower](https://github.com/containrrr/watchtower) and will update the online version of the dashboard whenever a new image is available.
 
 To pull the production image and run it locally, follow the steps [here]( https://docs.github.com/en/packages/working-with-a-github-packages-registry/working-with-the-container-registry) to log in to the Github package registry. Then run: 
 ```
