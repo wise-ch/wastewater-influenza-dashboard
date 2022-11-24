@@ -4,32 +4,30 @@ name: Calculate Wastewater-based Re
 
 on:
   push:
-    branches: 
+    branches:
       - 'master'
     paths:
       # Only run when a relevant file is updated
       - 'data/clean_data_bs.csv'
       - 'data/clean_data_ge_zh.csv'
-      - '.github/workflows/estimate_ww_re.yaml'
-      - 'R/estimate_wastewater_re.R'
 
 jobs:
-        
+
   estimate-ww-re:
-    runs-on: macOS-latest  
+    runs-on: macOS-latest
     env:
       GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
-  
+
     steps:
       # Load repo and install R, package dependencies
       - uses: actions/checkout@v3
       - uses: r-lib/actions/setup-r@v2
       - uses: r-lib/actions/setup-r-dependencies@v2  # install (possibly cached) dependencies from DESCRIPTION
-      
+
       # Run R script
       - name: Estimate Re
         run: Rscript R/estimate_wastewater_re.R
-    
+
       # Commit new files to data folder
       - name: Commit files
         run: |
@@ -40,4 +38,3 @@ jobs:
           git commit -am "GH ACTION calculate-ww-re $(date)"
           git fetch; git merge
           git push origin master
-          

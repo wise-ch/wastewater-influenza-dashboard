@@ -40,7 +40,7 @@ The app is currently tied to a domain name owned by Chaoran: wise.covidhub.scien
 
 ## Attribution
 
-The code and app are based on prior work by Taru Singhal and Jana Huisman for SARS-CoV-2. The data on which this app is based is generated and provided by collaborators at EAWAG, the Canton Basel-Stadt, and the Swiss Federal Office of Public Health.
+The code and app are based on prior work by Taru Singhal and Jana Huisman for SARS-CoV-2. Chaoran Chen and Adrian Lison helped set up and maintain the dashboard. The data on which this app is based is generated and provided by collaborators at EAWAG, the Canton Basel-Stadt, and the Swiss Federal Office of Public Health.
 
 ## Debugging the docker image
 Build the image, then run a container locally in interactive mode:
