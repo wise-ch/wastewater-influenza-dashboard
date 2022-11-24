@@ -16,7 +16,7 @@ The shiny app can also be run locally using the docker image specified by `Docke
 ```
 docker build -t ww-shiny .
 docker run --rm -p 8080:3838 ww-shiny
-# Open app in browser: https://localhost:8080
+# Open app in browser: http://localhost:8080
 ```
 
 The app is actually deployed using this docker image. Another Github action workflow re-builds the image using the latest data in the repository every Monday, Wednesday, and Friday morning. This workflow can also be manually triggered from Github. The workflow pushes the re-built image to the Github package registry associated with this repository.
