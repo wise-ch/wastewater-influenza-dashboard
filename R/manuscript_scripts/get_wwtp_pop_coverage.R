@@ -2,7 +2,6 @@
 
 library(dplyr)
 library(tidyr)
-library(xlsx)
 
 # Load data
 coverage_data_raw <- read.csv("data/DATA_Ara_ZurAireBasel.csv")  # percent of population in different locations inside WWTP catchment area
