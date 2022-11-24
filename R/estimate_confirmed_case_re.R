@@ -17,8 +17,8 @@ mean_serial_interval <- influenza_mean_serial_interval_days
 std_serial_interval <- influenza_std_serial_interval_days
 estimation_window <- 3  # 3 is EpiEstim default
 minimum_cumul_incidence <- 12  # minimum cumulative number of infections for Re to be estimated, EstimateR default is 12
-seasons_to_calculate <- c("2021/22", "2022/23")  # list of seasons to calculate estimates for
-n_bootstrap_reps <- 50
+seasons_to_calculate <- c("2021/22")  # list of seasons to calculate estimates for
+n_bootstrap_reps <- 500
 
 # Import data
 case_data <- read_csv("data/clean_data_cases_che.csv", col_types = cols(date = "D")) %>%
@@ -72,7 +72,7 @@ for (wwtp_i in unique(case_data$wwtp)) {
           # Make observation data frame anyways
           return(data.frame(
             date = case_data_filtered$date,
-            observed_incidence = case_data_filtered$total_cases,
+            observed_incidence = case_data_filtered$total_cases / 7,
             CI_down_observed_incidence = NA,
             CI_up_observed_incidence = NA,
             smoothed_incidence = NA,
@@ -96,16 +96,23 @@ for (wwtp_i in unique(case_data$wwtp)) {
 
         # Aggregate Re estimates
         if (is_first) {
+          data_all <- case_data_interpolated
           estimates_bootstrap_all <- estimates_bootstrap
           is_first <- F
         } else {
+          data_all <- rbind(data_all, case_data_interpolated)
           estimates_bootstrap_all <- rbind(estimates_bootstrap_all, estimates_bootstrap)
         }
       }
     }
 }
 
-# Write out estimates
+# Write out data used for Re inference and results
+write.csv(
+  x = data_all,
+  file = "data/data_used_in_manuscript/confirmed_cases.csv"
+)
+
 write.csv(
   x = estimates_bootstrap_all,
   file = "app/data/confirmed_case_re_estimates.csv",

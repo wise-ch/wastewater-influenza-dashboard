@@ -26,9 +26,8 @@ if (remake_map) {
 
 Specify colors and theme elements
 ```{r}
-influenza_type_colors <- brewer.pal(n = 8, name = "Set2")[c(1, 2, 5)]
-names(influenza_type_colors) <- c("IBV", "IAV", "ILI")
-influenza_type_color_scale <- scale_color_manual(values = influenza_type_colors, aesthetics = c("color", "fill"))
+influenza_type_colors <- brewer.pal(n = 8, name = "Set2")[c(2, 1)]
+influenza_type_color_scale <- scale_color_manual(name = "Influenza type", labels = c("IAV", "IBV"), values = influenza_type_colors, aesthetics = c("color", "fill"))
 
 catchment_area_colors <- brewer.pal(n = 8, name = "Set2")[c(4, 6, 3)]
 background_plot_color <- brewer.pal(n = 8, name = "Set2")[7]
@@ -52,6 +51,10 @@ line_size <- 1
 
 Load data
 ```{r}
+# Re input data
+ww_re_input_data <- read.csv("data/data_used_in_manuscript/ww_loads.csv")
+confirmed_cases_re_input_data <- read.csv("data/data_used_in_manuscript/confirmed_cases.csv")
+
 # Re estimates
 ww_re <- read.csv("data/data_used_in_manuscript/ww_re_estimates.csv")
 confirmed_case_re <- read.csv("data/data_used_in_manuscript/confirmed_case_re_estimates.csv")
@@ -191,8 +194,42 @@ if (remake_map) {
 }
 ```
 
-Merge Re output data
+Merge Re input and output data
 ```{r}
+all_re_input <- rbind(
+  ww_re_input_data %>% 
+    mutate(data_type = "Wastewater") %>% 
+    mutate(wwtp = zoo::na.locf(wwtp), influenza_type = zoo::na.locf(influenza_type)) %>%  # fill gaps due to interpolation
+    rename(observation_type = wwtp, date = sample_date) %>%
+    mutate(observation_type = recode(
+      observation_type,
+      "ARA Basel" = "Basel",
+      "ARA Werdhölzli" = "Zurich",
+      "STEP Aire" = "Geneva"
+    )) %>%
+    select(data_type, influenza_type, date, observation_type, observation, is_observation),
+  confirmed_cases_re_input_data %>%
+    mutate(data_type = "Cases") %>%
+    mutate(observation = daily_cases) %>%
+    mutate(observation_type = recode(
+      wwtp,
+      "ARA Basel" = "Basel",
+      "ARA Werdhölzli" = "Zurich",
+      "STEP Aire" = "Geneva",
+      "BASEL" = "Basel",
+      "ZUERICH(WERDHOELZLI)" = "Zurich",
+      "VERNIER/AIRE" = "Geneva",
+      "CHUR" = "Chur",
+      "BIOGGIO(LUGANO)" = "Lugano",
+      "THAL/ALTENRHEIN" = "Altenrhein",
+      "LAUPEN(SENSETAL)" = "Laupen")) %>%
+    mutate(influenza_type = recode(influenza_type, "A" = "IAV", "B" = "IBV")) %>%
+    mutate(observation_type = zoo::na.locf(observation_type), influenza_type = zoo::na.locf(influenza_type)) %>%  # fill gaps due to interpolation
+    select(data_type, influenza_type, date, observation_type, observation, is_observation)
+) %>% mutate(observation_type = factor(
+    observation_type, 
+    levels = c("Zurich", "Geneva", "Basel", "Lugano", "Altenrhein", "Laupen", "Chur", "All provided data")))  # decreasing size order
+
 all_re <- rbind(
   ww_re %>% 
     select(-X) %>%
@@ -225,15 +262,17 @@ all_re_clean <- all_re %>%
 Plot Re input data: interpolated, scaled wastewater data and case count data
 ```{r}
 input_data_plot <- ggplot(
-  data = all_re_clean %>% filter(delay_dist != "Respiratory"),
-  aes(x = as.Date(date), y = observed_incidence, color = influenza_type)) +
-  geom_line(size = 0.5) +
-  geom_point(size = 0.5) +
-  facet_grid(observation_type + measuring_period ~ data_type, scales = "free_y") +
+  data = all_re_input, 
+  aes(y = observation, x = as.Date(date), color = influenza_type),
+) +
+  geom_line(size = 0.5) +  # interpolated data
+  geom_point(data = all_re_input %>% filter(is_observation), aes(shape = influenza_type), size = 1) +  # actual measurements
+  facet_grid(observation_type ~ data_type, scales = "free_y") +
   scale_x_date(date_breaks = "2 months", date_labels = "%b\n%y") +
+  scale_shape_manual(labels = c("IAV", "IBV"), values = c(1, 4), name = "Influenza type") +
   influenza_type_color_scale +
   shared_theme + 
-  theme(legend.position = "none") +
+  theme(legend.position = "bottom") +
   labs(x = element_blank(), y = "Incidence")
 
 input_data_plot
@@ -257,7 +296,7 @@ estimated_incidence_plot <- ggplot(
   scale_x_date(date_breaks = "2 months", date_labels = "%b\n%y") +
   influenza_type_color_scale +
   shared_theme +
-  theme(legend.position = "none") +
+  theme(legend.position = "bottom") +
   labs(x = element_blank(), y = "Deconvolved incidence")
 
 estimated_incidence_plot
@@ -267,22 +306,29 @@ ggsave(filename = "figures/deconvolved_incidence.png", height = 9, width = 8, un
 
 Plot Re estimates
 ```{r}
+data_to_plot <- all_re_clean %>% 
+  filter(delay_dist != "Fecal") %>%
+  mutate(Re_low = pmin(CI_down_Re_estimate, Re_lowHPD, na.rm = T), 
+         Re_high = pmax(CI_up_Re_estimate, Re_highHPD, na.rm = T))  
+# this is to fix a bug(?) around the confidence intervals for the first weeks/months in Lugano, Laupen, and Chur, they're NA for combined uncertainty even though non-NA for Re_low/highHPD
+# tmp <- data_to_plot %>% filter(observation_type == "Lugano", influenza_type == "IAV", data_type == "Cases")
+
 estimated_re_plot <- ggplot(
-  data = all_re_clean %>% filter(delay_dist != "Fecal"), 
+  data = data_to_plot, 
   aes(x = as.Date(date), y = Re_estimate, color = influenza_type)) +
   geom_hline(aes(yintercept = 1), linetype = "solid", color = "darkgray") +
   geom_line(size = 0.5) +
   geom_ribbon(
-    aes(ymin = CI_down_Re_estimate, ymax = CI_up_Re_estimate, fill = influenza_type),
+    aes(ymin = Re_low, ymax = Re_high, fill = influenza_type),
     alpha = 0.3,
     linetype = 0) +
   facet_grid(observation_type ~ data_type, scales = "free_y") +
   scale_x_date(date_breaks = "2 months", date_labels = "%b\n%y") +
   influenza_type_color_scale +
   shared_theme +
-  theme(legend.position = "none") +
+  theme(legend.position = "bottom") +
   labs(x = element_blank(), y = "Reproductive number") +
-  scale_y_continuous(limits = c(0, 2.5), oob = oob_squish, breaks = c(0, 1, 2))
+  scale_y_continuous(limits = c(0, 3), oob = oob_squish, breaks = c(0, 1, 2, 3))
 
 estimated_re_plot
 
