@@ -5,19 +5,19 @@ library(tidyr)
 
 #' Get newest data file from FOPH.
 #' @param path_to_data The directory where FOPH data is stored.
-#' @return Path to newest data file.
+#' @return Newest data as a data frame.
 get_newest_data <- function(path_to_data = "data/raw_data/foph_case_data") {
   files <- list.files(path = path_to_data, pattern = ".*Influenza_daten_nach_plz.xlsx$", full.names = T)
   newest_data_file <- sort(files)[length(files)]
   print(paste("Newest file found is:", newest_data_file))
-  newest_data <- readxl::read_xlsx(newest_data_file, sheet = 1) %>% 
+  newest_data <- readxl::read_xlsx(newest_data_file, sheet = 1) %>%
     dplyr::rename_all(~make.names(.))
   return(newest_data)
 }
 
 print("Loading newest data from FOPH")
 case_data_raw <- get_newest_data()
-catchment_data <- readxl::read_xlsx("data/raw_data/plz_list.xlsx", sheet = 1) %>% 
+catchment_data <- readxl::read_xlsx("data/raw_data/plz_list.xlsx", sheet = 1) %>%
   dplyr::rename_all(~make.names(.))
 
 # Wrangle data
@@ -76,7 +76,7 @@ full_df_w_typ <- rbind(full_df %>% mutate(typ = "A"), full_df %>% mutate(typ = "
 if (any(full_df_w_typ %>% duplicated())) {
     stop("Daily date data frame has duplicate entries, rethink fill missing values strategy!")
 }
-  
+
 case_data_all_complete <- case_data_all %>%
     right_join(full_df_w_typ, by = c("date", "ARA.Name", "typ")) %>%
     mutate(total_cases = replace_na(total_cases, 0))
@@ -101,7 +101,7 @@ case_data_all_complete_renamed <- case_data_all_complete %>%
 write.csv(case_data_all_complete_renamed, "data/clean_data_cases_che.csv", row.names = F)
 
 # Plot data
-ggplot(data = case_data_all_complete_renamed, aes(x = date, y = total_cases)) + 
+ggplot(data = case_data_all_complete_renamed, aes(x = date, y = total_cases)) +
     geom_point() +
     facet_grid(wwtp + measuring_period ~ influenza_type) +
     scale_x_date(date_breaks = "2 months", date_labels = "%b %y")

@@ -6,7 +6,7 @@ library(tidyr)
 
 #' Get newest data file from EAWAG.
 #' @param path_to_data The directory where EAWAG data is stored.
-#' @return Path to newest data file.
+#' @return Newest data as a data frame.
 get_newest_data <- function(path_to_data = "data/raw_data/eawag_data") {
   files <- list.files(path = path_to_data, pattern = "^LatestFluData.*csv$", full.names = T)
   newest_data_file <- sort(files)[length(files)]
