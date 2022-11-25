@@ -89,32 +89,32 @@ clean_data_zh <- clean_data_eawag %>%
 
 clean_data_long_eawag <- rbind(clean_data_ge, clean_data_zh) %>%
   select(
-    sample_date, 
+    sample_date,
     wwtp,
-    measuring_period, 
+    measuring_period,
     target,
-    IAV_gc_per_mL_WW, 
-    IBV_gc_per_mL_WW, 
+    IAV_gc_per_mL_WW,
+    IBV_gc_per_mL_WW,
     SARS2_N1_gc_per_mL_WW,
     SARS2_N2_gc_per_mL_WW,
-    IAV_gc_per_day, 
+    IAV_gc_per_day,
     IBV_gc_per_day) %>%
   pivot_longer(cols = c(
-    IAV_gc_per_mL_WW, 
-    IBV_gc_per_mL_WW, 
+    IAV_gc_per_mL_WW,
+    IBV_gc_per_mL_WW,
     SARS2_N1_gc_per_mL_WW,
     SARS2_N2_gc_per_mL_WW,
-    IAV_gc_per_day, 
-    IBV_gc_per_day), 
+    IAV_gc_per_day,
+    IBV_gc_per_day),
     names_to = "measurement_type")
 
 clean_data_long_means_eawag <- clean_data_long_eawag %>%
   group_by(sample_date, measuring_period, wwtp, target, measurement_type) %>%
   summarize(
-    mean = mean(value), 
-    min = min(value), 
-    max = max(value), 
-    n_measurements = n(), 
+    mean = mean(value),
+    min = min(value),
+    max = max(value),
+    n_measurements = n(),
     .groups = "drop")
 
 # Plot controls (manually inspect)
@@ -126,7 +126,7 @@ ggplot(data = control_data_long_eawag, aes(x = target, y = value)) +
 ggsave("figures/all_controls_eawag.png", width = 7, height = 7, units = "in")
 
 # Plot all data
-ggplot(data = clean_data_long_means_eawag, 
+ggplot(data = clean_data_long_means_eawag,
        aes(x = as.Date(sample_date), y = mean, color = target)) +
   geom_point() +
   geom_errorbar(aes(ymin = min, ymax = max), width = 5) +
@@ -138,21 +138,25 @@ ggplot(data = clean_data_long_means_eawag,
 ggsave("figures/all_data_eawag.png", width = 9, height = 9, units = "in")
 
 # Select data for influenza analysis
-clean_data_long_means_eawag_for_analysis <- clean_data_long_eawag %>%
+clean_data_long_eawag_for_analysis <- clean_data_long_eawag %>%
   filter(!(target %in% c("sn1flu", "sn1(2x)flu"))) %>%  # remove data from earlier assays with different primer and/or probe concentrations
   filter(!(measurement_type %in% c("IBV_gc_per_mL_WW", "IBV_gc_per_day") & target == "iabv")) %>%  # remove IABV assay data for IBV due to poor separation between positive and negative droplets in controls
   filter(!(sample_date <= as.Date("2021-12-07") & measurement_type %in% c("IBV_gc_per_mL_WW", "IBV_gc_per_day") & wwtp == "ARA Werdhölzli")) %>%  # single non-zero measurement followed by many 0 measurements for IBV in Zurich cause estimateR bug where minimum incidence not met, this is a crude solution to remove early measurements
-  filter(!(measurement_type %in% c("SARS2_N1_gc_per_mL_WW", "SARS2_N2_gc_per_mL_WW"))) %>%  # don't analyze SARS-CoV-2
+  filter(!(measurement_type %in% c("SARS2_N1_gc_per_mL_WW", "SARS2_N2_gc_per_mL_WW")))  # don't analyze SARS-CoV-2
+
+# write.csv(clean_data_long_eawag_for_analysis, "data/data_used_in_manuscript/unnaggregated_data_ge_zh.csv", row.names = F)
+
+clean_data_long_means_eawag_for_analysis <- clean_data_long_eawag_for_analysis %>%
   group_by(sample_date, wwtp, measuring_period, measurement_type) %>%
   summarize(
-    mean = mean(value), 
-    min = min(value), 
-    max = max(value), 
-    n_measurements = n(), 
+    mean = mean(value),
+    min = min(value),
+    max = max(value),
+    n_measurements = n(),
     .groups = "drop")
 
 # Plot data used in analysis
-ggplot(data = clean_data_long_means_eawag_for_analysis, 
+ggplot(data = clean_data_long_means_eawag_for_analysis,
        aes(x = as.Date(sample_date), y = mean)) +
   geom_point() +
   geom_errorbar(aes(ymin = min, ymax = max), width = 5) +
