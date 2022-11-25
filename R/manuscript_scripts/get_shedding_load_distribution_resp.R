@@ -5,7 +5,7 @@ library(dplyr)
 library(MASS)
 library(fitdistrplus)
 
-data <- read.csv("data/shedding_profile_carrat_2008.csv") %>%
+data <- read.csv("data/data_used_in_manuscript/shedding_profile_carrat_2008.csv") %>%
     mutate(viral_titer = 10^log_viral_titer)
 
 ggplot(
@@ -22,10 +22,10 @@ for (i in seq_len(nrow(data))) {
 }
 
 # Plot fake data and digitized data correspondance
-ggplot(data = data) + 
+ggplot(data = data) +
     geom_point(aes(x = days_after_innoculation, y = viral_titer, color = "Viral titer from plot")) +
-    geom_bar(data = data.frame(obs = fake_data), aes(x = obs, fill = "Fake observations to fit ditribution to"), alpha = 0.5) + 
-    theme_bw() + 
+    geom_bar(data = data.frame(obs = fake_data), aes(x = obs, fill = "Fake observations to fit ditribution to"), alpha = 0.5) +
+    theme_bw() +
     theme(legend.position = "bottom")
 
 # Fit density function to fake dataset that follows plot
@@ -55,8 +55,8 @@ fit <- data.frame(
 
 # Get a function that returns linearly interpolated data points according to empirical data
 d.empirical <- approxfun(
-    x = data$days_after_innoculation, 
-    y = data$viral_titer, 
+    x = data$days_after_innoculation,
+    y = data$viral_titer,
     yleft = 0,  # assumes shedding is 0 before innoculation
     yright = 0  # assumes end of shedding captured by the data (at 9 days)
 )
@@ -90,12 +90,12 @@ ggplot(
     aes(x = days_after_innoculation, y = viral_titer)
 ) + geom_point(aes(shape = "Carrat 2008 data")) +
     # geom_line(
-    #     data = data.frame(days_after_innoculation = seq(from = 0, to = 10, by = 0.1)) %>% 
+    #     data = data.frame(days_after_innoculation = seq(from = 0, to = 10, by = 0.1)) %>%
     #         mutate(viral_titer = Z * dgamma(x = days_after_innoculation, shape = fit$shape[1], scale = fit$scale[1])),
     #     aes(linetype = "Gamma shedding distribution fit by MLE")
-    # ) + 
+    # ) +
     geom_line(
-        data = data.frame(days_after_innoculation = seq(from = 0, to = 10, by = 0.1)) %>% 
+        data = data.frame(days_after_innoculation = seq(from = 0, to = 10, by = 0.1)) %>%
             mutate(viral_titer = Z * dgamma(x = days_after_innoculation, shape = fit$shape[2], scale = fit$scale[2])),
         aes(linetype = "Gamma distribution fit")
     ) +
@@ -109,6 +109,6 @@ ggsave("figures/shedding_profile_fit.png", width = 4, height = 3, units = "in")
 # Write out fitted parameters
 write.csv(
     x = fit,
-    file = "data/shedding_profile_fit.csv",
+    file = "data/raw_data/shedding_profile_fit.csv",
     row.names = F
 )

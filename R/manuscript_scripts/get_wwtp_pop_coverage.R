@@ -5,9 +5,8 @@ library(tidyr)
 library(xlsx)
 
 # Load data
-coverage_data_raw <- read.csv("data/DATA_Ara_ZurAireBasel.csv")  # percent of population in different locations inside WWTP catchment area
-population_data_raw <- read.csv("data/swiss_population_data.csv")
-population_data_raw <- read.csv("data/swiss_population_data_by_plz.csv")
+coverage_data_raw <- read.csv("data/raw_data/DATA_Ara_ZurAireBasel.csv")  # percent of population in different locations inside WWTP catchment area
+population_data_raw <- read.csv("data/raw_data/swiss_population_data_by_plz.csv")
 
 # Re-format data
 population_data <- population_data_raw %>%
@@ -67,7 +66,7 @@ alt_estimates <- data.frame(
 coverage_summary <- coverage_total %>%
     full_join(alt_estimates, by = "ARA_NAMEN")
 
-write.csv(coverage_summary, "results/wwtp_population_coverage_summary.csv", row.names = F)
+write.csv(coverage_summary, "data/data_used_in_manuscript/wwtp_population_coverage_summary.csv", row.names = F)
 
 sum(coverage_summary$alt_est_percent_pop_covered)  # 16% Swiss population covered by Zurich, Basel, Geneva WWTP
 sum(coverage_summary$est_percent_pop_covered)  # 12% Swiss population covered by Zurich, Basel, Geneva WWTP

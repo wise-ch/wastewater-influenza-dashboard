@@ -5,7 +5,7 @@ library(dplyr)
 library(MASS)
 library(fitdistrplus)
 
-data <- read.csv("data/symptoms_score_carrat_2008.csv")
+data <- read.csv("data/data_used_in_manuscript/symptoms_score_carrat_2008.csv")
 
 ggplot(
     data = data,
@@ -16,8 +16,8 @@ ggplot(
 
 # Get a function that returns linearly interpolated data points according to empirical data
 d.empirical <- approxfun(
-    x = data$days_after_innoculation, 
-    y = data$symptom_score, 
+    x = data$days_after_innoculation,
+    y = data$symptom_score,
     yleft = 0,  # assumes shedding is 0 before innoculation
     yright = 0  # assumes end of shedding captured by the data (at 9 days)
 )
@@ -51,7 +51,7 @@ ggplot(
     aes(x = days_after_innoculation, y = symptom_score)
 ) + geom_point(aes(shape = "Carrat 2008 data")) +
     geom_line(
-        data = data.frame(days_after_innoculation = seq(from = 0, to = 10, by = 0.1)) %>% 
+        data = data.frame(days_after_innoculation = seq(from = 0, to = 10, by = 0.1)) %>%
             mutate(symptom_score = Z * dgamma(x = days_after_innoculation, shape = fit$shape, scale = fit$scale)),
         aes(linetype = "Gamma distribution fit")
     ) +
@@ -65,6 +65,6 @@ ggsave("figures/symptom_score_fit.png", width = 4, height = 3, units = "in")
 # Write out fitted parameters
 write.csv(
     x = fit,
-    file = "data/symptom_score_fit.csv",
+    file = "data/raw_data/symptom_score_fit.csv",
     row.names = F
 )

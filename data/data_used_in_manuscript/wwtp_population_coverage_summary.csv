@@ -1,0 +1,4 @@
+"ARA_NAMEN","est_residents_covered","est_min_residents_covered","est_max_residents_covered","est_percent_pop_covered","est_min_percent_pop_covered","est_max_percent_pop_covered","alt_est_residents_covered","alt_est_percent_pop_covered","alt_est_source"
+"BASEL",258472.070958253,256932.321768047,260011.82014846,0.03,0.03,0.03,270000,0.0308967224413537,"https://www.prorheno.ch/anlagen/ara-basel"
+"VERNIER/AIRE",359504.273407484,359211.327582161,359794.010766588,0.04,0.04,0.04,445000,0.0509223758755645,"https://ww2.sig-ge.ch/en/a-propos-de-sig/nous-connaitre/sites_expositions/step-aire"
+"ZUERICH(WERDHOELZLI)",454546.9266966,446628.038031709,463546.593201097,0.05,0.05,0.05,670000,0.0766696445766926,"https://de.wikipedia.org/wiki/Kl%C3%A4rwerk_Werdh%C3%B6lzli"
