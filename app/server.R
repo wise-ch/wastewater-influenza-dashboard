@@ -1,37 +1,8 @@
 library(shiny)
 
-# zurich flicker: not present if no observe event language change
-
-Sys.setlocale("LC_TIME", "en_GB.UTF-8")
 function(input, output, session) {
 
-  # Update title translation
-  output$title_panel <- renderText({
-    "Catchments"
-  })
-
-  # Update available data types based on pathogen --------
-  observeEvent(input$wwtp, {
-
-    output$data_type <- renderUI({
-      checkboxGroupInput(
-        inputId = "data_type",
-        label = "Data source (select to compare):",
-        choices = c("Wastewater", "Confirmed cases"),
-        selected = "Wastewater"
-      )
-    })
-
-    # output$disabled_data_types <- renderUI({
-    #   disabled(checkboxGroupInput(
-    #     inputId = "data_type_disabled",
-    #     label = NULL,
-    #     choices = options_disabled
-    #   ))
-    # })
-  })
-
-  # Control slider dates --------
+  # Control slider dates
   observeEvent(input$wwtp, {
     # Control the value, min, max according to region selected
     ww_loads_filtered <- ww_loads %>% filter(wwtp == input$wwtp, !is.na(sample_date))
@@ -51,18 +22,37 @@ function(input, output, session) {
 #     p
 #   })
 
-  # Plotting raw RNA copies -------
+  # Plotting wastewater measurements
   output$raw_plots <- renderPlot({
-    raw <- plot_ww_loads(wwtp_to_plot = input$wwtp, date_range = input$slider_dates)
+    raw <- plot_ww_loads(
+      wwtp_to_plot = input$wwtp,
+      date_range = input$slider_dates)
     raw
   })
 
-  # Plotting Rww+Re for other sources --------
-  output$re_plots <- renderPlot({
-    re <- plot_re(
-      data_types = input$data_type, wwtp_to_plot = input$wwtp,
+  # Plotting confirmed cases
+  output$case_plots <- renderPlot({
+    re <- plot_cases(
+      wwtp_to_plot = input$wwtp,
       date_range = input$slider_dates)
     re
+  })
+
+  # Plotting single catchment Re estimates
+  output$re_plots <- renderPlot({
+    re <- plot_re(
+      data_types = input$data_type,
+      wwtp_to_plot = input$wwtp,
+      date_range = input$slider_dates)
+    re
+  })
+
+  # Plotting all catchment Re estimates together
+  output$all_catchment_plots <- renderPlot({
+    all_re <- plot_all_re(
+      data_types = input$data_type_all_catchments,
+      date_range = input$slider_dates)
+    all_re
   })
 
   # # download the plot ------
@@ -96,9 +86,7 @@ function(input, output, session) {
 
   # add the about page --------
   output$about_page <- renderUI({
-    # different for the different languages
-    name <- paste0("texts/about_", input$lang, ".html")
-    includeHTML(path = name)
+    includeHTML(path = "texts/about_en-gb.html")
   })
 
 }
