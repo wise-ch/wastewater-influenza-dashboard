@@ -13,7 +13,6 @@ source("R/helper_scripts/parameters.R")
 
 # Set variables
 output_suffix <- "_fecal_sld" # Dashboard uses data with default output name, i.e. output_suffix = ""
-delay_dist_info <- influenza_distribution_infection_to_shedding_fecal_moments
 mean_serial_interval <- influenza_mean_serial_interval_days
 std_serial_interval <- influenza_std_serial_interval_days
 estimation_window <- 3  # 3 is EpiEstim default
@@ -101,7 +100,7 @@ for (data in list(ww_data_ge, ww_data_zh)) {
           uncertainty_summary_method = "original estimate - CI from bootstrap estimates",
           minimum_cumul_incidence = minimum_cumul_incidence,
           combine_bootstrap_and_estimation_uncertainties = TRUE,
-          delay = delay_dist_info,
+          delay = influenza_distribution_infection_to_shedding_fecal_moments,
           estimation_window = estimation_window,
           mean_serial_interval = mean_serial_interval,
           std_serial_interval = std_serial_interval,
@@ -161,3 +160,4 @@ write.csv(
   x = estimates_bootstrap_all,
   file = paste0("data/data_used_in_manuscript/ww_re_estimates", output_suffix, ".csv")
 )
+
