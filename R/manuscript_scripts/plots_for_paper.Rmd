@@ -10,7 +10,6 @@ Load packages
 library(ggplot2)
 library(dplyr)
 library(tidyr)
-library(xlsx)
 library(cowplot)
 library(RColorBrewer)
 library(scales)
@@ -78,7 +77,8 @@ ww_re_fecal_dist <- read.csv("data/data_used_in_manuscript/ww_re_estimates_fecal
 ww_re_scale_sensitivity <- read.csv("data/data_used_in_manuscript/ww_re_scaling_sensitivity.csv")
 
 # Catchment area data
-catchment_area_data <- read.xlsx("proposals/commune_list.xlsx", sheetIndex = 2)
+catchment_area_data <- readxl::read_xlsx("proposals/commune_list.xlsx", sheet = 2) %>% 
+  dplyr::rename_all(~make.names(.))
 
 # Wastewater concentration and load data
 ww_measurements <- rbind(
