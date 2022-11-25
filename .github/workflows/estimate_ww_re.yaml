@@ -3,6 +3,8 @@
 name: Calculate Wastewater-based Re
 
 on:
+  # Option to manually trigger deploy
+  workflow_dispatch:
   push:
     branches:
       - 'master'
