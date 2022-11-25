@@ -4,10 +4,9 @@ library(ggplot2)
 library(dplyr)
 library(MASS)
 library(fitdistrplus)
-library(xlsx)
 
 # Load, clean, and filter data
-data <- read.xlsx("data/raw_data/shedding_profile_data.xlsx", sheetIndex = 2)
+data <- readxl::read_xlsx("data/shedding_profile_data.xlsx", sheet = 2)
 
 data_cleaned <- data %>% group_by(specimen.type) %>%
     mutate(sample_type = case_when(

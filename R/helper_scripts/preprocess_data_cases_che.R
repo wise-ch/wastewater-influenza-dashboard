@@ -1,6 +1,5 @@
 #### Laboratory-confirmed case data provided by FOPH ####
 
-library(xlsx)
 library(dplyr)
 library(tidyr)
 
@@ -11,13 +10,15 @@ get_newest_data <- function(path_to_data = "data/raw_data/foph_case_data") {
   files <- list.files(path = path_to_data, pattern = ".*Influenza_daten_nach_plz.xlsx$", full.names = T)
   newest_data_file <- sort(files)[length(files)]
   print(paste("Newest file found is:", newest_data_file))
-  newest_data <- read.xlsx("data/raw_data/foph_case_data/2022-11-15_Influenza_daten_nach_plz.xlsx", sheetIndex = 1)
+  newest_data <- readxl::read_xlsx(newest_data_file, sheet = 1) %>% 
+    dplyr::rename_all(~make.names(.))
   return(newest_data)
 }
 
 print("Loading newest data from FOPH")
 case_data_raw <- get_newest_data()
-catchment_data <- read.xlsx("data/raw_data/plz_list.xlsx", sheetIndex = 1)
+catchment_data <- readxl::read_xlsx("data/raw_data/plz_list.xlsx", sheet = 1) %>% 
+  dplyr::rename_all(~make.names(.))
 
 # Wrangle data
 all_ww_plz <- unique(catchment_data$PLZ)
