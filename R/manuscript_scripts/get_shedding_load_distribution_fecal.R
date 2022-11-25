@@ -16,18 +16,17 @@ data_cleaned <- data %>% group_by(specimen.type) %>%
     mutate(title_2 = paste(author_year, title, sep = ": ")) %>%
     mutate(third_sd = 3 * sd(measurement)) %>%
     mutate(outlier = case_when(measurement > third_sd ~ T, T ~ F)) %>%
-    mutate(measurement.day = as.numeric(measurement.day))
+    mutate(measurement.day = as.numeric(measurement.day) + 2)  # 2-day average between infection and symptom onset according to Carrat 2008
 
-data_filtered <- data_cleaned %>% 
+data_filtered <- data_cleaned %>%
     filter(
         units != "Cycle threshold",
         !is.na(measurement.day),
         specimen.type == "faeces",
-        units == "copies/g")  %>% 
-        mutate(measurement.day = measurement.day + 2)  # temporal.measurement.reference.point is always symptom onset, shift by 2 to account for mean delay from infection to symptom onset in Carrat 2008
+        units == "copies/g")
 
 # Write out data used
-write.csv(data_filtered, "data/data_for_fecal_shedding_dist.csv", row.names = F)
+write.csv(data_filtered, "data/raw_data/data_for_fecal_shedding_dist.csv", row.names = F)
 
 data_summarized <- data_filtered %>% group_by(measurement.day) %>% summarize(measurement = mean(measurement))
 
@@ -43,8 +42,8 @@ show(p)
 
 # Get a function that returns linearly interpolated data points according to empirical data
 d.empirical <- approxfun(
-    x = data_summarized$measurement.day, 
-    y = data_summarized$measurement, 
+    x = data_summarized$measurement.day,
+    y = data_summarized$measurement,
     yleft = 0,  # assumes shedding is 0 before innoculation
     yright = 0  # assumes end of shedding captured by the data (at 9 days)
 )
@@ -76,7 +75,7 @@ scale_moments <- sd_moments ^ 2 / mean_moments
 p + geom_line(
         data = data.frame(
             measurement.day = seq(to = 35, by = 0.5)
-        ) %>% 
+        ) %>%
             mutate(measurement = Z * dgamma(x = measurement.day, shape = shape_moments, scale = scale_moments)),
         aes(linetype = "Gamma distribution fit")
     )
@@ -88,13 +87,12 @@ ggplot(
     geom_line(
         data = data.frame(
             measurement.day = seq(to = 35, by = 0.5)
-        ) %>% 
+        ) %>%
             mutate(measurement = Z * dgamma(x = measurement.day, shape = shape_moments, scale = scale_moments)),
         aes(linetype = "Gamma distribution fit")
     ) + theme_bw() +
-    theme(legend.position = "bottom", legend.title = element_blank()) + 
+    theme(legend.position = "bottom", legend.title = element_blank()) +
     labs(x = "Days after innoculation", y = "Genome copies / gram feces")
-ggsave("figures/shedding_profile_fit_fecal.png", width = 4, height = 3, units = "in")
 
 # Write out fitted parameters
 write.csv(
@@ -103,6 +101,6 @@ write.csv(
     empirical_dist_integral = Z,
     source_data = "Lit review", method = "Moments"
   ),
-  file = "data/shedding_profile_fit_fecal.csv",
+  file = "data/raw_data/shedding_profile_fit_fecal.csv",
   row.names = F
 )

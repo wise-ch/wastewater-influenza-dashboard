@@ -3,23 +3,23 @@
 ## SARS-CoV-2  Delay between infection and onset of symptoms (incubation period) in days
 # Ref: Linton et al., Journal of Clinical Medicine, 2020
 sars_cov_2_distribution_incubation <- list(
-    name = "gamma", 
-    shape = 3.2, 
+    name = "gamma",
+    shape = 3.2,
     scale = 1.3)
 
 
 ## SARS-CoV-2 Delay between onset of symptoms and case confirmation in days
 # Ref: Bi et al., The Lancet Infectious Diseases, 2020
 sars_cov_2_distribution_onset_to_confirmation <- list(
-    name = "gamma", 
+    name = "gamma",
     shape = 2.1,
     scale = 2.6)
 
 ## SARS-CoV-2 Delay between onset of symptoms and shedding into wastewater in days
 # Ref: Benefield et al., medRxiv, 2020
 sars_cov_2_distribution_onset_to_shedding <- list(
-    name = "gamma", 
-    shape = 0.929639, 
+    name = "gamma",
+    shape = 0.929639,
     scale = 7.241397)
 
 ## SARS-CoV-2 Serial interval (for Re estimation) in days
@@ -43,8 +43,8 @@ influenza_distribution_infection_to_shedding_carrat2008_moments <- list(
 # Ref: get_shedding_load_distribution_fecal.R
 influenza_distribution_infection_to_shedding_fecal_moments <- list(
     name = "gamma",
-    shape = 1.769032,
-    scale = 5.74016)
+    shape = 2.541929,
+    scale = 4.785657)
 
 ## Influenza Delay between infection and symptom score
 # Ref: get_symptom_score_distribution.R

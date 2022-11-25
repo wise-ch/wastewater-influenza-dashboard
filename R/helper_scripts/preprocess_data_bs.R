@@ -30,13 +30,15 @@ clean_data_long_bs <- clean_data_bs %>%
     select(sample_date, wwtp, measuring_period, IAV_gc_per_mL_WW, IBV_gc_per_mL_WW, IAV_gc_per_day, IBV_gc_per_day) %>%
     pivot_longer(cols = c(IAV_gc_per_mL_WW, IBV_gc_per_mL_WW, IAV_gc_per_day, IBV_gc_per_day), names_to = "measurement_type")
 
+# write.csv(clean_data_long_bs, "data/data_used_in_manuscript/unnaggregated_data_bs.csv", row.names = F)
+
 clean_data_long_means_bs <- clean_data_long_bs %>%
   group_by(sample_date, wwtp, measuring_period, measurement_type) %>%
   summarize(
-    mean = mean(value), 
-    min = min(value), 
-    max = max(value), 
-    n_measurements = n(), 
+    mean = mean(value),
+    min = min(value),
+    max = max(value),
+    n_measurements = n(),
     .groups = "drop")
 
 write.csv(clean_data_long_means_bs, "data/clean_data_bs.csv", row.names = F)
