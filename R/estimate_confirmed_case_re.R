@@ -110,7 +110,7 @@ for (wwtp_i in unique(case_data$wwtp)) {
 # Write out data used for Re inference and results
 write.csv(
   x = data_all,
-  file = "data/data_used_in_manuscript/confirmed_cases.csv"
+  file = "app/data/confirmed_cases.csv"
 )
 
 write.csv(
