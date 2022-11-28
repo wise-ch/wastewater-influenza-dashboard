@@ -6,9 +6,32 @@ library(readr)
 library(RColorBrewer)
 
 # Read in data
-ww_loads <- read_csv("data/ww_loads.csv", col_types = cols(sample_date = "D"), )  # path relative to app directory
+confirmed_cases <- read_csv("data/confirmed_cases.csv", col_types = cols(date = "D"))
+ww_loads <- read_csv("data/ww_loads.csv", col_types = cols(sample_date = "D"))  # path relative to app directory
 ww_re_estimates <- read_csv("data/ww_re_estimates.csv", col_types = cols(date = "D"))
 case_re_estimates <- read_csv("data/confirmed_case_re_estimates.csv", col_types = c(date = "D"))
+
+# Clean case data
+confirmed_cases <- confirmed_cases %>%
+  mutate(wwtp = recode(
+    wwtp,
+    "BASEL" = "ARA Basel",
+    "ZUERICH(WERDHOELZLI)" = "ARA Werhölzli Zurich",
+    "VERNIER/AIRE" = "STEP Aire Geneva",
+    "BIOGGIO(LUGANO)" = "IDA CDA Lugano",
+    "CHUR" = "ARA Chur",
+    "LAUPEN(SENSETAL)" = "ARA Sensetal Laupen",
+    "THAL/ALTENRHEIN" = "ARA Altenrhein"
+  )) %>%
+  mutate(influenza_type = recode(
+    influenza_type,
+    "A" = "IAV",
+    "B" = "IBV"
+  )) %>%  # fill gaps due to interpolation
+  mutate(
+    wwtp = zoo::na.locf(wwtp),
+    influenza_type = zoo::na.locf(influenza_type),
+    measuring_period = zoo::na.locf(measuring_period))
 
 # Clean load data
 ww_loads <- ww_loads %>%
@@ -16,7 +39,11 @@ ww_loads <- ww_loads %>%
     wwtp,
     "STEP Aire" = "STEP Aire Geneva",
     "ARA Werdhölzli" = "ARA Werhölzli Zurich"
-  ))
+  )) %>%  # fill gaps due to interpolation
+  mutate(
+    wwtp = zoo::na.locf(wwtp),
+    influenza_type = zoo::na.locf(influenza_type),
+    measuring_period = zoo::na.locf(measuring_period))
 
 # Join Re data
 re_to_plot <- bind_rows(
@@ -36,6 +63,8 @@ re_to_plot <- bind_rows(
       "A" = "IAV",
       "B" = "IBV"
     )) %>%
+    mutate(CI_down_Re_estimate = pmin(CI_down_Re_estimate, Re_lowHPD, na.rm = T),
+           CI_up_Re_estimate = pmax(CI_up_Re_estimate, Re_highHPD, na.rm = T)) %>%  # this is to fix a bug(?) around the confidence intervals for the first weeks/months in Lugano, Laupen, and Chur, they're NA for combined uncertainty even though non-NA for Re_low/highHPD
     mutate(data_type = "Confirmed cases"),
   ww_re_estimates %>%
     mutate(wwtp = recode(
@@ -75,10 +104,6 @@ date_range <- range(ww_loads$sample_date)
 #' Plot wastewater loads
 plot_ww_loads <- function(data = ww_loads, wwtp_to_plot, date_range) {
   data_filtered <- data %>%
-    mutate(
-      wwtp = zoo::na.locf(wwtp),
-      influenza_type = zoo::na.locf(influenza_type),
-      measuring_period = zoo::na.locf(measuring_period)) %>%  # fill gaps due to interpolation
     filter(wwtp == wwtp_to_plot) %>%
     filter(sample_date >= date_range[1] & sample_date <= date_range[2])
 
@@ -104,20 +129,28 @@ plot_ww_loads <- function(data = ww_loads, wwtp_to_plot, date_range) {
   p
 }
 
-plot_cases <- function(data = re_to_plot, wwtp_to_plot, date_range) {
+plot_cases <- function(data = confirmed_cases, wwtp_to_plot, date_range) {
   data_filtered <- data %>%
-    filter(wwtp == wwtp_to_plot, data_type == "Confirmed cases") %>%
+    filter(wwtp == wwtp_to_plot) %>%
     filter(date >= date_range[1] & date <= date_range[2])
 
-  p <- ggplot(data = data_filtered, aes(x = date, y = observed_incidence)) +
-    geom_line(aes(color = "Confirmed cases", group = measuring_period), lwd = 1) +
+  p <- ggplot() +
+    geom_point(
+      data = data_filtered %>% filter(is_observation),
+      aes(x = date, y = daily_cases), color = data_type_colors["Confirmed cases"]
+    ) +
+    geom_line(
+      data = data_filtered,
+      aes(x = date, y = daily_cases, group = measuring_period),
+      linetype = "dashed", colour = "black"
+    ) +
     facet_grid(. ~ influenza_type) +
     scale_x_date(
       limits = c(date_range[1], date_range[2]),
       date_breaks = "months", date_labels = "%b"
     ) +
     scale_y_continuous(labels = function(label) sprintf("%4.1f", label)) +
-    labs(x = "Date", y = "Confirmed cases\nin the catchment") +
+    labs(x = "Date", y = "Daily confirmed cases\nin the catchment") +
     shared_theme
 
   p

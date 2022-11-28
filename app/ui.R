@@ -74,7 +74,7 @@ navbarPage(
             style = "margin-bottom:0;font-size: 90%;"
           ),
           htmlOutput("link"),
-          # downloadButton('downloadPlot', i18n$t('Download results'))  # TODO: re-implement download function
+          downloadButton('download_plot', 'Download plots')
         ) # fluid row
       ) # main panel
     ) # Sidebar layout
