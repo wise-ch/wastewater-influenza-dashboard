@@ -369,7 +369,6 @@ data_to_plot <- all_re_clean %>%
          Re_high = pmax(CI_up_Re_estimate, Re_highHPD, na.rm = T)) %>%
   filter(!is.na(Re_estimate))  # this fixes figure scale
 # this is to fix a bug(?) around the confidence intervals for the first weeks/months in Lugano, Laupen, and Chur, they're NA for combined uncertainty even though non-NA for Re_low/highHPD
-# tmp <- data_to_plot %>% filter(observation_type == "Lugano", influenza_type == "IAV", data_type == "Cases")
 
 estimated_re_plot <- ggplot(
   data = data_to_plot, 
