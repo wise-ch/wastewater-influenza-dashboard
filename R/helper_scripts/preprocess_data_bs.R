@@ -8,8 +8,13 @@ data_bs <- read.csv("data/raw_data/bs_data_reanalyzed.csv")
 
 clean_data_bs <- data_bs %>%
   filter(!(is.na(InfA_gc_per_mLWW_Promega))) %>%
-  mutate(sample_date = as.Date(Date), IAV_gc_per_mL_WW = InfA_gc_per_mLWW_Promega) %>%
-  mutate(IAV_gc_per_day = InfA_gc_per_mLWW_Promega * 1000 * flow_ProRheno_L)  # measurements to daily loads
+  mutate(
+    sample_date = as.Date(Date),
+    IAV_gc_per_mL_WW = InfA_gc_per_mLWW_Promega,
+    IBV_gc_per_mL_WW = InfB_gc_per_mLWW_Promega) %>%
+  mutate(
+    IAV_gc_per_day = InfA_gc_per_mLWW_Promega * 1000 * flow_ProRheno_L,
+    IBV_gc_per_day = InfB_gc_per_mLWW_Promega * 1000 * flow_ProRheno_L)  # measurements to daily loads
 
 # Annotate different measuring periods (Re estimated for each separately)
 clean_data_bs <- clean_data_bs %>% mutate(
@@ -24,8 +29,7 @@ if (any(clean_data_bs$measuring_period == "Outside of measuring period")) {
 }
 
 clean_data_long_bs <- clean_data_bs %>%
-  select(sample_date, wwtp, measuring_period, IAV_gc_per_mL_WW, IAV_gc_per_day) %>%
-  mutate(IBV_gc_per_day = NA, IBV_gc_per_mL_WW = NA) %>%  # didn't re-analyze for IBV
+  select(sample_date, wwtp, measuring_period, IAV_gc_per_mL_WW, IAV_gc_per_day, IBV_gc_per_mL_WW, IBV_gc_per_day) %>%
   pivot_longer(cols = c(IAV_gc_per_mL_WW, IAV_gc_per_day, IBV_gc_per_mL_WW, IBV_gc_per_day), names_to = "measurement_type")
 
 write.csv(clean_data_long_bs, "data/data_used_in_manuscript/unnaggregated_data_bs.csv", row.names = F)
