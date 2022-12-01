@@ -81,7 +81,7 @@ names(data_type_colors) <- c("Confirmed cases", "Wastewater")
 
 # WWTP colors
 wwtp_colors <- RColorBrewer::brewer.pal(name = "Set2", n = 7)
-wwtp_levels <- c("ARA Werhölzli Zurich", "STEP Aire Geneva", "ARA Basel", "IDA CDA Lugano", "ARA Chur", "ARA Sensetal Laupen", "ARA Altenrhein", "All provided data")
+wwtp_levels <- c("ARA Werhölzli Zurich", "STEP Aire Geneva", "ARA Basel", "CDA Lugano", "ARA Chur", "ARA Laupen", "ARA Altenrhein", "All provided data")
 wwtp_labels <- c("Zurich", "Geneva", "Basel", "Lugano", "Chur", "Laupen", "Altenrhein", "Cases all\ncatchments")
 
 re_to_plot <- re_to_plot %>% mutate(wwtp_factor = factor(wwtp, levels = wwtp_levels, labels = wwtp_labels))

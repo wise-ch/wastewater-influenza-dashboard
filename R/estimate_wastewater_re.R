@@ -28,14 +28,42 @@ ww_data_bs <- read_csv("data/clean_data_bs.csv", col_types = cols(sample_date = 
     id_cols = c("sample_date", "measuring_period", "wwtp"),
     names_from = "measurement_type",
     values_from = "mean")
-ww_data_ge <- read_csv("data/clean_data_ge_zh.csv", col_types = cols(sample_date = "D")) %>%
+ww_data_gr <- read_csv("data/clean_data_eawag.csv", col_types = cols(sample_date = "D")) %>%
+  filter(measuring_period %in% seasons_to_calculate) %>%
+  filter(wwtp == "ARA Chur") %>%
+  pivot_wider(
+    id_cols = c("sample_date", "measuring_period", "wwtp"),
+    names_from = "measurement_type",
+    values_from = "mean")
+ww_data_sg <- read_csv("data/clean_data_eawag.csv", col_types = cols(sample_date = "D")) %>%
+  filter(measuring_period %in% seasons_to_calculate) %>%
+  filter(wwtp == "ARA Altenrhein") %>%
+  pivot_wider(
+    id_cols = c("sample_date", "measuring_period", "wwtp"),
+    names_from = "measurement_type",
+    values_from = "mean")
+ww_data_fr <- read_csv("data/clean_data_eawag.csv", col_types = cols(sample_date = "D")) %>%
+  filter(measuring_period %in% seasons_to_calculate) %>%
+  filter(wwtp == "ARA Sensetal") %>%
+  pivot_wider(
+    id_cols = c("sample_date", "measuring_period", "wwtp"),
+    names_from = "measurement_type",
+    values_from = "mean")
+ww_data_ti <- read_csv("data/clean_data_eawag.csv", col_types = cols(sample_date = "D")) %>%
+  filter(measuring_period %in% seasons_to_calculate) %>%
+  filter(wwtp == "CDA Lugano") %>%
+  pivot_wider(
+    id_cols = c("sample_date", "measuring_period", "wwtp"),
+    names_from = "measurement_type",
+    values_from = "mean")
+ww_data_ge <- read_csv("data/clean_data_eawag.csv", col_types = cols(sample_date = "D")) %>%
   filter(measuring_period %in% seasons_to_calculate) %>%
   filter(wwtp == "STEP Aire") %>%
   pivot_wider(
     id_cols = c("sample_date", "measuring_period", "wwtp"),
     names_from = "measurement_type",
     values_from = "mean")
-ww_data_zh <- read_csv("data/clean_data_ge_zh.csv", col_types = cols(sample_date = "D")) %>%
+ww_data_zh <- read_csv("data/clean_data_eawag.csv", col_types = cols(sample_date = "D")) %>%
   filter(measuring_period %in% seasons_to_calculate) %>%
   filter(wwtp == "ARA Werdhölzli") %>%
   pivot_wider(
@@ -51,6 +79,26 @@ normalization_factor_bs <- min(
   ww_data_bs$IBV_gc_per_day[ww_data_bs$IBV_gc_per_day > 0],
   na.rm = T
 )
+normalization_factor_gr <- min(
+  ww_data_gr$IAV_gc_per_day[ww_data_gr$IAV_gc_per_day > 0],
+  ww_data_gr$IBV_gc_per_day[ww_data_gr$IBV_gc_per_day > 0],
+  na.rm = T
+)
+normalization_factor_sg <- min(
+  ww_data_sg$IAV_gc_per_day[ww_data_sg$IAV_gc_per_day > 0],
+  ww_data_sg$IBV_gc_per_day[ww_data_sg$IBV_gc_per_day > 0],
+  na.rm = T
+)
+normalization_factor_fr <- min(
+  ww_data_fr$IAV_gc_per_day[ww_data_fr$IAV_gc_per_day > 0],
+  ww_data_fr$IBV_gc_per_day[ww_data_fr$IBV_gc_per_day > 0],
+  na.rm = T
+)
+normalization_factor_ti <- min(
+  ww_data_ti$IAV_gc_per_day[ww_data_ti$IAV_gc_per_day > 0],
+  ww_data_ti$IBV_gc_per_day[ww_data_ti$IBV_gc_per_day > 0],
+  na.rm = T
+)
 normalization_factor_ge <- min(
   ww_data_ge$IAV_gc_per_day[ww_data_ge$IAV_gc_per_day > 0],
   ww_data_ge$IBV_gc_per_day[ww_data_ge$IBV_gc_per_day > 0],
@@ -64,6 +112,18 @@ normalization_factor_zh <- min(
 ww_data_bs <- ww_data_bs %>%
   mutate(IAV_gc_per_day_norm = IAV_gc_per_day / normalization_factor_bs) %>%
   mutate(IBV_gc_per_day_norm = IBV_gc_per_day / normalization_factor_bs)
+ww_data_gr <- ww_data_gr %>%
+  mutate(IAV_gc_per_day_norm = IAV_gc_per_day / normalization_factor_gr) %>%
+  mutate(IBV_gc_per_day_norm = IBV_gc_per_day / normalization_factor_gr)
+ww_data_sg <- ww_data_sg %>%
+  mutate(IAV_gc_per_day_norm = IAV_gc_per_day / normalization_factor_sg) %>%
+  mutate(IBV_gc_per_day_norm = IBV_gc_per_day / normalization_factor_sg)
+ww_data_fr <- ww_data_fr %>%
+  mutate(IAV_gc_per_day_norm = IAV_gc_per_day / normalization_factor_fr) %>%
+  mutate(IBV_gc_per_day_norm = IBV_gc_per_day / normalization_factor_fr)
+ww_data_ti <- ww_data_ti %>%
+  mutate(IAV_gc_per_day_norm = IAV_gc_per_day / normalization_factor_ti) %>%
+  mutate(IBV_gc_per_day_norm = IBV_gc_per_day / normalization_factor_ti)
 ww_data_ge <- ww_data_ge %>%
   mutate(IAV_gc_per_day_norm = IAV_gc_per_day / normalization_factor_ge) %>%
   mutate(IBV_gc_per_day_norm = IBV_gc_per_day / normalization_factor_ge)
@@ -73,15 +133,23 @@ ww_data_zh <- ww_data_zh %>%
 
 # Estimate Re for each data stream
 is_first <- T
-for (data in list(ww_data_bs, ww_data_ge, ww_data_zh)) {
+for (df in list(
+  ww_data_bs,
+  ww_data_gr,
+  ww_data_sg,
+  ww_data_fr,
+  ww_data_ti,
+  ww_data_ge,
+  ww_data_zh)
+) {
 
-  data_long <- data %>% pivot_longer(
+  data_long <- df %>% pivot_longer(
     cols = c(IAV_gc_per_day, IBV_gc_per_day, IAV_gc_per_day_norm, IBV_gc_per_day_norm),
     values_to = "observation",
     names_to = c("influenza_type", "observation_units"),
     names_pattern = "([A-Z]{3})_(.*)"
   )
-  wwtp_i <- unique(data$wwtp)  # should be single plant
+  wwtp_i <- unique(df$wwtp)  # should be single plant
 
   for (influenza_type_j in unique(data_long$influenza_type)) {
     for (measuring_period_k in unique(data_long$measuring_period)) {
@@ -89,23 +157,27 @@ for (data in list(ww_data_bs, ww_data_ge, ww_data_zh)) {
 
       # Get appropriate data
       data_filtered <- data_long %>%
-        filter(influenza_type == influenza_type_j, measuring_period == measuring_period_k, observation_units == "gc_per_day_norm") %>%
+        filter(
+          influenza_type == influenza_type_j,
+          measuring_period == measuring_period_k,
+          observation_units == "gc_per_day_norm") %>%
         filter(!is.na(observation)) %>%  # this is just to remove leading NA measurements for ZH IBV
         arrange(sample_date)
 
-      # Interpolate measurements to daily values
-      data_interpolated <- interpolate_measurements_cubic_spline(
-        data_frame = data_filtered,
-        date_col = "sample_date",
-        measurement_cols = c("observation")
-      )
-
-      measurements = list(
-        values = data_interpolated$observation,
-        index_offset = 0)
-
       # Try to estimate Re (handling case where not enough incidence observed to calculate)
       estimates_bootstrap <- tryCatch({
+
+        # Interpolate measurements to daily values
+        data_interpolated <- interpolate_measurements_cubic_spline(
+          data_frame = data_filtered,
+          date_col = "sample_date",
+          measurement_cols = c("observation")
+        )
+
+        measurements <- list(
+          values = data_interpolated$observation,
+          index_offset = 0)
+
         get_block_bootstrapped_estimate(
           measurements$values,
           N_bootstrap_replicates = n_bootstrap_reps,
@@ -128,9 +200,17 @@ for (data in list(ww_data_bs, ww_data_ge, ww_data_zh)) {
         message(paste("Couldn't calculate Re for", wwtp_i, "influenza", influenza_type_j))
         message(cond)
         # Make observation data frame anyways
+        if (nrow(data_filtered) == 0) {
+          warning("No measurements found")
+          dates <- NA
+          observations <- NA
+        } else {
+          dates <- data_filtered$sample_date
+          observations <- data_filtered$observation
+        }
         return(data.frame(
-          date = data_filtered$sample_date,
-          observed_incidence = data_filtered$observation,
+          date = dates,
+          observed_incidence = observations,
           CI_down_observed_incidence = NA,
           CI_up_observed_incidence = NA,
           smoothed_incidence = NA,
