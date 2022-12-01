@@ -11,7 +11,7 @@ on:
     paths:
       # Only run when a relevant file is updated
       - 'data/clean_data_bs.csv'
-      - 'data/clean_data_ge_zh.csv'
+      - 'data/clean_data_eawag.csv'
 
 jobs:
 

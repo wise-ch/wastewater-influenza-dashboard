@@ -1,8 +1,8 @@
-##### EAWAG data: Geneva and Zurich #####
+##### EAWAG data: 6 WWTPs #####
 
 library(ggplot2)
-library(dplyr)
 library(tidyr)
+library(dplyr)
 
 #' Get newest data file from EAWAG.
 #' @param path_to_data The directory where EAWAG data is stored.
@@ -19,18 +19,48 @@ print("Loading newest data from EAWAG")
 data_eawag <- get_newest_data()
 
 print(paste("Loading flow data from online EAWAG sensors"))
-flow_data_ge<- read.table(
+flow_data_gr <- read.table(
+  "https://sensors-eawag.ch/sars/__data__/processed_normed_data_chur_v2.csv",
+  sep = ";",
+  header = T,
+  check.names = F
+)
+colnames(flow_data_gr) <- c("date", colnames(flow_data_gr)[2:length(flow_data_gr)])
+flow_data_sg <- read.table(
+  "https://sensors-eawag.ch/sars/__data__/processed_normed_data_altenrhein_v2.csv",
+  sep = ";",
+  header = T,
+  check.names = F
+)
+colnames(flow_data_sg) <- c("date", colnames(flow_data_sg)[2:length(flow_data_sg)])
+flow_data_fr <- read.table(
+  "https://sensors-eawag.ch/sars/__data__/processed_normed_data_laupen_v2.csv",
+  sep = ";",
+  header = T,
+  check.names = F
+)
+colnames(flow_data_fr) <- c("date", colnames(flow_data_fr)[2:length(flow_data_fr)])
+flow_data_ti <- read.table(
+  "https://sensors-eawag.ch/sars/__data__/processed_normed_data_lugano_v2.csv",
+  sep = ";",
+  header = T,
+  check.names = F
+)
+colnames(flow_data_ti) <- c("date", colnames(flow_data_ti)[2:length(flow_data_ti)])
+flow_data_ge <- read.table(
   "https://sensors-eawag.ch/sars/__data__/processed_normed_data_geneve_v2.csv",
   sep = ";",
   header = T,
   check.names = F
 )
+colnames(flow_data_ge) <- c("date", colnames(flow_data_ge)[2:length(flow_data_ge)])
 flow_data_zh <- read.table(
   "https://sensors-eawag.ch/sars/__data__/processed_normed_data_zurich_v2.csv",
   sep = ";",
   header = T,
   check.names = F
 )
+colnames(flow_data_zh) <- c("date", colnames(flow_data_zh)[2:length(flow_data_zh)])
 
 # Wrangle data
 control_data_eawag <- data_eawag %>% filter(sample_type %in% c("pos", "ntc"))
@@ -62,20 +92,54 @@ if (any(clean_data_eawag$measuring_period == "Outside of measuring period")) {
   warning("Some data is outside of a known measuring period, have you started monitoring a new season? Add the date range to code if so.")
 }
 
+flow_data_gr_clean <- flow_data_gr %>%
+  mutate(wwtp = "ARA Chur") %>%
+  mutate(date = as.Date(date)) %>%
+  dplyr::select(wwtp, date, `flow [m^3/d]`)
+flow_data_sg_clean <- flow_data_sg %>%
+  mutate(wwtp = "ARA Altenrhein") %>%
+  mutate(date = as.Date(date)) %>%
+  dplyr::select(wwtp, date, `flow [m^3/d]`)
+flow_data_fr_clean <- flow_data_fr %>%
+  mutate(wwtp = "ARA Sensetal") %>%
+  mutate(date = as.Date(date)) %>%
+  dplyr::select(wwtp, date, `flow [m^3/d]`)
+flow_data_ti_clean <- flow_data_ti %>%
+  mutate(wwtp = "CDA Lugano") %>%
+  mutate(date = as.Date(date)) %>%
+  dplyr::select(wwtp, date, `flow [m^3/d]`)
 flow_data_ge_clean <- flow_data_ge %>%
-  rename("date" = "") %>%
   mutate(wwtp = "STEP Aire") %>%
   mutate(date = as.Date(date)) %>%
-  select(wwtp, date, `flow [m^3/d]`)
+  dplyr::select(wwtp, date, `flow [m^3/d]`)
 flow_data_zh_clean <- flow_data_zh %>%
-  rename("date" = "") %>%
   mutate(wwtp = "ARA Werdhölzli") %>%
   mutate(date = as.Date(date)) %>%
-  select(wwtp, date, `flow [m^3/d]`)
+  dplyr::select(wwtp, date, `flow [m^3/d]`)
 
 ml_per_l <- 1000
 l_per_m3 <- 1000
 
+clean_data_gr <- clean_data_eawag %>%
+  filter(wwtp == "ARA Chur") %>%
+  left_join(flow_data_gr_clean, by = c("sample_date" = "date", "wwtp")) %>%
+  mutate("IBV_gc_per_day" = IBV_gc_per_mL_WW * `flow [m^3/d]` * ml_per_l * l_per_m3) %>%
+  mutate("IAV_gc_per_day" = IAV_gc_per_mL_WW * `flow [m^3/d]` * ml_per_l * l_per_m3)
+clean_data_sg <- clean_data_eawag %>%
+  filter(wwtp == "ARA Altenrhein") %>%
+  left_join(flow_data_sg_clean, by = c("sample_date" = "date", "wwtp")) %>%
+  mutate("IBV_gc_per_day" = IBV_gc_per_mL_WW * `flow [m^3/d]` * ml_per_l * l_per_m3) %>%
+  mutate("IAV_gc_per_day" = IAV_gc_per_mL_WW * `flow [m^3/d]` * ml_per_l * l_per_m3)
+clean_data_fr <- clean_data_eawag %>%
+  filter(wwtp == "ARA Sensetal") %>%
+  left_join(flow_data_fr_clean, by = c("sample_date" = "date", "wwtp")) %>%
+  mutate("IBV_gc_per_day" = IBV_gc_per_mL_WW * `flow [m^3/d]` * ml_per_l * l_per_m3) %>%
+  mutate("IAV_gc_per_day" = IAV_gc_per_mL_WW * `flow [m^3/d]` * ml_per_l * l_per_m3)
+clean_data_ti <- clean_data_eawag %>%
+  filter(wwtp == "CDA Lugano") %>%
+  left_join(flow_data_ti_clean, by = c("sample_date" = "date", "wwtp")) %>%
+  mutate("IBV_gc_per_day" = IBV_gc_per_mL_WW * `flow [m^3/d]` * ml_per_l * l_per_m3) %>%
+  mutate("IAV_gc_per_day" = IAV_gc_per_mL_WW * `flow [m^3/d]` * ml_per_l * l_per_m3)
 clean_data_ge <- clean_data_eawag %>%
   filter(wwtp == "STEP Aire") %>%
   left_join(flow_data_ge_clean, by = c("sample_date" = "date", "wwtp")) %>%
@@ -87,8 +151,15 @@ clean_data_zh <- clean_data_eawag %>%
   mutate("IBV_gc_per_day" = IBV_gc_per_mL_WW * `flow [m^3/d]` * ml_per_l * l_per_m3) %>%
   mutate("IAV_gc_per_day" = IAV_gc_per_mL_WW * `flow [m^3/d]` * ml_per_l * l_per_m3)
 
-clean_data_long_eawag <- rbind(clean_data_ge, clean_data_zh) %>%
-  select(
+clean_data_long_eawag <- rbind(
+  clean_data_gr,
+  clean_data_sg,
+  clean_data_fr,
+  clean_data_ti,
+  clean_data_ge,
+  clean_data_zh
+) %>%
+  dplyr::select(
     sample_date,
     wwtp,
     measuring_period,
@@ -167,4 +238,4 @@ ggplot(data = clean_data_long_means_eawag_for_analysis,
 
 ggsave("figures/analyzed_data_eawag.png", width = 9, height = 9, units = "in")
 
-write.csv(clean_data_long_means_eawag_for_analysis, "data/clean_data_ge_zh.csv", row.names = F)
+write.csv(clean_data_long_means_eawag_for_analysis, "data/clean_data_eawag.csv", row.names = F)
