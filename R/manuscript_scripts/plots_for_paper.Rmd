@@ -1,7 +1,7 @@
 This script is to make plots for the manuscript. It is adapted from `plots_for_poster.Rmd`.
 
 ```{r, setup, include=FALSE}
-knitr::opts_knit$set(root.dir = '/Users/nadeaus/Documents/Repos/wastewaterr')
+knitr::opts_knit$set(root.dir = '/Users/nadeau/Documents/PhD_research/wastewaterr')
 remake_map <- F
 ```
 
@@ -63,7 +63,7 @@ Load data
 ww_loads <- rbind(
   read.csv("data/data_used_in_manuscript/unnaggregated_data_ge_zh.csv"),
   read.csv("data/data_used_in_manuscript/unnaggregated_data_bs.csv") %>% 
-    mutate(target = "Viasure")
+    mutate(target = "Promega")
 )
 
 # Re input data
@@ -91,11 +91,66 @@ confirmed_case_data <- read.csv("data/data_used_in_manuscript/clean_data_cases_c
 
 # Delay distribution data
 fecal_delay_data <- read.csv("data/raw_data/data_for_fecal_shedding_dist.csv")
-resp_delay_data <- read.csv("data/raw_data/shedding_profile_carrat_2008.csv")
-symptoms_delay_data <- read.csv("data/raw_data/symptoms_score_carrat_2008.csv")
+resp_delay_data <- read.csv("data/data_used_in_manuscript/shedding_profile_carrat_2008.csv")
+symptoms_delay_data <- read.csv("data/data_used_in_manuscript/symptoms_score_carrat_2008.csv")
 fecal_delay_dist <- read.csv("data/raw_data/shedding_profile_fit_fecal.csv")
 resp_delay_dist <- read.csv("data/raw_data/shedding_profile_fit.csv")
 symptoms_delay_dist <- read.csv("data/raw_data/symptom_score_fit.csv")
+```
+
+Load Basel data reanalyzed on dPCR
+```{r}
+ww_loads_bs_dpcr <- read.csv("data/raw_data/eawag_data/LatestFluData_22_11_28.csv") %>%
+  filter(run_date == "28.11.22", sample_type == "ww") %>%
+  mutate(IAV.M_.gc.mLWW. = as.numeric(IAV.M_.gc.mLWW.))
+ww_loads_bs_both <- read.csv("data/raw_data/bs_data_reanalyzed.csv")
+
+all_data <- rbind(
+  ww_loads_bs_dpcr %>%
+    mutate(
+      measurement = `IAV.M_.gc.mLWW.`, 
+      measurement_type = "dPCR (gc/mLWW)",
+      date = as.Date(sample_date)) %>%
+    filter(!is.na(measurement)) %>%
+    select(measurement, measurement_type, date),
+  ww_loads_bs_both %>%
+    mutate(
+      measurement = InfA_gc_per_mLWW_Promega,
+      measurement_type = "Promega (gc/mLWW)",
+      date = as.Date(Date)) %>%
+    filter(!is.na(measurement)) %>%
+    select(measurement, measurement_type, date),
+  ww_loads_bs_both %>%
+    mutate(
+      measurement = InfA_gc_per_PCR_Viasure,
+      measurement_type = "Viasure (gc/PCR)",
+      date = as.Date(Date)) %>%
+    filter(!is.na(measurement)) %>%
+    select(measurement, measurement_type, date)
+)
+
+# Plot correlation between re-analyzed samples (there are only a few on the exact same date)
+all_data_wide <- all_data %>% 
+  group_by(date, measurement_type) %>%
+  summarize(mean_measurement = mean(measurement), .groups = "drop") %>%
+  pivot_wider(
+    id_cols = c(date), 
+    names_from = measurement_type, 
+    values_from = mean_measurement)
+
+ggplot(
+  data = all_data_wide,
+  aes(x = `dPCR (gc/mLWW)`, y = `Promega (gc/mLWW)`)) +
+  geom_point()
+
+# Plot each measurement type from Basel
+ggplot(data = all_data, aes(x = date, y = measurement)) +
+  geom_point() +
+  facet_wrap(. ~ measurement_type, scales = "free_y", nrow = 3) +
+  shared_theme +
+  shared_date_scale_coarse
+
+ggsave("figures/bs_methods_comparison.png", height = 6.5, width = 8, units = "in")
 ```
 
 Clean catchment area data
@@ -150,8 +205,8 @@ Make map
 ```{r}
 if (remake_map) {
   # Load admin boundaries shapefile
-  adm1 <- readOGR(dsn = "./data/spatial_data/gadm41_CHE_shp", layer = "gadm41_CHE_1")  # cantons
-  adm3 <- readOGR(dsn = "./data/spatial_data/gadm41_CHE_shp", layer = "gadm41_CHE_3")  # municipalities
+  adm1 <- readOGR(dsn = "data/raw_data/spatial_data/gadm41_CHE_shp", layer = "gadm41_CHE_1")  # cantons
+  adm3 <- readOGR(dsn = "data/raw_data/spatial_data/gadm41_CHE_shp", layer = "gadm41_CHE_3")  # municipalities
   
   # Get municipalities to plot
   data_to_plot <- rbind(
@@ -253,6 +308,7 @@ Merge Re input and output data
 ```{r}
 all_re_input <- rbind(
   ww_re_input_data %>% 
+    filter(measuring_period == "2021/22") %>%
     mutate(data_type = "Wastewater") %>% 
     mutate(wwtp = zoo::na.locf(wwtp), influenza_type = zoo::na.locf(influenza_type)) %>%  # fill gaps due to interpolation
     rename(observation_type = wwtp, date = sample_date) %>%
@@ -338,8 +394,7 @@ ggsave("figures/re_input_data.png", height = 9, width = 8, units = "in")
 Plot deconvolved incidence estimates per 100,000 catchment residents
 ```{r}
 data_to_plot <- all_re_clean %>% 
-  filter(!(data_type == "Wastewater" & observation_type == "Basel")) %>%  # remove Basel wastewater estimates because they make the case data scale way too big, uninterpretable
-  filter(delay_dist != "Fecal")
+  filter(delay_dist != "Fecal", measuring_period == "2021/22")
 
 estimated_incidence_plot <- ggplot(
   data = data_to_plot,
@@ -364,7 +419,7 @@ ggsave(filename = "figures/deconvolved_incidence.png", height = 9, width = 8, un
 Plot Re estimates
 ```{r}
 data_to_plot <- all_re_clean %>% 
-  filter(delay_dist != "Fecal") %>%
+  filter(delay_dist != "Fecal", measuring_period == "2021/22") %>%
   mutate(Re_low = pmin(CI_down_Re_estimate, Re_lowHPD, na.rm = T), 
          Re_high = pmax(CI_up_Re_estimate, Re_highHPD, na.rm = T)) %>%
   filter(!is.na(Re_estimate))  # this fixes figure scale
@@ -426,27 +481,30 @@ case_data_to_plot <- confirmed_case_data %>%
   mutate(observation_type = factor(observation_type, levels = catchment_factor_levels))
 
 re_data_to_plot <- all_re_clean %>%
-  filter(observation_type %in% c("Zurich", "Geneva")) %>%
+  filter(observation_type %in% c("Zurich", "Geneva", "Basel")) %>%
   filter(date >= as.Date("2021-12-01"), date < as.Date("2022-05-01")) %>%
   filter(delay_dist != "Fecal") %>%
   mutate(observation_type = factor(observation_type, levels = catchment_factor_levels)) %>%  
   mutate(
     deconvolved_incidence_per_100000 = case_when(
+      observation_type == "Basel" ~ deconvolved_incidence * 100000 / 258472.1,
       observation_type == "Zurich" ~ deconvolved_incidence * 100000 / 454546.9,
       observation_type == "Geneva" ~ deconvolved_incidence * 100000 / 359504.3),
     CI_down_deconvolved_incidence_per_100000 = case_when(
+      observation_type == "Basel" ~ CI_down_deconvolved_incidence * 100000 / 258472.1,
       observation_type == "Zurich" ~ CI_down_deconvolved_incidence * 100000 / 454546.9,
       observation_type == "Geneva" ~ CI_down_deconvolved_incidence * 100000 / 359504.3),
     CI_up_deconvolved_incidence_per_100000 = case_when(
+      observation_type == "Basel" ~ CI_up_deconvolved_incidence * 100000 / 258472.1,
       observation_type == "Zurich" ~ CI_up_deconvolved_incidence * 100000 / 454546.9,
       observation_type == "Geneva" ~ CI_up_deconvolved_incidence * 100000 / 359504.3)
   )  # normalize to catchment population size, see get_wwtp_pop_coverage.R
 
 highlight_data <- data.frame(
   re_threshold = 1,
-  influenza_type = c("IAV", "IAV", "IAV", "IAV", "IBV", "IBV", "IBV", "IBV"),
-  observation_type = rep(c("Geneva", "Zurich"), 4),
-  data_type = c("Cases", "Cases", "Wastewater", "Wastewater", "Cases", "Cases", "Wastewater", "Wastewater")
+  influenza_type = c("IAV", "IAV", "IAV", "IAV", "IAV", "IAV", "IBV", "IBV", "IBV", "IBV", "IBV", "IBV"),
+  observation_type = rep(c("Geneva", "Zurich", "Basel"), 4),
+  data_type = c("Cases", "Cases", "Cases", "Wastewater", "Wastewater", "Wastewater", "Cases", "Cases", "Cases", "Wastewater", "Wastewater", "Wastewater")
 ) %>%
   filter(!(influenza_type == "IBV" & data_type == "Cases")) %>%  # remove highlight for panels without Re
   mutate(observation_type = factor(observation_type, levels = catchment_factor_levels))
@@ -562,51 +620,6 @@ ggplot(data = re_data_to_plot %>% filter(influenza_type == "IAV")) +
 ggsave("figures/re_comparision_focus.png", width = 6.5, height = 3.25, units = "in")
 ```
 
-Basel incidence and Re estimates for supplement
-```{r}
-basel_re_data_to_plot <- all_re_clean %>%
-  filter(observation_type == c("Basel"), data_type == "Wastewater", influenza_type == "IAV") %>%
-  filter(delay_dist != "Fecal") %>%
-  filter(date >= as.Date("2021-12-01"), date < as.Date("2022-05-01"))
-
-basel_incidence_plot <- ggplot(data = basel_re_data_to_plot) +
-  geom_line(aes(x = as.Date(date), y = deconvolved_incidence, color = data_type), size = 0.5) +
-  geom_ribbon(
-    aes(
-      x = as.Date(date),
-      ymin = CI_down_deconvolved_incidence, ymax = CI_up_deconvolved_incidence,
-      fill = data_type),
-    alpha = 0.2) +
-  facet_grid(influenza_type ~ observation_type) +
-  data_type_color_scale +
-  shared_theme +
-  theme(legend.position = "none") +
-  shared_date_scale +
-  labs(x = element_blank(), y = "Deconvolved incidence")
-
-basel_re_plot <- ggplot(data = basel_re_data_to_plot) +
-  geom_hline(aes(yintercept = 1), color = "darkgray") +
-  geom_line(aes(x = as.Date(date), y = Re_estimate, color = data_type), size = 0.5) +
-  geom_ribbon(
-    aes(
-      x = as.Date(date), y = Re_estimate,
-      ymin = CI_down_Re_estimate, ymax = CI_up_Re_estimate,
-      fill = data_type),
-    alpha = 0.3,
-    linetype = 0) +
-  facet_grid(influenza_type ~ observation_type) +
-  data_type_color_scale +
-  shared_theme +
-  theme(legend.position = "none") +
-  shared_date_scale +
-  labs(x = element_blank(), y = "Reproductive number") +
-  scale_y_continuous(limits = c(0, 3), oob = oob_squish, breaks = c(0, 1, 2, 3))
-
-cowplot::plot_grid(basel_incidence_plot, basel_re_plot, labels = c('A', 'B'), nrow = 2, align = "v")
-
-ggsave("figures/basel_incidence_re.png", width = 4, height = 5, units = "in")
-```
-
 Plot various delay distributions for supplement
 ```{r}
 fecal_delay_plot <- ggplot(
@@ -666,7 +679,7 @@ Plot sensitivity analysis with both delay distributions for supplement
 ```{r}
 delay_dist_incidence_plot <- ggplot(
   data = all_re_clean %>% 
-    filter(data_type == "Wastewater", observation_type != "Basel", measuring_period == "2021/22")) +
+    filter(data_type == "Wastewater", measuring_period == "2021/22")) +
   geom_hline(aes(yintercept = 1), color = "darkgray") +
   geom_line(aes(x = as.Date(date), y = deconvolved_incidence, color = delay_dist), size = 0.5) +
   geom_ribbon(
@@ -697,7 +710,7 @@ delay_dist_incidence_plot <- ggplot(
 
 delay_dist_re_plot <- ggplot(
   data = all_re_clean %>% 
-    filter(data_type == "Wastewater", observation_type != "Basel", measuring_period == "2021/22")) +
+    filter(data_type == "Wastewater", measuring_period == "2021/22")) +
   geom_hline(aes(yintercept = 1), color = "darkgray") +
   geom_line(aes(x = as.Date(date), y = Re_estimate, color = delay_dist), size = 0.5) +
   geom_ribbon(
