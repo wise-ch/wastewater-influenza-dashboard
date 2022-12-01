@@ -4,33 +4,31 @@ library(ggplot2)
 library(dplyr)
 library(tidyr)
 
-data_bs <- read.csv("data/raw_data/Basel CoroWWmonitoring_Influenza copy.csv")
+data_bs <- read.csv("data/raw_data/bs_data_reanalyzed.csv")
 
 clean_data_bs <- data_bs %>%
-  filter(!(is.na(`InfA..gc..L.`) & is.na(`Inf.B..gc..L.`))) %>%  # remove days without measurement
-  mutate(sample_date = as.Date(Datum, format = "%d.%m.%y")) %>%
-  mutate(wwtp = "ARA Basel") %>%
-  mutate(IAV_gc_per_mL_WW = `InfA..gc..L.` / 1000) %>%
-  mutate(IBV_gc_per_mL_WW = `Inf.B..gc..L.` / 1000) %>%  # per L to per mL WW
-  mutate(IAV_gc_per_day = `InfA..gc..L.` * Inflow.ProRheno..LITER...Column.AH.) %>%
-  mutate(IBV_gc_per_day = `Inf.B..gc..L.` * Inflow.ProRheno..LITER...Column.AH.)  # measurements to daily loads
+  filter(!(is.na(InfA_gc_per_mLWW_Promega))) %>%
+  mutate(sample_date = as.Date(Date), IAV_gc_per_mL_WW = InfA_gc_per_mLWW_Promega) %>%
+  mutate(IAV_gc_per_day = InfA_gc_per_mLWW_Promega * 1000 * flow_ProRheno_L)  # measurements to daily loads
 
 # Annotate different measuring periods (Re estimated for each separately)
 clean_data_bs <- clean_data_bs %>% mutate(
   measuring_period = case_when(
     sample_date <= as.Date("2022-07-01") ~ "2021/22",
     T ~ "Outside of measuring period"
-  )
+  ),
+  wwtp = "ARA Basel"
 )
-if (any(clean_data_eawag$measuring_period == "Outside of measuring period")) {
+if (any(clean_data_bs$measuring_period == "Outside of measuring period")) {
   warning("Some data is outside of a known measuring period, have you started monitoring a new season? Add the date range to code if so.")
 }
 
 clean_data_long_bs <- clean_data_bs %>%
-    select(sample_date, wwtp, measuring_period, IAV_gc_per_mL_WW, IBV_gc_per_mL_WW, IAV_gc_per_day, IBV_gc_per_day) %>%
-    pivot_longer(cols = c(IAV_gc_per_mL_WW, IBV_gc_per_mL_WW, IAV_gc_per_day, IBV_gc_per_day), names_to = "measurement_type")
+  select(sample_date, wwtp, measuring_period, IAV_gc_per_mL_WW, IAV_gc_per_day) %>%
+  mutate(IBV_gc_per_day = NA, IBV_gc_per_mL_WW = NA) %>%  # didn't re-analyze for IBV
+  pivot_longer(cols = c(IAV_gc_per_mL_WW, IAV_gc_per_day, IBV_gc_per_mL_WW, IBV_gc_per_day), names_to = "measurement_type")
 
-# write.csv(clean_data_long_bs, "data/data_used_in_manuscript/unnaggregated_data_bs.csv", row.names = F)
+write.csv(clean_data_long_bs, "data/data_used_in_manuscript/unnaggregated_data_bs.csv", row.names = F)
 
 clean_data_long_means_bs <- clean_data_long_bs %>%
   group_by(sample_date, wwtp, measuring_period, measurement_type) %>%
