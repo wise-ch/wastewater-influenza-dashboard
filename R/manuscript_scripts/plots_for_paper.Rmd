@@ -2,7 +2,7 @@ This script is to make plots for the manuscript. It is adapted from `plots_for_p
 
 ```{r, setup, include=FALSE}
 knitr::opts_knit$set(root.dir = '/Users/nadeau/Documents/PhD_research/wastewaterr')
-remake_map <- F
+remake_map <- T
 ```
 
 Load packages
@@ -40,8 +40,8 @@ influenza_type_color_scale <- scale_color_manual(name = "Influenza type", labels
 catchment_area_colors <- brewer.pal(n = 8, name = "Set2")[c(4, 6, 3)]
 background_plot_color <- brewer.pal(n = 8, name = "Set2")[7]
 
-data_type_colors <- brewer.pal(n = 8, name = "Set1")[1:2]
-names(data_type_colors) <- c("Cases", "Wastewater")
+data_type_colors <- brewer.pal(n = 8, name = "Set1")[c(1, 2, 5)]
+names(data_type_colors) <- c("Cases", "Wastewater", "ILI")
 data_type_color_scale <- scale_color_manual(name = "Estimate type", values = data_type_colors, aesthetics = c("color", "fill"))
 
 delay_dist_colors <- brewer.pal(n = 8, name = "Set1")[c(2, 8)]
@@ -88,6 +88,9 @@ ww_measurements <- rbind(
 
 # Confirmed cases
 confirmed_case_data <- read.csv("data/data_used_in_manuscript/clean_data_cases_che.csv")
+
+# Influenza-like illnss
+ili_data <- read.csv("data/data_used_in_manuscrpt/ili_2021_2022.csv")
 
 # Delay distribution data
 fecal_delay_data <- read.csv("data/raw_data/data_for_fecal_shedding_dist.csv")
@@ -181,7 +184,6 @@ catchment_area_data <- catchment_area_data %>%
                                "Perly" = "Perly-Certoux",
                                "Petit-Lancy" = "Lancy",
                                "R³mlang" = "Rümlang",
-                               "Sch÷nenbuch" = "Arlesheim",
                                "Uitikon Waldegg" = "Uitikon",
                                "Vandoeuvres" = "Vandœuvres",
                                "Vessy" = "Veyrier",
@@ -194,14 +196,16 @@ catchment_area_summary <- catchment_area_data %>%
   summarize(n_plz = n(), per_plz_mean = mean(Per_PLZ), per_plz_sd = sd(Per_PLZ), .groups = "drop") %>%
   mutate(`Wastewater facility` = recode(
     .x = ARA_NAMEN,
-    "BASEL" = "Basel (270,000 residents)",
-    "VERNIER/AIRE" = "Geneva (445,000 residents)",
-    "ZUERICH(WERDHOELZLI)" = "Zurich (670,000 residents)"
+    "BASEL" = "Basel (260'000 residents)",
+    "VERNIER/AIRE" = "Geneva (360'000 residents)",
+    "ZUERICH(WERDHOELZLI)" = "Zurich (450'000 residents)"
   )) %>%
   mutate(district = case_when(commune == "Zürich" ~ "Zürich"))
 ```
 
 Make map
+Note: map data includes Schönenbuch in Alschwil (plotted right) and Brüglingen in Münchenstein (plotted wrong)
+Also not included in map are residents in Inzlingen (GE), Weil-Otterbach (GE), and Neuwiller (FR)
 ```{r}
 if (remake_map) {
   # Load admin boundaries shapefile
@@ -514,7 +518,7 @@ Make main text figure for wastewater ww_measurements and case data
 ```{r}
 case_scale_factor <- 5E10
 
-ggplot(
+ww_cases_plot <- ggplot(
   data = measurement_data_to_plot %>% filter(mean > 0),
   aes(x = as.Date(sample_date), y = mean, color = "Wastewater")) + 
   geom_line(
@@ -527,13 +531,35 @@ ggplot(
     data = measurement_data_to_plot %>% filter(mean > 0, n_measurements > 1),
     aes(ymin = min, ymax = max), 
     size = 0.5, width = 5) +
-  facet_grid(influenza_type ~ observation_type) +
+  facet_grid(influenza_type ~ observation_type, switch = "y") +
   shared_theme + 
   shared_date_scale_coarse +
   data_type_color_scale +
-  theme(legend.position = "bottom") +
+  theme(legend.position = "bottom", legend.margin = margin(), legend.box.spacing = unit(0, "pt")) +
   scale_y_continuous(sec.axis = sec_axis(trans = ~ . / case_scale_factor, name = "Confirmed cases per week")) +
   labs(x = element_blank(), y = "Genome copies per day")
+
+ili_data_clean <- ili_data %>%
+  mutate(year_week_day = paste(Jahr, Sentinella.Woche, "0", sep = "-")) %>%
+  mutate(first_day_of_week = as.Date(year_week_day, format = "%Y-%U-%w") - 1) %>%  # Sentinella weeks are Sat-Fri
+  mutate(date = first_day_of_week + 3)  # plot by midpoint of week (Tues)
+
+ili_plot <- ggplot(
+  data = ili_data_clean %>% filter(date >= as.Date("2021-12-01"), date <= as.Date("2022-05-01")),
+  aes(x = date, y = Konsultationen.pro.100.000.Einwohner, 
+      color = "ILI")) + 
+  geom_line() +
+  shared_theme + 
+  scale_x_date(
+    date_breaks = "1 month", date_labels = "%b\n%y",
+    limits = c(as.Date("2021-12-01"), as.Date("2022-05-01"))) +
+  data_type_color_scale +
+  labs(y = "Weekly consultations\nper 100'000 residents", x = element_blank())
+
+plots <- align_plots(ww_cases_plot, ili_plot, align = 'v', axis = 'l')
+bottom_row <- plot_grid(plots[[2]], NULL, labels = c('B'), rel_widths = c(0.6, 0.39))
+
+plot_grid(plots[[1]], bottom_row, rel_heights = c(1, 0.47), ncol = 1, labels = c("A", ""))
 
 ggsave("figures/ww_data_focus.png", width = 6.5, height = 4, units = "in")
 ```
@@ -792,7 +818,7 @@ ww_loads %>%
   group_by(wwtp, sample_date, measurement_type) %>%
   summarize(detected = mean(value) != 0, .groups = "drop") %>%  # are any samples non-0?
   group_by(wwtp, measurement_type) %>%
-  summarize(n_detect_days = sum(detected), total_days = n(), .groups = "drop") %>%
+  summarize(n_detect_days = sum(detected, na.rm = T), total_days = n(), .groups = "drop") %>%
   mutate(frac_detect_days = n_detect_days / total_days)
 
 # IAV and IBV confirmed cases

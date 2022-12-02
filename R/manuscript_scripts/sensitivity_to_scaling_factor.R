@@ -65,7 +65,7 @@ for (i in 1:length(normalization_factors)) {
         arrange(sample_date)
 
       # Interpolate measurements to daily values
-      data_interpolated <- interpolate_measurements_cubic_spline(
+      data_interpolated <- interpolate_measurements(
         data_frame = data_filtered,
         date_col = "sample_date",
         measurement_cols = c("observation")
