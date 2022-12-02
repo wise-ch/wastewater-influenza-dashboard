@@ -21,7 +21,7 @@ navbarPage(
           inputId = "wwtp",
           label = "Select wastewater treatment plant:",
           choices = c(
-            "Zurich" = "ARA Werhölzli Zurich",
+            "Zurich" = "ARA Werdhölzli Zurich",
             "Basel" = "ARA Basel",
             "Altenrhein" = "ARA Altenrhein",
             "Chur" = "ARA Chur",
@@ -29,6 +29,7 @@ navbarPage(
             "Lugano" = "IDA CDA Lugano",
             "Geneva" = "STEP Aire Geneva"
           ),
+          selected = "ARA Werhölzli Zurich"
         ),
         checkboxGroupInput(
           inputId = "data_type",
