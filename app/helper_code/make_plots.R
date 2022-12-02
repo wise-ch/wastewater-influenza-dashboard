@@ -5,18 +5,34 @@ library(dplyr)
 library(readr)
 library(RColorBrewer)
 
-# Read in data
+# Read in latest data
 confirmed_cases <- read_csv("data/confirmed_cases.csv", col_types = cols(date = "D"))
 ww_loads <- read_csv("data/ww_loads.csv", col_types = cols(sample_date = "D"))  # path relative to app directory
 ww_re_estimates <- read_csv("data/ww_re_estimates.csv", col_types = cols(date = "D"))
 case_re_estimates <- read_csv("data/confirmed_case_re_estimates.csv", col_types = c(date = "D"))
+
+# Read in cached data, merge to latest data
+for (file in list.files(path = "data/cached_data", full.names = T)) {
+  print(paste("Reading in", file))
+  if (endsWith(file, "_confirmed_cases.csv")) {
+    confirmed_cases <- rbind(confirmed_cases, read_csv(file, col_types = cols(date = "D")))
+  } else if (endsWith(file, "_ww_loads.csv")) {
+    ww_loads <- rbind(ww_loads, read_csv(file, col_types = cols(sample_date = "D")))
+  } else if (endsWith(file, "_confirmed_case_re_estimates.csv")) {
+    case_re_estimates <- rbind(case_re_estimates, read_csv(file, col_types = cols(date = "D")))
+  } else if (endsWith(file, "_ww_re_estimates.csv")) {
+    ww_re_estimates <- rbind(ww_re_estimates, read_csv(file, col_types = cols(date = "D")))
+  } else {
+    warning(paste("Unknown cached data file", file, "ignored."))
+  }
+}
 
 # Clean case data
 confirmed_cases <- confirmed_cases %>%
   mutate(wwtp = recode(
     wwtp,
     "BASEL" = "ARA Basel",
-    "ZUERICH(WERDHOELZLI)" = "ARA Werhölzli Zurich",
+    "ZUERICH(WERDHOELZLI)" = "ARA Werdhölzli Zurich",
     "VERNIER/AIRE" = "STEP Aire Geneva",
     "BIOGGIO(LUGANO)" = "IDA CDA Lugano",
     "CHUR" = "ARA Chur",
@@ -38,7 +54,9 @@ ww_loads <- ww_loads %>%
   mutate(wwtp = recode(
     wwtp,
     "STEP Aire" = "STEP Aire Geneva",
-    "ARA Werdhölzli" = "ARA Werhölzli Zurich"
+    "ARA Werdhölzli" = "ARA Werdhölzli Zurich",
+    "ARA Sensetal" = "ARA Senstal Laupen",
+    "CDA Lugano" = "IDA CDA Lugano"
   )) %>%  # fill gaps due to interpolation
   mutate(
     wwtp = zoo::na.locf(wwtp),
@@ -51,7 +69,7 @@ re_to_plot <- bind_rows(
     mutate(wwtp = recode(
       observation_type,
       "BASEL" = "ARA Basel",
-      "ZUERICH(WERDHOELZLI)" = "ARA Werhölzli Zurich",
+      "ZUERICH(WERDHOELZLI)" = "ARA Werdhölzli Zurich",
       "VERNIER/AIRE" = "STEP Aire Geneva",
       "BIOGGIO(LUGANO)" = "IDA CDA Lugano",
       "CHUR" = "ARA Chur",
@@ -70,7 +88,9 @@ re_to_plot <- bind_rows(
     mutate(wwtp = recode(
       observation_type,
       "STEP Aire" = "STEP Aire Geneva",
-      "ARA Werdhölzli" = "ARA Werhölzli Zurich"
+      "ARA Werdhölzli" = "ARA Werdhölzli Zurich",
+      "ARA Sensetal" = "ARA Senstal Laupen",
+      "CDA Lugano" = "IDA CDA Lugano"
     )) %>%
     mutate(data_type = "Wastewater")
 )
@@ -81,7 +101,7 @@ names(data_type_colors) <- c("Confirmed cases", "Wastewater")
 
 # WWTP colors
 wwtp_colors <- RColorBrewer::brewer.pal(name = "Set2", n = 7)
-wwtp_levels <- c("ARA Werhölzli Zurich", "STEP Aire Geneva", "ARA Basel", "CDA Lugano", "ARA Chur", "ARA Laupen", "ARA Altenrhein", "All provided data")
+wwtp_levels <- c("ARA Werdhölzli Zurich", "STEP Aire Geneva", "ARA Basel", "IDA CDA Lugano", "ARA Chur", "ARA Senstal Laupen", "ARA Altenrhein", "All provided data")
 wwtp_labels <- c("Zurich", "Geneva", "Basel", "Lugano", "Chur", "Laupen", "Altenrhein", "Cases all\ncatchments")
 
 re_to_plot <- re_to_plot %>% mutate(wwtp_factor = factor(wwtp, levels = wwtp_levels, labels = wwtp_labels))

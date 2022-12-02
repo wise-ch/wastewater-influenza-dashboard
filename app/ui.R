@@ -29,7 +29,7 @@ navbarPage(
             "Lugano" = "IDA CDA Lugano",
             "Geneva" = "STEP Aire Geneva"
           ),
-          selected = "ARA Werhölzli Zurich"
+          selected = "ARA Werdhölzli Zurich"
         ),
         checkboxGroupInput(
           inputId = "data_type",
