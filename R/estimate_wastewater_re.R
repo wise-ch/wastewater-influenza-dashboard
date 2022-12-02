@@ -18,7 +18,7 @@ mean_serial_interval <- influenza_mean_serial_interval_days
 std_serial_interval <- influenza_std_serial_interval_days
 estimation_window <- 3  # 3 is EpiEstim default
 minimum_cumul_incidence <- 12  # minimum cumulative number of infections for Re to be estimated, EstimateR default is 12
-seasons_to_calculate <- c("2021/22", "2022/23")  # list of seasons to calculate estimates for
+seasons_to_calculate <- c("2022/23")  # list of seasons to calculate estimates for (2021/22 is cached)
 n_bootstrap_reps <- 50
 
 # Import data
@@ -71,89 +71,59 @@ ww_data_zh <- read_csv("data/clean_data_eawag.csv", col_types = cols(sample_date
     names_from = "measurement_type",
     values_from = "mean")
 
-# Normalize daily copies by minimum value to get observations on the same scale as case data
-# See Huisman et al. 2022 Environmental Health Perspectives - deconvolution algorithm seems to struggle when observations are too peaked
-# TODO: using lowest non-zero measurement - any other strategy to consider?
-normalization_factor_bs <- min(
-  ww_data_bs$IAV_gc_per_day[ww_data_bs$IAV_gc_per_day > 0],
-  ww_data_bs$IBV_gc_per_day[ww_data_bs$IBV_gc_per_day > 0],
-  na.rm = T
+wwtp_data_all <- list(
+  "Basel" = ww_data_bs,
+  "Chur" = ww_data_gr,
+  "Altenrhein" = ww_data_sg,
+  "Laupen" = ww_data_fr,
+  "Lugano" = ww_data_ti,
+  "Geneva" = ww_data_ge,
+  "Zurich" = ww_data_zh
 )
-normalization_factor_gr <- min(
-  ww_data_gr$IAV_gc_per_day[ww_data_gr$IAV_gc_per_day > 0],
-  ww_data_gr$IBV_gc_per_day[ww_data_gr$IBV_gc_per_day > 0],
-  na.rm = T
-)
-normalization_factor_sg <- min(
-  ww_data_sg$IAV_gc_per_day[ww_data_sg$IAV_gc_per_day > 0],
-  ww_data_sg$IBV_gc_per_day[ww_data_sg$IBV_gc_per_day > 0],
-  na.rm = T
-)
-normalization_factor_fr <- min(
-  ww_data_fr$IAV_gc_per_day[ww_data_fr$IAV_gc_per_day > 0],
-  ww_data_fr$IBV_gc_per_day[ww_data_fr$IBV_gc_per_day > 0],
-  na.rm = T
-)
-normalization_factor_ti <- min(
-  ww_data_ti$IAV_gc_per_day[ww_data_ti$IAV_gc_per_day > 0],
-  ww_data_ti$IBV_gc_per_day[ww_data_ti$IBV_gc_per_day > 0],
-  na.rm = T
-)
-normalization_factor_ge <- min(
-  ww_data_ge$IAV_gc_per_day[ww_data_ge$IAV_gc_per_day > 0],
-  ww_data_ge$IBV_gc_per_day[ww_data_ge$IBV_gc_per_day > 0],
-  na.rm = T
-)
-normalization_factor_zh <- min(
-  ww_data_zh$IAV_gc_per_day[ww_data_zh$IAV_gc_per_day > 0],
-  ww_data_zh$IBV_gc_per_day[ww_data_zh$IBV_gc_per_day > 0],
-  na.rm = T
-)
-ww_data_bs <- ww_data_bs %>%
-  mutate(IAV_gc_per_day_norm = IAV_gc_per_day / normalization_factor_bs) %>%
-  mutate(IBV_gc_per_day_norm = IBV_gc_per_day / normalization_factor_bs)
-ww_data_gr <- ww_data_gr %>%
-  mutate(IAV_gc_per_day_norm = IAV_gc_per_day / normalization_factor_gr) %>%
-  mutate(IBV_gc_per_day_norm = IBV_gc_per_day / normalization_factor_gr)
-ww_data_sg <- ww_data_sg %>%
-  mutate(IAV_gc_per_day_norm = IAV_gc_per_day / normalization_factor_sg) %>%
-  mutate(IBV_gc_per_day_norm = IBV_gc_per_day / normalization_factor_sg)
-ww_data_fr <- ww_data_fr %>%
-  mutate(IAV_gc_per_day_norm = IAV_gc_per_day / normalization_factor_fr) %>%
-  mutate(IBV_gc_per_day_norm = IBV_gc_per_day / normalization_factor_fr)
-ww_data_ti <- ww_data_ti %>%
-  mutate(IAV_gc_per_day_norm = IAV_gc_per_day / normalization_factor_ti) %>%
-  mutate(IBV_gc_per_day_norm = IBV_gc_per_day / normalization_factor_ti)
-ww_data_ge <- ww_data_ge %>%
-  mutate(IAV_gc_per_day_norm = IAV_gc_per_day / normalization_factor_ge) %>%
-  mutate(IBV_gc_per_day_norm = IBV_gc_per_day / normalization_factor_ge)
-ww_data_zh <- ww_data_zh %>%
-  mutate(IAV_gc_per_day_norm = IAV_gc_per_day / normalization_factor_zh) %>%
-  mutate(IBV_gc_per_day_norm = IBV_gc_per_day / normalization_factor_zh)
 
 # Estimate Re for each data stream
 is_first <- T
-for (df in list(
-  ww_data_bs,
-  ww_data_gr,
-  ww_data_sg,
-  ww_data_fr,
-  ww_data_ti,
-  ww_data_ge,
-  ww_data_zh)
-) {
+for (wwtp_name in names(wwtp_data_all)) {
 
-  data_long <- df %>% pivot_longer(
+  df <- wwtp_data_all[[wwtp_name]]
+  wwtp_i <- unique(df$wwtp)  # should be single plant
+
+  # Normalize daily copies by minimum value to get observations on the same scale as case data
+  # See Huisman et al. 2022 Environmental Health Perspectives -
+  # deconvolution algorithm seems to struggle when observations are too peaked
+  data_normalized <- tryCatch(
+    {
+      suppressWarnings(normalization_factor <- min(
+        df$IAV_gc_per_day[df$IAV_gc_per_day > 0],
+        df$IBV_gc_per_day[df$IBV_gc_per_day > 0],
+        na.rm = T))
+      suppressWarnings(df %>%
+        mutate(IAV_gc_per_day_norm = IAV_gc_per_day / normalization_factor) %>%
+        mutate(IBV_gc_per_day_norm = IBV_gc_per_day / normalization_factor))
+    },
+    error = function(cond) {
+      message(paste("Couldn't calculate Re for", wwtp_name,
+                    "because normalization failed (probably due to no measurements this season.)"))
+      return(cond)
+    }
+  )
+
+  if(inherits(data_normalized, "error")) {
+    next  # if normalization fails, skip this wwtp
+  }
+
+  data_long <- data_normalized %>% pivot_longer(
     cols = c(IAV_gc_per_day, IBV_gc_per_day, IAV_gc_per_day_norm, IBV_gc_per_day_norm),
     values_to = "observation",
     names_to = c("influenza_type", "observation_units"),
     names_pattern = "([A-Z]{3})_(.*)"
   )
-  wwtp_i <- unique(df$wwtp)  # should be single plant
 
+  # Iterate over influenza types and seasons (if multiple)
   for (influenza_type_j in unique(data_long$influenza_type)) {
     for (measuring_period_k in unique(data_long$measuring_period)) {
-      writeLines(paste("\nEstimating Re for", wwtp_i, "influenza", influenza_type_j, "in period", measuring_period_k))
+      writeLines(paste("\nEstimating Re for", wwtp_i, "influenza", influenza_type_j,
+                       "in period", measuring_period_k))
 
       # Get appropriate data
       data_filtered <- data_long %>%

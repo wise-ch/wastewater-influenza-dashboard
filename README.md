@@ -6,8 +6,10 @@
 Wastewater data is provided by EAWAG and Canton Basel-Stadt, case data is provided by the Swiss FOPH. The raw data is expected to be in `data/raw_data`.
 The pre-processing scripts in `R/helper_scripts` generate generate clean versions of these raw data files and save them to `data`. 
 
-The Re estimation scripts `R/estimate_wastewater_re.R` and `R/estimate_confirmed_case_re.R` run automatically via Github actions when new clean versions of the data files are pushed.
-These scripts save Re estimates to `app/data`.
+The Re estimation scripts [estimate_wastewater_re.R](R/estimate_wastewater_re.R) and [estimate_confirmed_case_re.R](R/estimate_confirmed_case_re.R) run automatically via Github actions when new clean versions of the data files are pushed.
+These scripts save Re estimates to `app/data`. 
+Estimates will only be generated for the current influenza season, this is hardcoded in the Re estiamte scripts and in the data preprocessing scripts [here](R/helper_scripts).
+Cached estimates from previous seasons are stored [here](app/data/cached_data).
 
 The shiny app can then be run to visualize the Re estimates. You can run the shiny app locally from RStudio by opening `app/server.R`, setting your working directory to the `app` directory, and clicking "Run App".
 
