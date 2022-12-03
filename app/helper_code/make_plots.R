@@ -41,8 +41,8 @@ confirmed_cases <- confirmed_cases %>%
   )) %>%
   mutate(influenza_type = recode(
     influenza_type,
-    "A" = "IAV",
-    "B" = "IBV"
+    "A" = "Influenza A virus",
+    "B" = "Influenza B virus"
   )) %>%  # fill gaps due to interpolation
   mutate(
     wwtp = zoo::na.locf(wwtp),
@@ -67,6 +67,11 @@ ww_loads <- ww_loads %>%
     wwtp = zoo::na.locf(wwtp),
     influenza_type = zoo::na.locf(influenza_type),
     measuring_period = zoo::na.locf(measuring_period)) %>%
+  mutate(influenza_type = recode(
+    influenza_type,
+    "IAV" = "Influenza A virus",
+    "IBV" = "Influenza B virus"
+  )) %>%
   mutate(dummy_year = case_when(
     format(sample_date, "%m") %in% c("09", "10", "11", "12") ~ "1999",
     T ~ "2000"
@@ -88,8 +93,8 @@ re_to_plot <- bind_rows(
     )) %>%
     mutate(influenza_type = recode(
       influenza_type,
-      "A" = "IAV",
-      "B" = "IBV"
+      "A" = "Influenza A virus",
+      "B" = "Influenza B virus"
     )) %>%
     mutate(CI_down_Re_estimate = pmin(CI_down_Re_estimate, Re_lowHPD, na.rm = T),
            CI_up_Re_estimate = pmax(CI_up_Re_estimate, Re_highHPD, na.rm = T)) %>%  # this is to fix a bug(?) around the confidence intervals for the first weeks/months in Lugano, Laupen, and Chur, they're NA for combined uncertainty even though non-NA for Re_low/highHPD
@@ -101,6 +106,11 @@ re_to_plot <- bind_rows(
       "ARA Werdhölzli" = "ARA Werdhölzli Zurich",
       "ARA Sensetal" = "ARA Senstal Laupen",
       "CDA Lugano" = "IDA CDA Lugano"
+    )) %>%
+    mutate(influenza_type = recode(
+      influenza_type,
+      "IAV" = "Influenza A virus",
+      "IBV" = "Influenza B virus"
     )) %>%
     mutate(data_type = "Wastewater")
 ) %>%
@@ -115,7 +125,7 @@ data_type_colors <- brewer.pal(n = 8, name = "Set1")[1:2]
 names(data_type_colors) <- c("Confirmed cases", "Wastewater")
 
 # WWTP names to display
-wwtp_levels <- c("ARA Werdhölzli Zurich", "STEP Aire Geneva", "ARA Basel", "IDA CDA Lugano", "ARA Chur", "ARA Senstal Laupen", "ARA Altenrhein", "All provided data")
+wwtp_levels <- c("ARA Werdhölzli Zurich", "STEP Aire Geneva", "ARA Basel", "IDA CDA Lugano", "ARA Chur", "ARA Sensetal Laupen", "ARA Altenrhein", "All provided data")
 wwtp_labels <- c("Zurich", "Geneva", "Basel", "Lugano", "Chur", "Laupen", "Altenrhein", "Cases all\ncatchments")
 re_to_plot <- re_to_plot %>% mutate(wwtp_factor = factor(wwtp, levels = wwtp_levels, labels = wwtp_labels))
 
@@ -209,7 +219,7 @@ plot_re <- function(data = re_to_plot, data_types, wwtp_to_plot, date_range, mea
       lwd = 0.8) +
     geom_ribbon(
       aes(x = date_to_plot, ymin = CI_down_Re_estimate, ymax = CI_up_Re_estimate, fill = data_type),
-      alpha = 0.5) +
+      alpha = 0.5, linetype = 0) +
     facet_grid(. ~ influenza_type) +
     geom_hline(yintercept = 1) +
     scale_color_manual(values = data_type_colors, aesthetics = c("color", "fill"), breaks = data_types) +
@@ -239,9 +249,8 @@ plot_all_re <- function(data = re_to_plot, data_types, measuring_period_to_plot,
     geom_ribbon(
       aes(x = date_to_plot, ymin = CI_down_Re_estimate,
           ymax = CI_up_Re_estimate,
-          fill = data_type,
-          color = data_type),
-      alpha = 0.5) +
+          fill = data_type),
+      alpha = 0.5, linetype = 0) +
     facet_grid(wwtp_factor ~ influenza_type, drop = F) +
     geom_hline(yintercept = 1) +
     scale_color_manual(values = data_type_colors, aesthetics = c("color", "fill"), breaks = data_types) +

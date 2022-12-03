@@ -5,6 +5,9 @@ function(input, output, session) {
 
   # Plotting wastewater measurements
   output$raw_plots <- renderPlot({
+    validate(need(
+      input$measuring_periods != "",
+      "Please select at least one season in the menu to generate the plot."))
     raw <- plot_ww_loads(
       wwtp_to_plot = input$wwtp,
       date_range = input$slider_dates,
@@ -14,6 +17,9 @@ function(input, output, session) {
 
   # Plotting confirmed cases
   output$case_plots <- renderPlot({
+    validate(need(
+      input$measuring_periods != "",
+      "Please select at least one season in the menu to generate the plot."))
     cases <- plot_cases(
       wwtp_to_plot = input$wwtp,
       date_range = input$slider_dates,
@@ -26,6 +32,9 @@ function(input, output, session) {
     validate(need(
       input$data_type != "",
       "Please select at least one data source in the menu to generate the plot."))
+    validate(need(
+      input$measuring_periods != "",
+      "Please select at least one season in the menu to generate the plot."))
     re <- plot_re(
       data_types = input$data_type,
       wwtp_to_plot = input$wwtp,
