@@ -123,6 +123,11 @@ re_to_plot <- bind_rows(
 # Data type colors
 data_type_colors <- brewer.pal(n = 8, name = "Set1")[1:2]
 names(data_type_colors) <- c("Confirmed cases", "Wastewater")
+data_type_color_scale <- scale_color_manual(
+  values = data_type_colors,
+  aesthetics = c("color", "fill"),
+  labels = c("Laboratory-confirmed cases", "Virus load in wastewater")
+)
 
 # WWTP names to display
 wwtp_levels <- c("ARA Werdhölzli Zurich", "STEP Aire Geneva", "ARA Basel", "IDA CDA Lugano", "ARA Chur", "ARA Sensetal Laupen", "ARA Altenrhein", "All provided data")
@@ -222,7 +227,7 @@ plot_re <- function(data = re_to_plot, data_types, wwtp_to_plot, date_range, mea
       alpha = 0.5, linetype = 0) +
     facet_grid(. ~ influenza_type) +
     geom_hline(yintercept = 1) +
-    scale_color_manual(values = data_type_colors, aesthetics = c("color", "fill"), breaks = data_types) +
+    data_type_color_scale +
     shared_date_scale +
     scale_y_continuous(labels = function(label) sprintf("%6.1f", label)) +
     coord_cartesian(ylim = re_ylimits) +
@@ -253,7 +258,7 @@ plot_all_re <- function(data = re_to_plot, data_types, measuring_period_to_plot,
       alpha = 0.5, linetype = 0) +
     facet_grid(wwtp_factor ~ influenza_type, drop = F) +
     geom_hline(yintercept = 1) +
-    scale_color_manual(values = data_type_colors, aesthetics = c("color", "fill"), breaks = data_types) +
+    data_type_color_scale +
     shared_date_scale +
     scale_y_continuous(labels = function(label) sprintf("%6.1f", label)) +
     coord_cartesian(ylim = re_ylimits) +

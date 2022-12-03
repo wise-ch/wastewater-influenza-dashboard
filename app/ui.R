@@ -34,7 +34,9 @@ navbarPage(
         checkboxGroupInput(
           inputId = "data_type",
           label = "Data source (select to compare):",
-          choices = c("Wastewater", "Confirmed cases"),
+          choices = c(
+            "Virus load in wastewater" = "Wastewater",
+            "Laboratory-confirmed cases" = "Confirmed cases"),
           selected = "Wastewater"
         ),
         checkboxGroupInput(
