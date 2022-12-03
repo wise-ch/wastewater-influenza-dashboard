@@ -3,23 +3,12 @@ library(patchwork)
 
 function(input, output, session) {
 
-  # Control slider dates
-  observeEvent(input$wwtp, {
-    # Control the value, min, max according to region selected
-    ww_loads_filtered <- ww_loads %>% filter(wwtp == input$wwtp, !is.na(sample_date))
-    date_range <- range(ww_loads_filtered$sample_date)
-    # this is what is causing flickering for region
-    updateSliderInput(session, "slider_dates",
-      value = date_range,
-      min = date_range[1], max = Sys.Date()
-    )
-  })
-
   # Plotting wastewater measurements
   output$raw_plots <- renderPlot({
     raw <- plot_ww_loads(
       wwtp_to_plot = input$wwtp,
-      date_range = input$slider_dates)
+      date_range = input$slider_dates,
+      measuring_period = input$measuring_periods)
     raw
   })
 
@@ -27,24 +16,33 @@ function(input, output, session) {
   output$case_plots <- renderPlot({
     cases <- plot_cases(
       wwtp_to_plot = input$wwtp,
-      date_range = input$slider_dates)
+      date_range = input$slider_dates,
+      measuring_period = input$measuring_periods)
     cases
   })
 
   # Plotting single catchment Re estimates
   output$re_plots <- renderPlot({
+    validate(need(
+      input$data_type != "",
+      "Please select at least one data source in the menu to generate the plot."))
     re <- plot_re(
       data_types = input$data_type,
       wwtp_to_plot = input$wwtp,
-      date_range = input$slider_dates)
+      date_range = input$slider_dates,
+      measuring_period = input$measuring_periods)
     re
   })
 
   # Plotting all catchment Re estimates together
   output$all_catchment_plots <- renderPlot({
+    validate(need(
+      input$data_type_all_catchments != "",
+      "Please select at least one data source in the menu to generate the plot."))
     all_re <- plot_all_re(
       data_types = input$data_type_all_catchments,
-      date_range = input$slider_dates)
+      measuring_period = input$measuring_period_all_catchments,
+      date_range = input$slider_dates_all_catchments)
     all_re
   })
 

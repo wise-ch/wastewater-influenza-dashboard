@@ -47,7 +47,12 @@ confirmed_cases <- confirmed_cases %>%
   mutate(
     wwtp = zoo::na.locf(wwtp),
     influenza_type = zoo::na.locf(influenza_type),
-    measuring_period = zoo::na.locf(measuring_period))
+    measuring_period = zoo::na.locf(measuring_period)) %>%
+  mutate(dummy_year = case_when(
+    format(date, "%m") %in% c("08", "09", "10", "11", "12") ~ "1999",
+    T ~ "2000"
+  )) %>%  # start each season from Sept for plotting
+  mutate(date_to_plot = as.Date(paste0(dummy_year, format(date, "-%m-%d"))))
 
 # Clean load data
 ww_loads <- ww_loads %>%
@@ -61,7 +66,12 @@ ww_loads <- ww_loads %>%
   mutate(
     wwtp = zoo::na.locf(wwtp),
     influenza_type = zoo::na.locf(influenza_type),
-    measuring_period = zoo::na.locf(measuring_period))
+    measuring_period = zoo::na.locf(measuring_period)) %>%
+  mutate(dummy_year = case_when(
+    format(sample_date, "%m") %in% c("09", "10", "11", "12") ~ "1999",
+    T ~ "2000"
+  )) %>%  # start each season from Sept for plotting
+  mutate(date_to_plot = as.Date(paste0(dummy_year, format(sample_date, "-%m-%d"))))
 
 # Join Re data
 re_to_plot <- bind_rows(
@@ -93,18 +103,24 @@ re_to_plot <- bind_rows(
       "CDA Lugano" = "IDA CDA Lugano"
     )) %>%
     mutate(data_type = "Wastewater")
-)
+) %>%
+  mutate(dummy_year = case_when(
+    format(date, "%m") %in% c("09", "10", "11", "12") ~ "1999",
+    T ~ "2000"
+  )) %>%  # start each season from Sept for plotting
+  mutate(date_to_plot = as.Date(paste0(dummy_year, format(date, "-%m-%d"))))
 
 # Data type colors
 data_type_colors <- brewer.pal(n = 8, name = "Set1")[1:2]
 names(data_type_colors) <- c("Confirmed cases", "Wastewater")
 
-# WWTP colors
-wwtp_colors <- RColorBrewer::brewer.pal(name = "Set2", n = 7)
+# WWTP names to display
 wwtp_levels <- c("ARA Werdhölzli Zurich", "STEP Aire Geneva", "ARA Basel", "IDA CDA Lugano", "ARA Chur", "ARA Senstal Laupen", "ARA Altenrhein", "All provided data")
 wwtp_labels <- c("Zurich", "Geneva", "Basel", "Lugano", "Chur", "Laupen", "Altenrhein", "Cases all\ncatchments")
-
 re_to_plot <- re_to_plot %>% mutate(wwtp_factor = factor(wwtp, levels = wwtp_levels, labels = wwtp_labels))
+
+# y-axis limits for Re plots
+re_ylimits <- c(0, 2)
 
 # Define shared theme for plots
 shared_theme <- theme_minimal() +
@@ -116,121 +132,128 @@ shared_theme <- theme_minimal() +
     legend.title = element_text(size = 17),
     plot.title = element_text(size = 16),
     panel.spacing.y = unit(2, "lines"),
-    legend.position = "bottom"
+    legend.position = "none"
   )
 
-date_range <- range(ww_loads$sample_date)
+shared_date_scale <- scale_x_date(date_breaks = "months", date_labels = "%b")
 
 #' Plot wastewater loads
-plot_ww_loads <- function(data = ww_loads, wwtp_to_plot, date_range) {
+plot_ww_loads <- function(data = ww_loads, wwtp_to_plot, date_range, measuring_periods) {
+
   data_filtered <- data %>%
     filter(wwtp == wwtp_to_plot) %>%
-    filter(sample_date >= date_range[1] & sample_date <= date_range[2])
+    filter(date_to_plot >= date_range[1], date_to_plot <= date_range[2]) %>%
+    filter(measuring_period %in% measuring_periods)
 
   p <- ggplot() +
     geom_point(
       data = data_filtered %>% filter(is_observation),
-      aes(x = sample_date, y = observation), color = data_type_colors["Wastewater"]
+      aes(x = date_to_plot, y = observation, shape = measuring_period),
+      color = data_type_colors["Wastewater"],
+      size = 2
     ) +
     geom_line(
       data = data_filtered,
-      aes(x = sample_date, y = observation, group = measuring_period),
+      aes(x = date_to_plot, y = observation, group = measuring_period),
       linetype = "dashed", colour = "black"
     ) +
     facet_grid(. ~ influenza_type) +
-    scale_x_date(
-      limits = c(date_range[1], date_range[2]),
-      date_breaks = "months", date_labels = "%b"
-    ) +
+    shared_date_scale +
     scale_y_continuous(labels = function(label) sprintf("%4.1f", label)) +
-    labs(x = "Date", y = "Genome copies per day\n(normalized by minimum value)") +
+    labs(x = element_blank(), y = "Genome copies per day\n(normalized by minimum value)") +
     shared_theme
 
   p
 }
 
-plot_cases <- function(data = confirmed_cases, wwtp_to_plot, date_range) {
+plot_cases <- function(data = confirmed_cases, wwtp_to_plot, date_range, measuring_periods) {
   data_filtered <- data %>%
     filter(wwtp == wwtp_to_plot) %>%
-    filter(date >= date_range[1] & date <= date_range[2])
+    filter(date_to_plot >= date_range[1], date_to_plot <= date_range[2]) %>%
+    filter(measuring_period %in% measuring_periods)
 
   p <- ggplot() +
     geom_point(
       data = data_filtered %>% filter(is_observation),
-      aes(x = date, y = daily_cases), color = data_type_colors["Confirmed cases"]
+      aes(x = date_to_plot, y = daily_cases, shape = measuring_period),
+      color = data_type_colors["Confirmed cases"],
+      size = 2
     ) +
     geom_line(
       data = data_filtered,
-      aes(x = date, y = daily_cases, group = measuring_period),
+      aes(x = date_to_plot, y = daily_cases, group = measuring_period),
       linetype = "dashed", colour = "black"
     ) +
     facet_grid(. ~ influenza_type) +
-    scale_x_date(
-      limits = c(date_range[1], date_range[2]),
-      date_breaks = "months", date_labels = "%b"
-    ) +
+    shared_date_scale +
     scale_y_continuous(labels = function(label) sprintf("%4.1f", label)) +
-    labs(x = "Date", y = "Daily confirmed cases\nin the catchment") +
+    labs(x = element_blank(), y = "Daily confirmed cases\nin the catchment") +
     shared_theme
 
   p
 }
 
 #' Plot Re estimates
-plot_re <- function(data = re_to_plot, data_types, wwtp_to_plot, date_range) {
+plot_re <- function(data = re_to_plot, data_types, wwtp_to_plot, date_range, measuring_periods) {
   data_filtered <- data %>%
     filter(wwtp == wwtp_to_plot) %>%
+    filter(date_to_plot >= date_range[1], date_to_plot <= date_range[2]) %>%
     filter(data_type %in% data_types) %>%
-    filter(date >= date_range[1] & date <= date_range[2])
+    filter(measuring_period %in% measuring_periods)
 
   ylimits <- c(0, 2) # TODO: re-implement reactive y limits
 
   p <- ggplot(data = data_filtered) +
-    geom_line(aes(x = date, y = Re_estimate, colour = data_type), lwd = 0.8) +
-    geom_ribbon(aes(x = date, ymin = CI_down_Re_estimate, ymax = CI_up_Re_estimate, fill = data_type), alpha = 0.5) +
+    geom_line(
+      aes(x = date_to_plot, y = Re_estimate, colour = data_type, linetype = measuring_period),
+      lwd = 0.8) +
+    geom_ribbon(
+      aes(x = date_to_plot, ymin = CI_down_Re_estimate, ymax = CI_up_Re_estimate, fill = data_type),
+      alpha = 0.5) +
     facet_grid(. ~ influenza_type) +
     geom_hline(yintercept = 1) +
     scale_color_manual(values = data_type_colors, aesthetics = c("color", "fill"), breaks = data_types) +
-    scale_x_date(
-      limits = c(date_range[1], date_range[2]),
-      date_breaks = "months", date_labels = "%b"
-    ) +
+    shared_date_scale +
     scale_y_continuous(labels = function(label) sprintf("%6.1f", label)) +
-    coord_cartesian(ylim = ylimits) + # change this? Autoadjust? but how?
+    coord_cartesian(ylim = re_ylimits) +
+    shared_theme +
     labs(
-      x = "Date", y = "Reproductive number",
-      colour = "Data type", fill = "Data type"
-    ) +
-    shared_theme
+      x = element_blank(), y = "Reproductive number",
+      colour = "Data type", fill = "Data type", linetype = "Influenza season") +
+    theme(legend.position = "bottom")
 
   p
 }
 
 # Plot Re for all catchments together
-plot_all_re <- function(data = re_to_plot, data_types, date_range) {
+plot_all_re <- function(data = re_to_plot, data_types, measuring_period_to_plot, date_range) {
   data_filtered <- data %>%
     filter(data_type %in% data_types) %>%
-    filter(date >= date_range[1] & date <= date_range[2])
-
-  ylimits <- c(0, 2) # TODO: re-implement reactive y limits
+    filter(measuring_period == measuring_period_to_plot) %>%
+    filter(date_to_plot >= date_range[1], date_to_plot <= date_range[2])
 
   p <- ggplot(data = data_filtered) +
-    geom_line(aes(x = date, y = Re_estimate, colour = data_type), lwd = 0.8) +
-    geom_ribbon(aes(x = date, ymin = CI_down_Re_estimate, ymax = CI_up_Re_estimate, fill = data_type), alpha = 0.5) +
+    geom_line(
+      aes(x = date_to_plot, y = Re_estimate, colour = data_type),
+      lwd = 0.8) +
+    geom_ribbon(
+      aes(x = date_to_plot, ymin = CI_down_Re_estimate,
+          ymax = CI_up_Re_estimate,
+          fill = data_type,
+          color = data_type),
+      alpha = 0.5) +
     facet_grid(wwtp_factor ~ influenza_type, drop = F) +
     geom_hline(yintercept = 1) +
     scale_color_manual(values = data_type_colors, aesthetics = c("color", "fill"), breaks = data_types) +
-    scale_x_date(
-      limits = c(date_range[1], date_range[2]),
-      date_breaks = "months", date_labels = "%b"
-    ) +
+    shared_date_scale +
     scale_y_continuous(labels = function(label) sprintf("%6.1f", label)) +
-    coord_cartesian(ylim = ylimits) + # change this? Autoadjust? but how?
+    coord_cartesian(ylim = re_ylimits) +
     labs(
-      x = "Date", y = "Reproductive number",
+      x = element_blank(), y = "Reproductive number",
       colour = "Data type", fill = "Data type"
     ) +
-    shared_theme
+    shared_theme +
+    theme(legend.position = "bottom")
 
   p
 }
