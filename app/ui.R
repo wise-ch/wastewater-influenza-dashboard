@@ -37,6 +37,12 @@ navbarPage(
           choices = c("Wastewater", "Confirmed cases"),
           selected = "Wastewater"
         ),
+        checkboxGroupInput(
+          inputId = "measuring_periods",
+          label = "Influenza season (select to compare):",
+          choices = c("2021/22", "2022/23"),
+          selected = c("2021/22", "2022/23")
+        ),
         width = 3
       ),
 
@@ -68,8 +74,9 @@ navbarPage(
           shinyWidgets::setSliderColor(color = rep("darkgrey", 2), 1:2),
           sliderInput("slider_dates",
             label = NULL, width = "950px",
-            min = min(re_to_plot$date), max = Sys.Date(),
-            value = c(min(re_to_plot$date), Sys.Date())
+            min = as.Date("1999-08-01"), max = as.Date("2000-07-31"),
+            timeFormat = "%b. %d",
+            value = c(as.Date("1999-08-01"), as.Date("2000-07-31"))  # these correspond to dummy date range for plotting so that all seasons are overlayed
           ),
           p(HTML(paste0("<em>", "(The start and end date of the time interval to be displayed can be changed by moving the slider above.)"), "</em>"),
             style = "margin-bottom:0;font-size: 90%;"
@@ -93,9 +100,14 @@ navbarPage(
           choices = c("Wastewater", "Confirmed cases"),
           selected = "Wastewater"
         ),
+        radioButtons(
+          inputId = "measuring_period_all_catchments",
+          label = "Influenza season:",
+          choices = c("2021/22", "2022/23"),
+          selected = "2021/22"
+        ),
         width = 3
       ),
-
       mainPanel(
         fluidRow(
           div(
@@ -105,11 +117,11 @@ navbarPage(
             ) %>%
               withSpinner(color = "#0dc5c1")
           ),
-          sliderInput("slider_dates_cantonal",
-            label = NULL, width = "950px",
-            min = as.Date("2021-02-01"), max = Sys.Date(),
-            value = c(as.Date("2021-02-01"), Sys.Date())
-          ),
+          sliderInput("slider_dates_all_catchments",
+                      label = NULL, width = "950px",
+                      min = as.Date("1999-08-01"), max = as.Date("2000-07-31"),
+                      timeFormat = "%b. %d",
+                      value = c(as.Date("1999-08-01"), as.Date("2000-07-31"))),  # these correspond to dummy date range for plotting so that all seasons are overlayed
           p(HTML(paste0("<em>", "(The start and end date of the time interval to be displayed can be changed by moving the slider above.)", "</em>")),
             style = "margin-bottom:0;font-size: 90%;"
           )
