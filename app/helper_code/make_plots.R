@@ -153,11 +153,10 @@ shared_theme <- theme_minimal() +
 shared_date_scale <- scale_x_date(date_breaks = "months", date_labels = "%b")
 
 #' Plot wastewater loads
-plot_ww_loads <- function(data = ww_loads, wwtp_to_plot, date_range, measuring_periods) {
+plot_ww_loads <- function(data = ww_loads, wwtp_to_plot, measuring_periods) {
 
   data_filtered <- data %>%
     filter(wwtp == wwtp_to_plot) %>%
-    filter(date_to_plot >= date_range[1], date_to_plot <= date_range[2]) %>%
     filter(measuring_period %in% measuring_periods)
 
   p <- ggplot() +
@@ -181,11 +180,10 @@ plot_ww_loads <- function(data = ww_loads, wwtp_to_plot, date_range, measuring_p
   p
 }
 
-plot_cases <- function(data = confirmed_cases, wwtp_to_plot, date_range, measuring_periods) {
+plot_cases <- function(data = confirmed_cases, wwtp_to_plot, measuring_periods) {
   data_filtered <- data %>%
     filter(is_observation) %>%
     filter(wwtp == wwtp_to_plot) %>%
-    filter(date_to_plot >= date_range[1], date_to_plot <= date_range[2]) %>%
     filter(measuring_period %in% measuring_periods)
 
   p <- ggplot() +
@@ -228,10 +226,9 @@ plot_cases <- function(data = confirmed_cases, wwtp_to_plot, date_range, measuri
 }
 
 #' Plot Re estimates
-plot_re <- function(data = re_to_plot, data_types, wwtp_to_plot, date_range, measuring_periods) {
+plot_re <- function(data = re_to_plot, data_types, wwtp_to_plot, measuring_periods) {
   data_filtered <- data %>%
     filter(wwtp == wwtp_to_plot) %>%
-    filter(date_to_plot >= date_range[1], date_to_plot <= date_range[2]) %>%
     filter(data_type %in% data_types) %>%
     filter(measuring_period %in% measuring_periods)
 
@@ -260,11 +257,10 @@ plot_re <- function(data = re_to_plot, data_types, wwtp_to_plot, date_range, mea
 }
 
 # Plot Re for all catchments together
-plot_all_re <- function(data = re_to_plot, data_types, measuring_period_to_plot, date_range) {
+plot_all_re <- function(data = re_to_plot, data_types, measuring_period_to_plot) {
   data_filtered <- data %>%
     filter(data_type %in% data_types) %>%
-    filter(measuring_period == measuring_period_to_plot) %>%
-    filter(date_to_plot >= date_range[1], date_to_plot <= date_range[2])
+    filter(measuring_period == measuring_period_to_plot)
 
   p <- ggplot(data = data_filtered) +
     geom_line(

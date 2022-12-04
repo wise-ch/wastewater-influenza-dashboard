@@ -10,7 +10,6 @@ function(input, output, session) {
       "Please select at least one season in the menu to generate the plot."))
     raw <- plot_ww_loads(
       wwtp_to_plot = input$wwtp,
-      date_range = input$slider_dates,
       measuring_period = input$measuring_periods)
     raw
   })
@@ -22,7 +21,6 @@ function(input, output, session) {
       "Please select at least one season in the menu to generate the plot."))
     cases <- plot_cases(
       wwtp_to_plot = input$wwtp,
-      date_range = input$slider_dates,
       measuring_period = input$measuring_periods)
     cases
   })
@@ -38,7 +36,6 @@ function(input, output, session) {
     re <- plot_re(
       data_types = input$data_type,
       wwtp_to_plot = input$wwtp,
-      date_range = input$slider_dates,
       measuring_period = input$measuring_periods)
     re
   })
@@ -50,8 +47,7 @@ function(input, output, session) {
       "Please select at least one data source in the menu to generate the plot."))
     all_re <- plot_all_re(
       data_types = input$data_type_all_catchments,
-      measuring_period = input$measuring_period_all_catchments,
-      date_range = input$slider_dates_all_catchments)
+      measuring_period = input$measuring_period_all_catchments)
     all_re
   })
 
@@ -64,24 +60,23 @@ function(input, output, session) {
     content = function(file) {
       raw <- plot_ww_loads(
         wwtp_to_plot = input$wwtp,
-        date_range = input$slider_dates)
+        measuring_periods = input$measuring_periods)
       cases <- plot_cases(
         wwtp_to_plot = input$wwtp,
-        date_range = input$slider_dates)
+        measuring_periods = input$measuring_periods)
       re <- plot_re(
         data_types = input$data_type,
         wwtp_to_plot = input$wwtp,
-        date_range = input$slider_dates)
+        measuring_periods = input$measuring_periods)
 
       p <- patchwork::wrap_plots(raw, cases, re, nrow = 3) +
         plot_annotation(caption = paste0(
           "Generated on: ", Sys.Date(),
           " (by: WISE influenza dashboard)"
         ))
-      cairo_pdf(
-        filename = file,
-        width = 16, height = 12, pointsize = 12, family = "sans", bg = "transparent",
-        antialias = "subpixel", fallback_resolution = 300
+      pdf(
+        file = file,
+        width = 16, height = 12, family = "sans"
       )
       plot(p)
       dev.off()
