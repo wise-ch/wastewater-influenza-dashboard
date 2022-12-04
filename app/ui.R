@@ -72,17 +72,6 @@ navbarPage(
             ) %>%
               withSpinner(color = "#0dc5c1")
           ),
-          # slider input for date range -----
-          shinyWidgets::setSliderColor(color = rep("darkgrey", 2), 1:2),
-          sliderInput("slider_dates",
-            label = NULL, width = "950px",
-            min = as.Date("1999-08-01"), max = as.Date("2000-07-31"),
-            timeFormat = "%b. %d",
-            value = c(as.Date("1999-08-01"), as.Date("2000-07-31"))  # these correspond to dummy date range for plotting so that all seasons are overlayed
-          ),
-          p(HTML(paste0("<em>", "(The start and end date of the time interval to be displayed can be changed by moving the slider above.)"), "</em>"),
-            style = "margin-bottom:0;font-size: 90%;"
-          ),
           htmlOutput("link"),
           downloadButton('download_plot', 'Download plots')
         ) # fluid row
@@ -118,14 +107,6 @@ navbarPage(
               height = "1050px", width = "980px"
             ) %>%
               withSpinner(color = "#0dc5c1")
-          ),
-          sliderInput("slider_dates_all_catchments",
-                      label = NULL, width = "950px",
-                      min = as.Date("1999-08-01"), max = as.Date("2000-07-31"),
-                      timeFormat = "%b. %d",
-                      value = c(as.Date("1999-08-01"), as.Date("2000-07-31"))),  # these correspond to dummy date range for plotting so that all seasons are overlayed
-          p(HTML(paste0("<em>", "(The start and end date of the time interval to be displayed can be changed by moving the slider above.)", "</em>")),
-            style = "margin-bottom:0;font-size: 90%;"
           )
         ) # fluid row
       )  # main panel
