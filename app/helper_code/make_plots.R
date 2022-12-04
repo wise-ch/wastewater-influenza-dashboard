@@ -183,27 +183,46 @@ plot_ww_loads <- function(data = ww_loads, wwtp_to_plot, date_range, measuring_p
 
 plot_cases <- function(data = confirmed_cases, wwtp_to_plot, date_range, measuring_periods) {
   data_filtered <- data %>%
+    filter(is_observation) %>%
     filter(wwtp == wwtp_to_plot) %>%
     filter(date_to_plot >= date_range[1], date_to_plot <= date_range[2]) %>%
     filter(measuring_period %in% measuring_periods)
 
   p <- ggplot() +
     geom_point(
-      data = data_filtered %>% filter(is_observation),
-      aes(x = date_to_plot, y = daily_cases, shape = measuring_period),
+      data = data_filtered,
+      aes(x = date_to_plot, y = total_cases, shape = measuring_period),
       color = data_type_colors["Confirmed cases"],
       size = 2
     ) +
     geom_line(
       data = data_filtered,
-      aes(x = date_to_plot, y = daily_cases, group = measuring_period),
+      aes(x = date_to_plot, y = total_cases, group = measuring_period),
       linetype = "dashed", colour = "black"
     ) +
     facet_grid(. ~ influenza_type) +
     shared_date_scale +
     scale_y_continuous(labels = function(label) sprintf("%4.1f", label)) +
-    labs(x = element_blank(), y = "Daily confirmed cases\nin the catchment") +
+    labs(x = element_blank(), y = "Weekly confirmed cases\nin the catchment") +
     shared_theme
+
+  # p <- ggplot() +
+  #   geom_point(
+  #     data = data_filtered %>% filter(is_observation),
+  #     aes(x = date_to_plot, y = daily_cases, shape = measuring_period),
+  #     color = data_type_colors["Confirmed cases"],
+  #     size = 2
+  #   ) +
+  #   geom_line(
+  #     data = data_filtered,
+  #     aes(x = date_to_plot, y = daily_cases, group = measuring_period),
+  #     linetype = "dashed", colour = "black"
+  #   ) +
+  #   facet_grid(. ~ influenza_type) +
+  #   shared_date_scale +
+  #   scale_y_continuous(labels = function(label) sprintf("%4.1f", label)) +
+  #   labs(x = element_blank(), y = "Daily confirmed cases\nin the catchment") +
+  #   shared_theme
 
   p
 }
