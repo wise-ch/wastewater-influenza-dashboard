@@ -4,13 +4,15 @@ FROM rocker/shiny-verse:4.2.0
 # Install app's R dependencies
 RUN install2.r --error --skipinstalled \
   dplyr \
+  patchwork \
   RColorBrewer \
   readr \
   shiny \
   shinyBS \
   shinycssloaders \
   shinyjs \
-  shinyWidgets
+  shinyWidgets \
+  zoo
 
 # Copy app code into container
 COPY ./app/ /srv/shiny-server/
