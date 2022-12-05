@@ -74,7 +74,7 @@ confirmed_cases_re_input_data <- read.csv("data/data_used_in_manuscript/confirme
 ww_re <- read.csv("data/data_used_in_manuscript/ww_re_estimates.csv")
 confirmed_case_re <- read.csv("data/data_used_in_manuscript/confirmed_case_re_estimates.csv")
 ww_re_fecal_dist <- read.csv("data/data_used_in_manuscript/ww_re_estimates_fecal_sld.csv")
-ww_re_scale_sensitivity <- read.csv("data/data_used_in_manuscript/ww_re_scaling_sensitivity.csv")
+ww_re_scale_sensitivity <- read.csv("data/data_used_in_manuscript/ww_re_scaling_sensitivity-2.csv")
 
 # Catchment area data
 catchment_area_data <- readxl::read_xlsx("proposals/commune_list.xlsx", sheet = 2) %>% 
@@ -90,7 +90,7 @@ ww_measurements <- rbind(
 confirmed_case_data <- read.csv("data/data_used_in_manuscript/clean_data_cases_che.csv")
 
 # Influenza-like illnss
-ili_data <- read.csv("data/data_used_in_manuscrpt/ili_2021_2022.csv")
+ili_data <- read.csv("data/data_used_in_manuscript/ili_2021_2022.csv")
 
 # Delay distribution data
 fecal_delay_data <- read.csv("data/raw_data/data_for_fecal_shedding_dist.csv")
@@ -588,6 +588,18 @@ ggplot(data = re_data_to_plot) +
       ymin = -Inf, ymax = Inf, 
       xmin = as.Date("2021-12-20"), xmax = as.Date("2022-02-03")),  # work from home mandate
     alpha = 0.15) +
+  geom_vline(
+    data = highlight_data %>% filter(data_type == "Wastewater"),  # prevent double-plotting
+    aes(
+      xintercept = as.Date("2021-12-20"),
+      linetype = "Gathering sizes limited,\nmore certificates and masks")
+  ) +
+    geom_vline(
+    data = highlight_data %>% filter(data_type == "Wastewater"),  # prevent double-plotting
+    aes(
+      xintercept = as.Date("2022-02-17"),
+      linetype = "Gathering sizes limited,\nmore certificates and masks")
+  ) +
   geom_line(aes(x = as.Date(date), y = deconvolved_incidence_per_100000, color = data_type), size = 0.5) +
   dummy_alpha_rectangle_1 +
   dummy_alpha_rectangle_2 +
@@ -600,12 +612,13 @@ ggplot(data = re_data_to_plot) +
     alpha = 0.2) +
   facet_grid(influenza_type ~ observation_type) +
   data_type_color_scale +
+  scale_linetype_manual(values = c("dashed"), name = NULL) +
   shared_theme +
   theme(legend.position = "bottom", legend.box = "vertical", legend.margin = margin()) +
   shared_date_scale_coarse +
   labs(x = element_blank(), y = "Deconvolved daily incidence\n(per 100'000 catchment residents)")
 
-ggsave("figures/deconvolved_incidence_comparision_focus.png", width = 6.5, height = 4.5, units = "in")
+ggsave("figures/deconvolved_incidence_comparision_focus.png", width = 6.5, height = 4.75, units = "in")
 ```
 
 Make main text figure comparing case- and wastewater-based estimates around the time of Omicron measures
@@ -632,9 +645,22 @@ ggplot(data = re_data_to_plot %>% filter(influenza_type == "IAV")) +
       fill = data_type),
     alpha = 0.3,
     linetype = 0) +
+    geom_vline(
+    data = highlight_data %>% filter(data_type == "Wastewater", influenza_type == "IAV"),  # prevent double-plotting
+    aes(
+      xintercept = as.Date("2021-12-20"),
+      linetype = "Gathering sizes limited,\nmore certificates and masks")
+  ) +
+    geom_vline(
+    data = highlight_data %>% filter(data_type == "Wastewater", influenza_type == "IAV"),  # prevent double-plotting
+    aes(
+      xintercept = as.Date("2022-02-17"),
+      linetype = "Gathering sizes limited,\nmore certificates and masks")
+  ) +
   dummy_alpha_rectangle_1 +
   dummy_alpha_rectangle_2 +
   measures_alpha_scale +
+  scale_linetype_manual(values = c("dashed"), name = NULL) +
   facet_grid(influenza_type ~ observation_type) +
   data_type_color_scale +
   shared_theme +
@@ -643,7 +669,7 @@ ggplot(data = re_data_to_plot %>% filter(influenza_type == "IAV")) +
   labs(x = element_blank(), y = "Reproductive number") +
   scale_y_continuous(limits = c(0, 3), oob = oob_squish, breaks = c(0, 1, 2, 3))
 
-ggsave("figures/re_comparision_focus.png", width = 6.5, height = 3.25, units = "in")
+ggsave("figures/re_comparision_focus.png", width = 6.5, height = 3.5, units = "in")
 ```
 
 Plot various delay distributions for supplement
@@ -779,13 +805,13 @@ Plot sensitivity analysis for wastewater measurement scaling for supplement
 ggplot(
     data = ww_re_scale_sensitivity %>% mutate(data_type = "Wastewater"),
     aes(x = as.Date(date), y = Re_estimate, color = influenza_type, fill = data_type)
-) + facet_grid(scaling_type ~ influenza_type, labeller = label_wrap_gen(width = 20)) +
+) + facet_grid(scaling_type ~ influenza_type + observation_type, labeller = label_wrap_gen(width = 20)) +
     geom_line() +
     geom_ribbon(aes(ymax = CI_up_Re_estimate, ymin = CI_down_Re_estimate), alpha = 0.45, colour = NA) +
     data_type_color_scale +
     shared_theme +
     theme(legend.position = "none") +
-    shared_date_scale +
+    shared_date_scale_coarse +
     labs(x = element_blank(), y = "Reproductive number") +
     scale_y_continuous(limits = c(0, 3), oob = oob_squish, breaks = c(0, 1, 2, 3))
 
