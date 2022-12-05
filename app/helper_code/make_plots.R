@@ -45,6 +45,7 @@ confirmed_cases <- confirmed_cases %>%
     "B" = "Influenza B virus"
   )) %>%  # fill gaps due to interpolation
   mutate(
+    data_type = "Confirmed cases",
     wwtp = zoo::na.locf(wwtp),
     influenza_type = zoo::na.locf(influenza_type),
     measuring_period = zoo::na.locf(measuring_period)) %>%
@@ -52,7 +53,8 @@ confirmed_cases <- confirmed_cases %>%
     format(date, "%m") %in% c("08", "09", "10", "11", "12") ~ "1999",
     T ~ "2000"
   )) %>%  # start each season from Sept for plotting
-  mutate(date_to_plot = as.Date(paste0(dummy_year, format(date, "-%m-%d"))))
+  mutate(date_to_plot = as.Date(paste0(dummy_year, format(date, "-%m-%d")))) %>%
+  mutate(data_type = factor(data_type, levels = c("Wastewater", "Confirmed cases")))
 
 # Clean load data
 ww_loads <- ww_loads %>%
@@ -60,10 +62,11 @@ ww_loads <- ww_loads %>%
     wwtp,
     "STEP Aire" = "STEP Aire Geneva",
     "ARA Werdhölzli" = "ARA Werdhölzli Zurich",
-    "ARA Sensetal" = "ARA Senstal Laupen",
+    "ARA Sensetal" = "ARA Sensetal Laupen",
     "CDA Lugano" = "IDA CDA Lugano"
   )) %>%  # fill gaps due to interpolation
   mutate(
+    data_type = "Wastewater",
     wwtp = zoo::na.locf(wwtp),
     influenza_type = zoo::na.locf(influenza_type),
     measuring_period = zoo::na.locf(measuring_period)) %>%
@@ -76,7 +79,8 @@ ww_loads <- ww_loads %>%
     format(sample_date, "%m") %in% c("09", "10", "11", "12") ~ "1999",
     T ~ "2000"
   )) %>%  # start each season from Sept for plotting
-  mutate(date_to_plot = as.Date(paste0(dummy_year, format(sample_date, "-%m-%d"))))
+  mutate(date_to_plot = as.Date(paste0(dummy_year, format(sample_date, "-%m-%d")))) %>%
+  mutate(data_type = factor(data_type, levels = c("Wastewater", "Confirmed cases")))
 
 # Join Re data
 re_to_plot <- bind_rows(
@@ -104,7 +108,7 @@ re_to_plot <- bind_rows(
       observation_type,
       "STEP Aire" = "STEP Aire Geneva",
       "ARA Werdhölzli" = "ARA Werdhölzli Zurich",
-      "ARA Sensetal" = "ARA Senstal Laupen",
+      "ARA Sensetal" = "ARA Sensetal Laupen",
       "CDA Lugano" = "IDA CDA Lugano"
     )) %>%
     mutate(influenza_type = recode(
@@ -118,7 +122,8 @@ re_to_plot <- bind_rows(
     format(date, "%m") %in% c("09", "10", "11", "12") ~ "1999",
     T ~ "2000"
   )) %>%  # start each season from Sept for plotting
-  mutate(date_to_plot = as.Date(paste0(dummy_year, format(date, "-%m-%d"))))
+  mutate(date_to_plot = as.Date(paste0(dummy_year, format(date, "-%m-%d")))) %>%
+  mutate(data_type = factor(data_type, levels = c("Wastewater", "Confirmed cases")))
 
 # Data type colors
 data_type_colors <- brewer.pal(n = 8, name = "Set1")[1:2]
@@ -126,7 +131,8 @@ names(data_type_colors) <- c("Confirmed cases", "Wastewater")
 data_type_color_scale <- scale_color_manual(
   values = data_type_colors,
   aesthetics = c("color", "fill"),
-  labels = c("Laboratory-confirmed cases", "Virus load in wastewater")
+  labels = c("Laboratory-confirmed cases", "Virus load in wastewater"),
+  drop = F
 )
 
 # WWTP names to display
@@ -150,7 +156,10 @@ shared_theme <- theme_minimal() +
     legend.position = "none"
   )
 
-shared_date_scale <- scale_x_date(date_breaks = "months", date_labels = "%b")
+shared_date_scale <- scale_x_date(
+  date_breaks = "months", date_labels = "%b",
+  limits = c(as.Date("1999-09-01"), as.Date("2000-08-31")),
+  expand = c(0, 0))
 
 #' Plot wastewater loads
 plot_ww_loads <- function(data = ww_loads, wwtp_to_plot, measuring_periods) {
@@ -162,17 +171,17 @@ plot_ww_loads <- function(data = ww_loads, wwtp_to_plot, measuring_periods) {
   p <- ggplot() +
     geom_point(
       data = data_filtered %>% filter(is_observation),
-      aes(x = date_to_plot, y = observation, shape = measuring_period),
-      color = data_type_colors["Wastewater"],
+      aes(x = date_to_plot, y = observation, color = data_type),
       size = 2
     ) +
     geom_line(
       data = data_filtered,
-      aes(x = date_to_plot, y = observation, group = measuring_period),
-      linetype = "dashed", colour = "black"
+      aes(x = date_to_plot, y = observation, linetype = measuring_period, color = data_type)
     ) +
     facet_grid(. ~ influenza_type) +
+    scale_shape_discrete(name = "Influenza season") +
     shared_date_scale +
+    data_type_color_scale +
     scale_y_continuous(labels = function(label) sprintf("%4.1f", label)) +
     labs(x = element_blank(), y = "Genome copies per day\n(normalized by minimum value)") +
     shared_theme
@@ -189,38 +198,20 @@ plot_cases <- function(data = confirmed_cases, wwtp_to_plot, measuring_periods) 
   p <- ggplot() +
     geom_point(
       data = data_filtered,
-      aes(x = date_to_plot, y = total_cases, shape = measuring_period),
-      color = data_type_colors["Confirmed cases"],
+      aes(x = date_to_plot, y = total_cases, color = data_type),
       size = 2
     ) +
     geom_line(
       data = data_filtered,
-      aes(x = date_to_plot, y = total_cases, group = measuring_period),
-      linetype = "dashed", colour = "black"
+      aes(x = date_to_plot, y = total_cases, linetype = measuring_period, color = data_type)
     ) +
     facet_grid(. ~ influenza_type) +
     shared_date_scale +
+    scale_shape_discrete(name = "Influenza season") +
+    data_type_color_scale +
     scale_y_continuous(labels = function(label) sprintf("%4.1f", label)) +
     labs(x = element_blank(), y = "Weekly confirmed cases\nin the catchment") +
     shared_theme
-
-  # p <- ggplot() +
-  #   geom_point(
-  #     data = data_filtered %>% filter(is_observation),
-  #     aes(x = date_to_plot, y = daily_cases, shape = measuring_period),
-  #     color = data_type_colors["Confirmed cases"],
-  #     size = 2
-  #   ) +
-  #   geom_line(
-  #     data = data_filtered,
-  #     aes(x = date_to_plot, y = daily_cases, group = measuring_period),
-  #     linetype = "dashed", colour = "black"
-  #   ) +
-  #   facet_grid(. ~ influenza_type) +
-  #   shared_date_scale +
-  #   scale_y_continuous(labels = function(label) sprintf("%4.1f", label)) +
-  #   labs(x = element_blank(), y = "Daily confirmed cases\nin the catchment") +
-  #   shared_theme
 
   p
 }
@@ -250,7 +241,7 @@ plot_re <- function(data = re_to_plot, data_types, wwtp_to_plot, measuring_perio
     shared_theme +
     labs(
       x = element_blank(), y = "Reproductive number",
-      colour = "Data type", fill = "Data type", linetype = "Influenza season") +
+      colour = "Data source", fill = "Data source", linetype = "Influenza season") +
     theme(legend.position = "bottom")
 
   p
