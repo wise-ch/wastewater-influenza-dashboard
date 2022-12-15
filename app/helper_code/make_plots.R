@@ -146,7 +146,7 @@ re_ylimits <- c(0, 2)
 # Define shared theme for plots
 shared_theme <- theme_minimal() +
   theme(
-    strip.text = element_text(size = 17),
+    strip.text = element_text(size = 17, hjust = 0),
     axis.text = element_text(size = 14),
     axis.title = element_text(size = 16),
     legend.text = element_text(size = 14),
@@ -166,7 +166,10 @@ plot_ww_loads <- function(data = ww_loads, wwtp_to_plot, measuring_periods) {
 
   data_filtered <- data %>%
     filter(wwtp == wwtp_to_plot) %>%
-    filter(measuring_period %in% measuring_periods)
+    filter(measuring_period %in% measuring_periods) %>% 
+    group_by(influenza_type) %>% 
+    mutate(latest_date = max(sample_date, na.rm = T),
+           influenza_type = paste0(influenza_type," (last update: ",latest_date,")"))
 
   p <- ggplot() +
     geom_point(
@@ -193,7 +196,10 @@ plot_cases <- function(data = confirmed_cases, wwtp_to_plot, measuring_periods) 
   data_filtered <- data %>%
     filter(is_observation) %>%
     filter(wwtp == wwtp_to_plot) %>%
-    filter(measuring_period %in% measuring_periods)
+    filter(measuring_period %in% measuring_periods) %>% 
+    group_by(influenza_type) %>% 
+    mutate(latest_date = max(date, na.rm = T),
+           influenza_type = paste0(influenza_type," (last update: ",latest_date,")"))
 
   p <- ggplot() +
     geom_point(
