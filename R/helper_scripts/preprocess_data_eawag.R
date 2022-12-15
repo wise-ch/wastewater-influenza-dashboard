@@ -189,12 +189,14 @@ clean_data_long_means_eawag <- clean_data_long_eawag %>%
     .groups = "drop")
 
 # Plot controls (manually inspect)
-ggplot(data = control_data_long_eawag, aes(x = target, y = value)) +
+try({
+  ggplot(data = control_data_long_eawag, aes(x = target, y = value)) +
   geom_boxplot(aes(color = target)) +
   facet_grid(name ~ sample_type, scales = "free_y") +
   labs(x = "Target", y = "Measurement (genome copies per mL wastewater)")
 
 ggsave("figures/all_controls_eawag.png", width = 7, height = 7, units = "in")
+})
 
 # Plot all data
 ggplot(data = clean_data_long_means_eawag,
