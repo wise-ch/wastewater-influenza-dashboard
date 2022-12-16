@@ -16,7 +16,7 @@ RUN install2.r --error --skipinstalled \
 
 # Copy app code into container
 COPY ./app/ /srv/shiny-server/
-RUN echo "preserve_logs true;" >> /etc/shiny-server/shiny-server.conf  # will save logs to /var/log/shiny-server inside container
+COPY ./shiny-server.conf /etc/shiny-server/shiny-server.conf
 
 USER shiny
 
