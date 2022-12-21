@@ -2,6 +2,7 @@
 
 library(dplyr)
 library(tidyr)
+library(ggplot2)
 
 #' Get newest data file from FOPH.
 #' @param path_to_data The directory where FOPH data is stored.
