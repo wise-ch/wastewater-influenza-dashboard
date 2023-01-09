@@ -126,12 +126,26 @@ re_to_plot <- bind_rows(
   mutate(data_type = factor(data_type, levels = c("Wastewater", "Confirmed cases")))
 
 # Data type colors
-data_type_colors <- brewer.pal(n = 8, name = "Set1")[1:2]
-names(data_type_colors) <- c("Confirmed cases", "Wastewater")
+all_seasons <- unique(c(confirmed_cases$measuring_period, ww_loads$measuring_period))
+all_sources <- c("Confirmed cases", "Wastewater")
+all_levels <- levels(interaction(all_sources, all_seasons, sep=" ", lex.order = T))
+all_levels_verbose <- levels(interaction(c("Laboratory-confirmed cases", "Virus load in wastewater"), all_seasons, sep=" ", lex.order = T))
+
+confirmed_cases <- confirmed_cases %>% mutate(color_code = factor(paste(data_type,measuring_period,sep=" "), levels = all_levels))
+ww_loads <- ww_loads %>% mutate(color_code = factor(paste(data_type,measuring_period,sep=" "), levels = all_levels))
+re_to_plot <- re_to_plot %>% mutate(color_code = factor(paste(data_type,measuring_period,sep=" "), levels = all_levels))
+
+color_codes <- c(
+  rgb(0.9,seq(0.6,0.1,length.out=length(all_seasons)),0.1), # confirmed cases, all seasons
+  rgb(0.1,seq(0.1,0.6,length.out=length(all_seasons)),0.9) # wastewater, all seasons
+  )
+
+#data_type_colors <- brewer.pal(n = 8, name = "Set1")[1:2]
+#names(data_type_colors) <- c("Confirmed cases", "Wastewater")
 data_type_color_scale <- scale_color_manual(
-  values = data_type_colors,
+  values = color_codes,
   aesthetics = c("color", "fill"),
-  labels = c("Laboratory-confirmed cases", "Virus load in wastewater"),
+  labels = all_levels_verbose,
   drop = F
 )
 
@@ -174,12 +188,12 @@ plot_ww_loads <- function(data = ww_loads, wwtp_to_plot, measuring_periods) {
   p <- ggplot() +
     geom_point(
       data = data_filtered %>% filter(is_observation),
-      aes(x = date_to_plot, y = observation, color = data_type),
+      aes(x = date_to_plot, y = observation, color = color_code),
       size = 2
     ) +
     geom_line(
       data = data_filtered,
-      aes(x = date_to_plot, y = observation, linetype = measuring_period, color = data_type)
+      aes(x = date_to_plot, y = observation, color = color_code)
     ) +
     facet_grid(. ~ influenza_type) +
     scale_shape_discrete(name = "Influenza season") +
@@ -204,12 +218,12 @@ plot_cases <- function(data = confirmed_cases, wwtp_to_plot, measuring_periods) 
   p <- ggplot() +
     geom_point(
       data = data_filtered,
-      aes(x = date_to_plot, y = total_cases, color = data_type),
+      aes(x = date_to_plot, y = total_cases, color = color_code),
       size = 2
     ) +
     geom_line(
       data = data_filtered,
-      aes(x = date_to_plot, y = total_cases, linetype = measuring_period, color = data_type)
+      aes(x = date_to_plot, y = total_cases, color = color_code)
     ) +
     facet_grid(. ~ influenza_type) +
     shared_date_scale +
@@ -233,11 +247,11 @@ plot_re <- function(data = re_to_plot, data_types, wwtp_to_plot, measuring_perio
 
   p <- ggplot(data = data_filtered) +
     geom_line(
-      aes(x = date_to_plot, y = Re_estimate, colour = data_type, linetype = measuring_period),
+      aes(x = date_to_plot, y = Re_estimate, color = color_code),
       lwd = 0.8) +
     geom_ribbon(
-      aes(x = date_to_plot, ymin = CI_down_Re_estimate, ymax = CI_up_Re_estimate, fill = data_type),
-      alpha = 0.5, linetype = 0) +
+      aes(x = date_to_plot, ymin = CI_down_Re_estimate, ymax = CI_up_Re_estimate, fill = color_code),
+      alpha = 0.5) +
     facet_grid(. ~ influenza_type) +
     geom_hline(yintercept = 1) +
     data_type_color_scale +
@@ -247,8 +261,9 @@ plot_re <- function(data = re_to_plot, data_types, wwtp_to_plot, measuring_perio
     shared_theme +
     labs(
       x = element_blank(), y = "Reproductive number",
-      colour = "Data source", fill = "Data source", linetype = "Influenza season") +
-    theme(legend.position = "bottom")
+      colour = "Data source", fill = "Data source") +
+    theme(legend.position = "bottom") +
+    guides(color = guide_legend(ncol = 2, byrow = F))
 
   p
 }
@@ -261,13 +276,13 @@ plot_all_re <- function(data = re_to_plot, data_types, measuring_period_to_plot)
 
   p <- ggplot(data = data_filtered) +
     geom_line(
-      aes(x = date_to_plot, y = Re_estimate, colour = data_type),
+      aes(x = date_to_plot, y = Re_estimate, color = color_code),
       lwd = 0.8) +
     geom_ribbon(
       aes(x = date_to_plot, ymin = CI_down_Re_estimate,
           ymax = CI_up_Re_estimate,
-          fill = data_type),
-      alpha = 0.5, linetype = 0) +
+          fill = color_code),
+      alpha = 0.5) +
     facet_grid(wwtp_factor ~ influenza_type, drop = F) +
     geom_hline(yintercept = 1) +
     data_type_color_scale +
@@ -279,7 +294,8 @@ plot_all_re <- function(data = re_to_plot, data_types, measuring_period_to_plot)
       colour = "Data type", fill = "Data type"
     ) +
     shared_theme +
-    theme(legend.position = "bottom")
+    theme(legend.position = "bottom") +
+    guides(color = guide_legend(ncol = 2, byrow = F))
 
   p
 }

@@ -68,7 +68,7 @@ navbarPage(
           div(
             style = "position:relative",
             plotOutput("re_plots",
-              height = "255px", width = "950px"
+              height = "260px", width = "950px"
             ) %>%
               withSpinner(color = "#0dc5c1")
           ),
