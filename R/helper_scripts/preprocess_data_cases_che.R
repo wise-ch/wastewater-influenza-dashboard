@@ -21,6 +21,17 @@ case_data_raw <- get_newest_data()
 catchment_data <- readxl::read_xlsx("data/raw_data/plz_list.xlsx", sheet = 1) %>%
   dplyr::rename_all(~make.names(.))
 
+data_version <- ifelse(setequal(names(case_data_raw), c("jahrwoche", "ARA.Name", "typ", "n")), 2, 1)
+
+if (data_version == 2) {
+  case_data_raw <- case_data_raw %>% mutate(
+    meldejahr = substr(jahrwoche,1,4),
+    meldewoche = substr(jahrwoche,5,6),
+  ) %>% 
+    rename(count = n)
+}
+
+
 # Wrangle data
 all_ww_plz <- unique(catchment_data$PLZ)
 setdiff(all_ww_plz, case_data_raw$ptplz)  # These PLZ don't have reported cases
@@ -36,13 +47,18 @@ case_data_clean <- case_data %>%
     filter(typ %in% c("A", "B"))  # remove H1 and H3 type virus cases
 
 # Aggregate data by catchment area
-case_data_by_catchment <- case_data_clean %>%
+if (data_version == 1) {
+  case_data_by_catchment <- case_data_clean %>%
     left_join(catchment_data, by = c("ptplz" = "PLZ")) %>%
     mutate(scaled_cases = count * `WEIGHT..as.percentage.` / 100) %>%
     group_by(typ, date, ARA.Name) %>%
     summarize(total_cases = sum(scaled_cases), .groups = "drop")
+} else if (data_version == 2) {
+  case_data_by_catchment <- case_data_clean %>% 
+    select(typ, date, ARA.Name, total_cases = count)
+}
 
-# Aggregate data across all provided PLZ (take the most data possible)
+# Aggregate data across all provided PLZ/catchment areas (take the most data possible)
 case_data_all_provided <- case_data_clean %>%
   group_by(typ, date) %>%
   summarize(total_cases = sum(count), .groups = "drop") %>%
