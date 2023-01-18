@@ -167,6 +167,7 @@ shared_theme <- theme_minimal() +
     legend.title = element_text(size = 17),
     plot.title = element_text(size = 16),
     panel.spacing.y = unit(2, "lines"),
+    panel.spacing.x = unit(2, "lines"),
     legend.position = "none"
   )
 
