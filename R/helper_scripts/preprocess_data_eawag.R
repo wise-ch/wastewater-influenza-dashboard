@@ -62,6 +62,10 @@ flow_data_zh <- read.table(
 )
 colnames(flow_data_zh) <- c("date", colnames(flow_data_zh)[2:length(flow_data_zh)])
 
+# Remove faulty samples
+bad_samples <- read.csv("data/raw_data/eawag_data/bad samples.csv")
+data_eawag <- data_eawag %>% filter(!(file_name %in% bad_samples$file_name))
+
 # Wrangle data
 control_data_eawag <- data_eawag %>% filter(sample_type %in% c("pos", "ntc"))
 
