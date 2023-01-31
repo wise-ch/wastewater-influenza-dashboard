@@ -55,3 +55,19 @@ influenza_distribution_infection_to_symptoms_moments <- list(
 
 influenza_mean_serial_interval_days <- 2.6  # EpiEstim example (from Ferguson et al. 2005, Nature)
 influenza_std_serial_interval_days <- 1.5  # EpiEstim example (from Ferguson et al. 2005, Nature)
+
+
+#########
+# RSV Parameters
+
+#RSV shedding distribution currently visually matched to https://doi.org/10.1093/aje/kwab181 fig 2a
+rsv_distribution_infection_to_shedding <- list(
+  name = "gamma",
+  shape = 6.6,
+  scale = 1.0)
+
+
+# RSV Serial interval taken from Vink et al. https://doi.org/10.1093/aje/kwu209 
+# data from Crowcroft et al.https://doi.org/10.1007/s00431-007-0509-9 
+rsv_mean_serial_interval_days <- 7.5 
+rsv_std_serial_interval_days <- 2.1  
