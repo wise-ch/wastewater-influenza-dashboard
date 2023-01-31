@@ -46,6 +46,7 @@ flow_data_ti <- read.table(
   header = T,
   check.names = F
 )
+
 colnames(flow_data_ti) <- c("date", colnames(flow_data_ti)[2:length(flow_data_ti)])
 flow_data_ge <- read.table(
   "https://sensors-eawag.ch/sars/__data__/processed_normed_data_geneve_v2.csv",
@@ -69,6 +70,7 @@ control_data_long_eawag <- control_data_eawag %>%
   pivot_longer(cols = c(
     IAV.M_.gc.mLWW.,
     IBV.M_.gc.mLWW.,
+    RSV_.gc.mLWW.,
     SARS.N1_.gc.mLWW.,
     SARS.N2_.gc.mLWW.
   ))
@@ -77,6 +79,7 @@ clean_data_eawag <- data_eawag %>%
   filter(TotalDroplets >= 15000, sample_type == "ww") %>%
   rename(IAV_gc_per_mL_WW = IAV.M_.gc.mLWW.) %>%
   rename(IBV_gc_per_mL_WW = IBV.M_.gc.mLWW.) %>%
+  rename(RSV_gc_per_mL_WW = RSV_.gc.mLWW.) %>%
   rename(SARS2_N1_gc_per_mL_WW = SARS.N1_.gc.mLWW.) %>%
   rename(SARS2_N2_gc_per_mL_WW = SARS.N2_.gc.mLWW.)
 
@@ -124,32 +127,38 @@ clean_data_gr <- clean_data_eawag %>%
   filter(wwtp == "ARA Chur") %>%
   left_join(flow_data_gr_clean, by = c("sample_date" = "date", "wwtp")) %>%
   mutate("IBV_gc_per_day" = IBV_gc_per_mL_WW * `flow [m^3/d]` * ml_per_l * l_per_m3) %>%
-  mutate("IAV_gc_per_day" = IAV_gc_per_mL_WW * `flow [m^3/d]` * ml_per_l * l_per_m3)
+  mutate("IAV_gc_per_day" = IAV_gc_per_mL_WW * `flow [m^3/d]` * ml_per_l * l_per_m3) %>%
+  mutate("RSV_gc_per_day" = RSV_gc_per_mL_WW * `flow [m^3/d]` * ml_per_l * l_per_m3)
 clean_data_sg <- clean_data_eawag %>%
   filter(wwtp == "ARA Altenrhein") %>%
   left_join(flow_data_sg_clean, by = c("sample_date" = "date", "wwtp")) %>%
   mutate("IBV_gc_per_day" = IBV_gc_per_mL_WW * `flow [m^3/d]` * ml_per_l * l_per_m3) %>%
-  mutate("IAV_gc_per_day" = IAV_gc_per_mL_WW * `flow [m^3/d]` * ml_per_l * l_per_m3)
+  mutate("IAV_gc_per_day" = IAV_gc_per_mL_WW * `flow [m^3/d]` * ml_per_l * l_per_m3) %>%
+  mutate("RSV_gc_per_day" = RSV_gc_per_mL_WW * `flow [m^3/d]` * ml_per_l * l_per_m3)
 clean_data_fr <- clean_data_eawag %>%
   filter(wwtp == "ARA Sensetal") %>%
   left_join(flow_data_fr_clean, by = c("sample_date" = "date", "wwtp")) %>%
   mutate("IBV_gc_per_day" = IBV_gc_per_mL_WW * `flow [m^3/d]` * ml_per_l * l_per_m3) %>%
-  mutate("IAV_gc_per_day" = IAV_gc_per_mL_WW * `flow [m^3/d]` * ml_per_l * l_per_m3)
+  mutate("IAV_gc_per_day" = IAV_gc_per_mL_WW * `flow [m^3/d]` * ml_per_l * l_per_m3) %>%
+  mutate("RSV_gc_per_day" = RSV_gc_per_mL_WW * `flow [m^3/d]` * ml_per_l * l_per_m3)
 clean_data_ti <- clean_data_eawag %>%
   filter(wwtp == "CDA Lugano") %>%
   left_join(flow_data_ti_clean, by = c("sample_date" = "date", "wwtp")) %>%
   mutate("IBV_gc_per_day" = IBV_gc_per_mL_WW * `flow [m^3/d]` * ml_per_l * l_per_m3) %>%
-  mutate("IAV_gc_per_day" = IAV_gc_per_mL_WW * `flow [m^3/d]` * ml_per_l * l_per_m3)
+  mutate("IAV_gc_per_day" = IAV_gc_per_mL_WW * `flow [m^3/d]` * ml_per_l * l_per_m3) %>%
+  mutate("RSV_gc_per_day" = RSV_gc_per_mL_WW * `flow [m^3/d]` * ml_per_l * l_per_m3)
 clean_data_ge <- clean_data_eawag %>%
   filter(wwtp == "STEP Aire") %>%
   left_join(flow_data_ge_clean, by = c("sample_date" = "date", "wwtp")) %>%
   mutate("IBV_gc_per_day" = IBV_gc_per_mL_WW * `flow [m^3/d]` * ml_per_l * l_per_m3) %>%
-  mutate("IAV_gc_per_day" = IAV_gc_per_mL_WW * `flow [m^3/d]` * ml_per_l * l_per_m3)
+  mutate("IAV_gc_per_day" = IAV_gc_per_mL_WW * `flow [m^3/d]` * ml_per_l * l_per_m3) %>%
+  mutate("RSV_gc_per_day" = RSV_gc_per_mL_WW * `flow [m^3/d]` * ml_per_l * l_per_m3)
 clean_data_zh <- clean_data_eawag %>%
   filter(wwtp == "ARA Werdhölzli") %>%
   left_join(flow_data_zh_clean, by = c("sample_date" = "date", "wwtp")) %>%
   mutate("IBV_gc_per_day" = IBV_gc_per_mL_WW * `flow [m^3/d]` * ml_per_l * l_per_m3) %>%
-  mutate("IAV_gc_per_day" = IAV_gc_per_mL_WW * `flow [m^3/d]` * ml_per_l * l_per_m3)
+  mutate("IAV_gc_per_day" = IAV_gc_per_mL_WW * `flow [m^3/d]` * ml_per_l * l_per_m3) %>%
+  mutate("RSV_gc_per_day" = RSV_gc_per_mL_WW * `flow [m^3/d]` * ml_per_l * l_per_m3)
 
 clean_data_long_eawag <- rbind(
   clean_data_gr,
@@ -166,17 +175,21 @@ clean_data_long_eawag <- rbind(
     target,
     IAV_gc_per_mL_WW,
     IBV_gc_per_mL_WW,
+    RSV_gc_per_mL_WW,
     SARS2_N1_gc_per_mL_WW,
     SARS2_N2_gc_per_mL_WW,
     IAV_gc_per_day,
-    IBV_gc_per_day) %>%
+    IBV_gc_per_day,
+    RSV_gc_per_day) %>%
   pivot_longer(cols = c(
     IAV_gc_per_mL_WW,
     IBV_gc_per_mL_WW,
+    RSV_gc_per_mL_WW,
     SARS2_N1_gc_per_mL_WW,
     SARS2_N2_gc_per_mL_WW,
     IAV_gc_per_day,
-    IBV_gc_per_day),
+    IBV_gc_per_day,
+    RSV_gc_per_day),
     names_to = "measurement_type")
 
 clean_data_long_means_eawag <- clean_data_long_eawag %>%
