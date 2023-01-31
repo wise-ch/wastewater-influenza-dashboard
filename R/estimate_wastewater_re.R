@@ -96,10 +96,12 @@ for (wwtp_name in names(wwtp_data_all)) {
       suppressWarnings(normalization_factor <- min(
         df$IAV_gc_per_day[df$IAV_gc_per_day > 0],
         df$IBV_gc_per_day[df$IBV_gc_per_day > 0],
+        df$RSV_gc_per_day[df$RSV_gc_per_day > 0],
         na.rm = T))
       suppressWarnings(df %>%
         mutate(IAV_gc_per_day_norm = IAV_gc_per_day / normalization_factor) %>%
-        mutate(IBV_gc_per_day_norm = IBV_gc_per_day / normalization_factor))
+        mutate(IBV_gc_per_day_norm = IBV_gc_per_day / normalization_factor)%>%
+        mutate(RSV_gc_per_day_norm = RSV_gc_per_day / normalization_factor))
     },
     error = function(cond) {
       message(paste("Couldn't calculate Re for", wwtp_name,
@@ -112,8 +114,8 @@ for (wwtp_name in names(wwtp_data_all)) {
     next  # if normalization fails, skip this wwtp
   }
 
-  data_long <- data_normalized %>% pivot_longer(
-    cols = c(IAV_gc_per_day, IBV_gc_per_day, IAV_gc_per_day_norm, IBV_gc_per_day_norm),
+   data_long <- data_normalized %>% pivot_longer(
+    cols = c(IAV_gc_per_day, IBV_gc_per_day, RSV_gc_per_day, IAV_gc_per_day_norm, IBV_gc_per_day_norm, RSV_gc_per_day_norm),
     values_to = "observation",
     names_to = c("influenza_type", "observation_units"),
     names_pattern = "([A-Z]{3})_(.*)"
