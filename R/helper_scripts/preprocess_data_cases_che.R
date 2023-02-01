@@ -21,16 +21,26 @@ case_data_raw <- get_newest_data()
 catchment_data <- readxl::read_xlsx("data/raw_data/plz_list.xlsx", sheet = 1) %>%
   dplyr::rename_all(~make.names(.))
 
-data_version <- ifelse(setequal(names(case_data_raw), c("jahrwoche", "ARA.Name", "typ", "n")), 2, 1)
-
-if (data_version == 2) {
+if (setequal(names(case_data_raw), c("jahrwoche", "ARA.Name", "typ", "sum.n_weighted."))) {
+  data_version <- 3
+} else if (setequal(names(case_data_raw), c("jahrwoche", "ARA.Name", "typ", "n"))) {
+  data_version <- 2
+} else if (setequal(names(case_data_raw), c("meldejahr", "meldewoche", "ptplz", "typ", "count", "jahrwoche"))) {
+  data_version <- 1
+} else {
+  stop("Unknown data version.")
+}
+  
+if (data_version == 3) {
+  case_data_raw <- case_data_raw %>% rename(n = sum.n_weighted.)
+}
+if (data_version %in% c(2,3)) {
   case_data_raw <- case_data_raw %>% mutate(
     meldejahr = substr(jahrwoche,1,4),
     meldewoche = substr(jahrwoche,5,6),
   ) %>% 
     rename(count = n)
 }
-
 
 # Wrangle data
 all_ww_plz <- unique(catchment_data$PLZ)
@@ -53,7 +63,7 @@ if (data_version == 1) {
     mutate(scaled_cases = count * `WEIGHT..as.percentage.` / 100) %>%
     group_by(typ, date, ARA.Name) %>%
     summarize(total_cases = sum(scaled_cases), .groups = "drop")
-} else if (data_version == 2) {
+} else if (data_version %in% c(2,3)) {
   case_data_by_catchment <- case_data_clean %>% 
     select(typ, date, ARA.Name, total_cases = count)
 }
