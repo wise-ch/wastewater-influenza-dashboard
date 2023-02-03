@@ -1,7 +1,7 @@
 library(shiny)
 library(patchwork)
 
-function(input, output, session) {
+server = function(input, output, session) {
 
   # Plotting wastewater measurements
   output$raw_plots <- renderPlot({
@@ -13,7 +13,8 @@ function(input, output, session) {
       "Wastewater data not yet available for Basel in 2022/23"))
     raw <- plot_ww_loads(
       wwtp_to_plot = input$wwtp,
-      measuring_period = input$measuring_periods)
+      measuring_period = input$measuring_periods,
+      disease_classes = input$influenza_type)
     raw
   })
 
@@ -24,7 +25,8 @@ function(input, output, session) {
       "Please select at least one season in the menu to generate the plot."))
     cases <- plot_cases(
       wwtp_to_plot = input$wwtp,
-      measuring_period = input$measuring_periods)
+      measuring_period = input$measuring_periods, 
+      disease_classes = input$influenza_type)
     cases
   })
 
@@ -42,7 +44,8 @@ function(input, output, session) {
     re <- plot_re(
       data_types = input$data_type,
       wwtp_to_plot = input$wwtp,
-      measuring_period = input$measuring_periods)
+      measuring_period = input$measuring_periods,
+      disease_classes = input$influenza_type)
     re
   })
 
@@ -53,7 +56,8 @@ function(input, output, session) {
       "Please select at least one data source in the menu to generate the plot."))
     all_re <- plot_all_re(
       data_types = input$data_type_all_catchments,
-      measuring_period = input$measuring_period_all_catchments)
+      measuring_period = input$measuring_period_all_catchments,
+      disease_classes = input$influenza_type_all_catchments)
     all_re
   })
 
@@ -66,14 +70,17 @@ function(input, output, session) {
     content = function(file) {
       raw <- plot_ww_loads(
         wwtp_to_plot = input$wwtp,
-        measuring_periods = input$measuring_periods)
+        measuring_periods = input$measuring_periods,
+        disease_classes = input$influenza_type)
       cases <- plot_cases(
         wwtp_to_plot = input$wwtp,
-        measuring_periods = input$measuring_periods)
+        measuring_periods = input$measuring_periods,
+        disease_classes = input$influenza_type)
       re <- plot_re(
         data_types = input$data_type,
         wwtp_to_plot = input$wwtp,
-        measuring_periods = input$measuring_periods)
+        measuring_periods = input$measuring_periods, 
+        disease_classes = input$influenza_type)
 
       p <- patchwork::wrap_plots(raw, cases, re, nrow = 3) +
         plot_annotation(caption = paste0(
@@ -95,3 +102,4 @@ function(input, output, session) {
   })
 
 }
+

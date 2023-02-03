@@ -6,7 +6,7 @@ library(shinyWidgets)
 
 source("helper_code/make_plots.R")
 
-navbarPage(
+ui = fluidPage(navbarPage(
   title = "Wastewater Re",
   selected = "Single catchment",
 
@@ -44,6 +44,15 @@ navbarPage(
             "Virus load in wastewater" = "Wastewater",
             "Laboratory-confirmed cases" = "Confirmed cases"),
           selected = "Wastewater"
+        ),
+        checkboxGroupInput(
+          inputId = "influenza_type",
+          label = "Disease class (select to compare):",
+          choices = c(
+            "Influenza A" = "Influenza A virus",
+            "Influenza B" = "Influenza B virus", 
+            "RSV"         = "RSV"),
+          selected = c("Influenza A virus", "Influenza B virus", "RSV")
         ),
         width = 3
       ),
@@ -98,7 +107,16 @@ navbarPage(
           inputId = "measuring_period_all_catchments",
           label = "Influenza season:",
           choices = c("2021/22", "2022/23"),
-          selected = "2021/22"
+          selected = "2022/23"
+        ),
+        checkboxGroupInput(
+          inputId = "influenza_type_all_catchments",
+          label = "Disease class (select to compare):",
+          choices = c(
+            "Influenza A" = "Influenza A virus",
+            "Influenza B" = "Influenza B virus", 
+            "RSV"         = "RSV"),
+          selected = c("Influenza A virus", "Influenza B virus", "RSV")
         ),
         width = 3
       ),
@@ -127,4 +145,4 @@ navbarPage(
       hr()
     )
   )
-)
+))

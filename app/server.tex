@@ -1,0 +1,216 @@
+% Options for packages loaded elsewhere
+\PassOptionsToPackage{unicode}{hyperref}
+\PassOptionsToPackage{hyphens}{url}
+%
+\documentclass[
+]{article}
+\usepackage{amsmath,amssymb}
+\usepackage{lmodern}
+\usepackage{iftex}
+\ifPDFTeX
+  \usepackage[T1]{fontenc}
+  \usepackage[utf8]{inputenc}
+  \usepackage{textcomp} % provide euro and other symbols
+\else % if luatex or xetex
+  \usepackage{unicode-math}
+  \defaultfontfeatures{Scale=MatchLowercase}
+  \defaultfontfeatures[\rmfamily]{Ligatures=TeX,Scale=1}
+\fi
+% Use upquote if available, for straight quotes in verbatim environments
+\IfFileExists{upquote.sty}{\usepackage{upquote}}{}
+\IfFileExists{microtype.sty}{% use microtype if available
+  \usepackage[]{microtype}
+  \UseMicrotypeSet[protrusion]{basicmath} % disable protrusion for tt fonts
+}{}
+\makeatletter
+\@ifundefined{KOMAClassName}{% if non-KOMA class
+  \IfFileExists{parskip.sty}{%
+    \usepackage{parskip}
+  }{% else
+    \setlength{\parindent}{0pt}
+    \setlength{\parskip}{6pt plus 2pt minus 1pt}}
+}{% if KOMA class
+  \KOMAoptions{parskip=half}}
+\makeatother
+\usepackage{xcolor}
+\usepackage[margin=1in]{geometry}
+\usepackage{color}
+\usepackage{fancyvrb}
+\newcommand{\VerbBar}{|}
+\newcommand{\VERB}{\Verb[commandchars=\\\{\}]}
+\DefineVerbatimEnvironment{Highlighting}{Verbatim}{commandchars=\\\{\}}
+% Add ',fontsize=\small' for more characters per line
+\usepackage{framed}
+\definecolor{shadecolor}{RGB}{248,248,248}
+\newenvironment{Shaded}{\begin{snugshade}}{\end{snugshade}}
+\newcommand{\AlertTok}[1]{\textcolor[rgb]{0.94,0.16,0.16}{#1}}
+\newcommand{\AnnotationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\AttributeTok}[1]{\textcolor[rgb]{0.77,0.63,0.00}{#1}}
+\newcommand{\BaseNTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{#1}}
+\newcommand{\BuiltInTok}[1]{#1}
+\newcommand{\CharTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\CommentTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textit{#1}}}
+\newcommand{\CommentVarTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\ConstantTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
+\newcommand{\ControlFlowTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{\textbf{#1}}}
+\newcommand{\DataTypeTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{#1}}
+\newcommand{\DecValTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{#1}}
+\newcommand{\DocumentationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\ErrorTok}[1]{\textcolor[rgb]{0.64,0.00,0.00}{\textbf{#1}}}
+\newcommand{\ExtensionTok}[1]{#1}
+\newcommand{\FloatTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{#1}}
+\newcommand{\FunctionTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
+\newcommand{\ImportTok}[1]{#1}
+\newcommand{\InformationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\KeywordTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{\textbf{#1}}}
+\newcommand{\NormalTok}[1]{#1}
+\newcommand{\OperatorTok}[1]{\textcolor[rgb]{0.81,0.36,0.00}{\textbf{#1}}}
+\newcommand{\OtherTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{#1}}
+\newcommand{\PreprocessorTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textit{#1}}}
+\newcommand{\RegionMarkerTok}[1]{#1}
+\newcommand{\SpecialCharTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
+\newcommand{\SpecialStringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\StringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\VariableTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
+\newcommand{\VerbatimStringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\WarningTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\usepackage{graphicx}
+\makeatletter
+\def\maxwidth{\ifdim\Gin@nat@width>\linewidth\linewidth\else\Gin@nat@width\fi}
+\def\maxheight{\ifdim\Gin@nat@height>\textheight\textheight\else\Gin@nat@height\fi}
+\makeatother
+% Scale images if necessary, so that they will not overflow the page
+% margins by default, and it is still possible to overwrite the defaults
+% using explicit options in \includegraphics[width, height, ...]{}
+\setkeys{Gin}{width=\maxwidth,height=\maxheight,keepaspectratio}
+% Set default figure placement to htbp
+\makeatletter
+\def\fps@figure{htbp}
+\makeatother
+\setlength{\emergencystretch}{3em} % prevent overfull lines
+\providecommand{\tightlist}{%
+  \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
+\setcounter{secnumdepth}{-\maxdimen} % remove section numbering
+\ifLuaTeX
+  \usepackage{selnolig}  % disable illegal ligatures
+\fi
+\IfFileExists{bookmark.sty}{\usepackage{bookmark}}{\usepackage{hyperref}}
+\IfFileExists{xurl.sty}{\usepackage{xurl}}{} % add URL line breaks if available
+\urlstyle{same} % disable monospaced font for URLs
+\hypersetup{
+  pdftitle={server.R},
+  pdfauthor={jmunday},
+  hidelinks,
+  pdfcreator={LaTeX via pandoc}}
+
+\title{server.R}
+\author{jmunday}
+\date{2023-02-02}
+
+\begin{document}
+\maketitle
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{library}\NormalTok{(shiny)}
+\FunctionTok{library}\NormalTok{(patchwork)}
+
+\NormalTok{ui }\OtherTok{=} \ControlFlowTok{function}\NormalTok{(input, output, session) \{}
+
+  \CommentTok{\# Plotting wastewater measurements}
+\NormalTok{  output}\SpecialCharTok{$}\NormalTok{raw\_plots }\OtherTok{\textless{}{-}} \FunctionTok{renderPlot}\NormalTok{(\{}
+    \FunctionTok{validate}\NormalTok{(}\FunctionTok{need}\NormalTok{(}
+\NormalTok{      input}\SpecialCharTok{$}\NormalTok{measuring\_periods }\SpecialCharTok{!=} \StringTok{""}\NormalTok{,}
+      \StringTok{"Please select at least one season in the menu to generate the plot."}\NormalTok{))}
+    \FunctionTok{validate}\NormalTok{(}\FunctionTok{need}\NormalTok{(}
+      \SpecialCharTok{!}\NormalTok{(input}\SpecialCharTok{$}\NormalTok{wwtp }\SpecialCharTok{==} \StringTok{"ARA Basel"} \SpecialCharTok{\&\&}\NormalTok{ input}\SpecialCharTok{$}\NormalTok{measuring\_periods }\SpecialCharTok{==} \StringTok{"2022/23"}\NormalTok{),}
+      \StringTok{"Wastewater data not yet available for Basel in 2022/23"}\NormalTok{))}
+\NormalTok{    raw }\OtherTok{\textless{}{-}} \FunctionTok{plot\_ww\_loads}\NormalTok{(}
+      \AttributeTok{wwtp\_to\_plot =}\NormalTok{ input}\SpecialCharTok{$}\NormalTok{wwtp,}
+      \AttributeTok{measuring\_period =}\NormalTok{ input}\SpecialCharTok{$}\NormalTok{measuring\_periods)}
+\NormalTok{    raw}
+\NormalTok{  \})}
+
+  \CommentTok{\# Plotting confirmed cases}
+\NormalTok{  output}\SpecialCharTok{$}\NormalTok{case\_plots }\OtherTok{\textless{}{-}} \FunctionTok{renderPlot}\NormalTok{(\{}
+    \FunctionTok{validate}\NormalTok{(}\FunctionTok{need}\NormalTok{(}
+\NormalTok{      input}\SpecialCharTok{$}\NormalTok{measuring\_periods }\SpecialCharTok{!=} \StringTok{""}\NormalTok{,}
+      \StringTok{"Please select at least one season in the menu to generate the plot."}\NormalTok{))}
+\NormalTok{    cases }\OtherTok{\textless{}{-}} \FunctionTok{plot\_cases}\NormalTok{(}
+      \AttributeTok{wwtp\_to\_plot =}\NormalTok{ input}\SpecialCharTok{$}\NormalTok{wwtp,}
+      \AttributeTok{measuring\_period =}\NormalTok{ input}\SpecialCharTok{$}\NormalTok{measuring\_periods)}
+\NormalTok{    cases}
+\NormalTok{  \})}
+
+  \CommentTok{\# Plotting single catchment Re estimates}
+\NormalTok{  output}\SpecialCharTok{$}\NormalTok{re\_plots }\OtherTok{\textless{}{-}} \FunctionTok{renderPlot}\NormalTok{(\{}
+    \FunctionTok{validate}\NormalTok{(}\FunctionTok{need}\NormalTok{(}
+\NormalTok{      input}\SpecialCharTok{$}\NormalTok{data\_type }\SpecialCharTok{!=} \StringTok{""}\NormalTok{,}
+      \StringTok{"Please select at least one data source in the menu to generate the plot."}\NormalTok{))}
+    \FunctionTok{validate}\NormalTok{(}\FunctionTok{need}\NormalTok{(}
+\NormalTok{      input}\SpecialCharTok{$}\NormalTok{measuring\_periods }\SpecialCharTok{!=} \StringTok{""}\NormalTok{,}
+      \StringTok{"Please select at least one season in the menu to generate the plot."}\NormalTok{))}
+    \FunctionTok{validate}\NormalTok{(}\FunctionTok{need}\NormalTok{(}
+      \SpecialCharTok{!}\NormalTok{(input}\SpecialCharTok{$}\NormalTok{wwtp }\SpecialCharTok{==} \StringTok{"ARA Basel"} \SpecialCharTok{\&\&}\NormalTok{ input}\SpecialCharTok{$}\NormalTok{measuring\_periods }\SpecialCharTok{==} \StringTok{"2022/23"}\NormalTok{),}
+      \StringTok{"Wastewater data not yet available for Basel in 2022/23"}\NormalTok{))}
+\NormalTok{    re }\OtherTok{\textless{}{-}} \FunctionTok{plot\_re}\NormalTok{(}
+      \AttributeTok{data\_types =}\NormalTok{ input}\SpecialCharTok{$}\NormalTok{data\_type,}
+      \AttributeTok{wwtp\_to\_plot =}\NormalTok{ input}\SpecialCharTok{$}\NormalTok{wwtp,}
+      \AttributeTok{measuring\_period =}\NormalTok{ input}\SpecialCharTok{$}\NormalTok{measuring\_periods)}
+\NormalTok{    re}
+\NormalTok{  \})}
+
+  \CommentTok{\# Plotting all catchment Re estimates together}
+\NormalTok{  output}\SpecialCharTok{$}\NormalTok{all\_catchment\_plots }\OtherTok{\textless{}{-}} \FunctionTok{renderPlot}\NormalTok{(\{}
+    \FunctionTok{validate}\NormalTok{(}\FunctionTok{need}\NormalTok{(}
+\NormalTok{      input}\SpecialCharTok{$}\NormalTok{data\_type\_all\_catchments }\SpecialCharTok{!=} \StringTok{""}\NormalTok{,}
+      \StringTok{"Please select at least one data source in the menu to generate the plot."}\NormalTok{))}
+\NormalTok{    all\_re }\OtherTok{\textless{}{-}} \FunctionTok{plot\_all\_re}\NormalTok{(}
+      \AttributeTok{data\_types =}\NormalTok{ input}\SpecialCharTok{$}\NormalTok{data\_type\_all\_catchments,}
+      \AttributeTok{measuring\_period =}\NormalTok{ input}\SpecialCharTok{$}\NormalTok{measuring\_period\_all\_catchments)}
+\NormalTok{    all\_re}
+\NormalTok{  \})}
+
+  \CommentTok{\# Download the plot {-}{-}{-}{-}{-}{-}}
+\NormalTok{  output}\SpecialCharTok{$}\NormalTok{download\_plot }\OtherTok{\textless{}{-}} \FunctionTok{downloadHandler}\NormalTok{(}
+    \AttributeTok{filename =} \ControlFlowTok{function}\NormalTok{() \{}
+      \FunctionTok{paste0}\NormalTok{(}\StringTok{"Catchment\_"}\NormalTok{, input}\SpecialCharTok{$}\NormalTok{wwtp, }\StringTok{".pdf"}\NormalTok{)}
+\NormalTok{    \},}
+    \CommentTok{\# content is a function with argument file. content writes the plot to the device}
+    \AttributeTok{content =} \ControlFlowTok{function}\NormalTok{(file) \{}
+\NormalTok{      raw }\OtherTok{\textless{}{-}} \FunctionTok{plot\_ww\_loads}\NormalTok{(}
+        \AttributeTok{wwtp\_to\_plot =}\NormalTok{ input}\SpecialCharTok{$}\NormalTok{wwtp,}
+        \AttributeTok{measuring\_periods =}\NormalTok{ input}\SpecialCharTok{$}\NormalTok{measuring\_periods)}
+\NormalTok{      cases }\OtherTok{\textless{}{-}} \FunctionTok{plot\_cases}\NormalTok{(}
+        \AttributeTok{wwtp\_to\_plot =}\NormalTok{ input}\SpecialCharTok{$}\NormalTok{wwtp,}
+        \AttributeTok{measuring\_periods =}\NormalTok{ input}\SpecialCharTok{$}\NormalTok{measuring\_periods)}
+\NormalTok{      re }\OtherTok{\textless{}{-}} \FunctionTok{plot\_re}\NormalTok{(}
+        \AttributeTok{data\_types =}\NormalTok{ input}\SpecialCharTok{$}\NormalTok{data\_type,}
+        \AttributeTok{wwtp\_to\_plot =}\NormalTok{ input}\SpecialCharTok{$}\NormalTok{wwtp,}
+        \AttributeTok{measuring\_periods =}\NormalTok{ input}\SpecialCharTok{$}\NormalTok{measuring\_periods)}
+
+\NormalTok{      p }\OtherTok{\textless{}{-}}\NormalTok{ patchwork}\SpecialCharTok{::}\FunctionTok{wrap\_plots}\NormalTok{(raw, cases, re, }\AttributeTok{nrow =} \DecValTok{3}\NormalTok{) }\SpecialCharTok{+}
+        \FunctionTok{plot\_annotation}\NormalTok{(}\AttributeTok{caption =} \FunctionTok{paste0}\NormalTok{(}
+          \StringTok{"Generated on: "}\NormalTok{, }\FunctionTok{Sys.Date}\NormalTok{(),}
+          \StringTok{" (by: WISE influenza dashboard)"}
+\NormalTok{        ))}
+      \FunctionTok{pdf}\NormalTok{(}
+        \AttributeTok{file =}\NormalTok{ file,}
+        \AttributeTok{width =} \DecValTok{16}\NormalTok{, }\AttributeTok{height =} \DecValTok{12}\NormalTok{, }\AttributeTok{family =} \StringTok{"sans"}
+\NormalTok{      )}
+      \FunctionTok{plot}\NormalTok{(p)}
+      \FunctionTok{dev.off}\NormalTok{()}
+\NormalTok{    \}}
+\NormalTok{  )}
+
+  \CommentTok{\# add the about page {-}{-}{-}{-}{-}{-}{-}{-}}
+\NormalTok{  output}\SpecialCharTok{$}\NormalTok{about\_page }\OtherTok{\textless{}{-}} \FunctionTok{renderUI}\NormalTok{(\{}
+    \FunctionTok{includeHTML}\NormalTok{(}\AttributeTok{path =} \StringTok{"texts/about\_en{-}gb.html"}\NormalTok{)}
+\NormalTok{  \})}
+
+\NormalTok{\}}
+\end{Highlighting}
+\end{Shaded}
+
+
+\end{document}
