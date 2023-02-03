@@ -12,20 +12,20 @@ ww_re_estimates <- read_csv("data/ww_re_estimates.csv", col_types = cols(date = 
 case_re_estimates <- read_csv("data/confirmed_case_re_estimates.csv", col_types = c(date = "D"))
 
 # Read in cached data, merge to latest data
-for (file in list.files(path = "data/cached_data", full.names = T)) {
-  print(paste("Reading in", file))
-  if (endsWith(file, "_confirmed_cases.csv")) {
-    confirmed_cases <- rbind(confirmed_cases, read_csv(file, col_types = cols(date = "D")))
-  } else if (endsWith(file, "_ww_loads.csv")) {
-    ww_loads <- rbind(ww_loads, read_csv(file, col_types = cols(sample_date = "D")))
-  } else if (endsWith(file, "_confirmed_case_re_estimates.csv")) {
-    case_re_estimates <- rbind(case_re_estimates, read_csv(file, col_types = cols(date = "D")))
-  } else if (endsWith(file, "_ww_re_estimates.csv")) {
-    ww_re_estimates <- rbind(ww_re_estimates, read_csv(file, col_types = cols(date = "D")))
-  } else {
-    warning(paste("Unknown cached data file", file, "ignored."))
-  }
-}
+#for (file in list.files(path = "data/cached_data", full.names = T)) {
+#  print(paste("Reading in", file))
+#  if (endsWith(file, "_confirmed_cases.csv")) {
+#    confirmed_cases <- rbind(confirmed_cases, read_csv(file, col_types = cols(date = "D")))
+#  } else if (endsWith(file, "_ww_loads.csv")) {
+#    ww_loads <- rbind(ww_loads, read_csv(file, col_types = cols(sample_date = "D")))
+#  } else if (endsWith(file, "_confirmed_case_re_estimates.csv")) {
+#    case_re_estimates <- rbind(case_re_estimates, read_csv(file, col_types = cols(date = "D")))
+#  } else if (endsWith(file, "_ww_re_estimates.csv")) {
+#    ww_re_estimates <- rbind(ww_re_estimates, read_csv(file, col_types = cols(date = "D")))
+#  } else {
+#    warning(paste("Unknown cached data file", file, "ignored."))
+#  }
+#}
 
 # Clean case data
 confirmed_cases <- confirmed_cases %>%
@@ -176,11 +176,12 @@ shared_date_scale <- scale_x_date(
   expand = c(0, 0))
 
 #' Plot wastewater loads
-plot_ww_loads <- function(data = ww_loads, wwtp_to_plot, measuring_periods) {
+plot_ww_loads <- function(data = ww_loads, wwtp_to_plot, disease_classes, measuring_periods) {
 
   data_filtered <- data %>%
     filter(wwtp == wwtp_to_plot) %>%
     filter(measuring_period %in% measuring_periods) %>% 
+    filter(influenza_type %in% disease_classes) %>% 
     group_by(influenza_type) %>% 
     mutate(latest_date = max(sample_date, na.rm = T),
            influenza_type = paste0(influenza_type," (last update: ",latest_date,")"))
@@ -206,11 +207,12 @@ plot_ww_loads <- function(data = ww_loads, wwtp_to_plot, measuring_periods) {
   p
 }
 
-plot_cases <- function(data = confirmed_cases, wwtp_to_plot, measuring_periods) {
+plot_cases <- function(data = confirmed_cases, wwtp_to_plot, measuring_periods, disease_classes) {
   data_filtered <- data %>%
     filter(is_observation) %>%
     filter(wwtp == wwtp_to_plot) %>%
     filter(measuring_period %in% measuring_periods) %>% 
+    filter(influenza_type %in% disease_classes) %>% 
     group_by(influenza_type) %>% 
     mutate(latest_date = max(date, na.rm = T),
            influenza_type = paste0(influenza_type," (last update: ",latest_date,")"))
@@ -237,11 +239,12 @@ plot_cases <- function(data = confirmed_cases, wwtp_to_plot, measuring_periods) 
 }
 
 #' Plot Re estimates
-plot_re <- function(data = re_to_plot, data_types, wwtp_to_plot, measuring_periods) {
+plot_re <- function(data = re_to_plot, data_types, disease_classes, wwtp_to_plot, measuring_periods) {
   data_filtered <- data %>%
     filter(wwtp == wwtp_to_plot) %>%
     filter(data_type %in% data_types) %>%
-    filter(measuring_period %in% measuring_periods)
+    filter(measuring_period %in% measuring_periods) %>% 
+    filter(influenza_type %in% disease_classes)
 
   ylimits <- c(0, 2) # TODO: re-implement reactive y limits
 
@@ -269,9 +272,10 @@ plot_re <- function(data = re_to_plot, data_types, wwtp_to_plot, measuring_perio
 }
 
 # Plot Re for all catchments together
-plot_all_re <- function(data = re_to_plot, data_types, measuring_period_to_plot) {
+plot_all_re <- function(data = re_to_plot, data_types, measuring_period_to_plot, disease_classes) {
   data_filtered <- data %>%
     filter(data_type %in% data_types) %>%
+    filter(influenza_type %in% disease_classes) %>% 
     filter(measuring_period == measuring_period_to_plot)
 
   p <- ggplot(data = data_filtered) +
