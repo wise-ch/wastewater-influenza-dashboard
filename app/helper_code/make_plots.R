@@ -135,6 +135,16 @@ confirmed_cases <- confirmed_cases %>% mutate(color_code = factor(paste(data_typ
 ww_loads <- ww_loads %>% mutate(color_code = factor(paste(data_type,measuring_period,sep=" "), levels = all_levels))
 re_to_plot <- re_to_plot %>% mutate(color_code = factor(paste(data_type,measuring_period,sep=" "), levels = all_levels))
 
+new_col = confirmed_cases[1,]
+new_col['influenza_type'] = 'RSV'
+for(wwtp in unique(confirmed_cases$wwtp)){
+  new_col['wwtp'] = wwtp
+  confirmed_cases= rbind(confirmed_cases, new_col)
+}
+
+
+
+
 color_codes <- c(
   rgb(0.9,seq(0.6,0.1,length.out=length(all_seasons)),0.1), # confirmed cases, all seasons
   rgb(0.1,seq(0.1,0.6,length.out=length(all_seasons)),0.9) # wastewater, all seasons
