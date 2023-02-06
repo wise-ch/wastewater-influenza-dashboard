@@ -135,10 +135,13 @@ confirmed_cases <- confirmed_cases %>% mutate(color_code = factor(paste(data_typ
 ww_loads <- ww_loads %>% mutate(color_code = factor(paste(data_type,measuring_period,sep=" "), levels = all_levels))
 re_to_plot <- re_to_plot %>% mutate(color_code = factor(paste(data_type,measuring_period,sep=" "), levels = all_levels))
 
+
+# HACK - adding dummy columns to confirmed_cases for RSV so that the facel appears in the app
 new_col = confirmed_cases[1,]
 new_col['influenza_type'] = 'RSV'
 for(wwtp in unique(confirmed_cases$wwtp)){
   new_col['wwtp'] = wwtp
+  new_col['total_cases'] = NA
   confirmed_cases= rbind(confirmed_cases, new_col)
 }
 
