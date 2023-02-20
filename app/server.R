@@ -8,9 +8,6 @@ function(input, output, session) {
     validate(need(
       input$measuring_periods != "",
       "Please select at least one season in the menu to generate the plot."))
-    validate(need(
-      !(input$wwtp == "ARA Basel" && input$measuring_periods == "2022/23"),
-      "Wastewater data not yet available for Basel in 2022/23"))
     raw <- plot_ww_loads(
       wwtp_to_plot = input$wwtp,
       measuring_period = input$measuring_periods)
@@ -36,9 +33,6 @@ function(input, output, session) {
     validate(need(
       input$measuring_periods != "",
       "Please select at least one season in the menu to generate the plot."))
-    validate(need(
-      !(input$wwtp == "ARA Basel" && input$measuring_periods == "2022/23"),
-      "Wastewater data not yet available for Basel in 2022/23"))
     re <- plot_re(
       data_types = input$data_type,
       wwtp_to_plot = input$wwtp,
