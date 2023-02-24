@@ -63,21 +63,21 @@ ui = fluidPage(navbarPage(
           div(
             style = "position:relative",
             plotOutput("raw_plots",
-              height = "250px", width = "1350px"
+              height = "250px", width = "950px"
             ) %>%
               withSpinner(color = "#0dc5c1")
           ),
           div(
             style = "position:relative",
             plotOutput("case_plots",
-                       height = "250px", width = "1350px"
+                       height = "250px", width = "950px"
             ) %>%
               withSpinner(color = "#0dc5c1")
           ),
           div(
             style = "position:relative",
             plotOutput("re_plots",
-              height = "300px", width = "1350px"
+              height = "300px", width = "950px"
             ) %>%
               withSpinner(color = "#0dc5c1")
           ),
@@ -125,7 +125,7 @@ ui = fluidPage(navbarPage(
           div(
             style = "position:relative",
             plotOutput("all_catchment_plots",
-              height = "1050px", width = "1380px"
+              height = "1050px", width = "980px"
             ) %>%
               withSpinner(color = "#0dc5c1")
           )
