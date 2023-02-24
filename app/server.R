@@ -26,9 +26,6 @@ server = function(input, output, session) {
     validate(need(
       !(input$wwtp == "ARA Basel" && ("RSV" %in% input$influenza_type)),
       paste("Confirmed case data not yet available for RSV in Basel (unselect RSV to show influenza).")))
-    validate(need(
-      !(input$wwtp == "ARA Basel" && !("2022/23" %in% input$measuring_periods)),
-      "Confirmed case data not available for Basel in 2021/22"))
     cases <- plot_cases(
       wwtp_to_plot = input$wwtp,
       measuring_period = input$measuring_periods, 
