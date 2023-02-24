@@ -52,7 +52,7 @@ ui = fluidPage(navbarPage(
             "Influenza A" = "Influenza A virus",
             "Influenza B" = "Influenza B virus", 
             "RSV"         = "RSV"),
-          selected = c("Influenza A virus", "Influenza B virus", "RSV")
+          selected = c("Influenza A virus", "Influenza B virus")
         ),
         width = 3
       ),
