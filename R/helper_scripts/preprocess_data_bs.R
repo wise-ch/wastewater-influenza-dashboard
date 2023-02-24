@@ -13,10 +13,12 @@ clean_data_bs <- data_bs %>%
     sample_date = as.Date(Datum),
     flow_ProRheno_L = `Flussmenge ProRheno (LITER) (Column AH)`,
     IAV_gc_per_mL_WW = `InfA (gc/L)` / 1000,
-    IBV_gc_per_mL_WW = `InfB (gc/L)` / 1000) %>%
+    IBV_gc_per_mL_WW = `InfB (gc/L)` / 1000,
+    RSV_gc_per_mL_WW = NA) %>%
   mutate(
     IAV_gc_per_day = IAV_gc_per_mL_WW * 1000 * flow_ProRheno_L,
-    IBV_gc_per_day = IBV_gc_per_mL_WW * 1000 * flow_ProRheno_L)  # measurements to daily loads
+    IBV_gc_per_day = IBV_gc_per_mL_WW * 1000 * flow_ProRheno_L,
+    RSV_gc_per_day = RSV_gc_per_mL_WW * 1000 * flow_ProRheno_L)  # measurements to daily loads
 
 # Annotate different measuring periods (Re estimated for each separately)
 clean_data_bs <- clean_data_bs %>% mutate(
@@ -32,8 +34,8 @@ if (any(clean_data_bs$measuring_period == "Outside of measuring period")) {
 }
 
 clean_data_long_bs <- clean_data_bs %>%
-  select(sample_date, wwtp, measuring_period, IAV_gc_per_mL_WW, IAV_gc_per_day, IBV_gc_per_mL_WW, IBV_gc_per_day) %>%
-  pivot_longer(cols = c(IAV_gc_per_mL_WW, IAV_gc_per_day, IBV_gc_per_mL_WW, IBV_gc_per_day), names_to = "measurement_type")
+  select(sample_date, wwtp, measuring_period, IAV_gc_per_mL_WW, IAV_gc_per_day, IBV_gc_per_mL_WW, IBV_gc_per_day, RSV_gc_per_mL_WW, RSV_gc_per_day) %>%
+  pivot_longer(cols = c(IAV_gc_per_mL_WW, IAV_gc_per_day, IBV_gc_per_mL_WW, IBV_gc_per_day, RSV_gc_per_mL_WW, RSV_gc_per_day), names_to = "measurement_type")
 
 #write.csv(clean_data_long_bs, "data/data_used_in_manuscript/unnaggregated_data_bs.csv", row.names = F)
 
