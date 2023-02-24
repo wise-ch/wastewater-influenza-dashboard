@@ -47,7 +47,7 @@ ui = fluidPage(navbarPage(
         ),
         checkboxGroupInput(
           inputId = "influenza_type",
-          label = "Disease class (select to compare):",
+          label = "Pathogen type (select to compare):",
           choices = c(
             "Influenza A" = "Influenza A virus",
             "Influenza B" = "Influenza B virus", 

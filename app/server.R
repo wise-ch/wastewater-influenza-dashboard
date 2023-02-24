@@ -11,7 +11,7 @@ server = function(input, output, session) {
     raw <- plot_ww_loads(
       wwtp_to_plot = input$wwtp,
       measuring_period = input$measuring_periods,
-      disease_classes = input$influenza_type)
+      pathogen_type = input$influenza_type)
     raw
   })
 
@@ -23,7 +23,7 @@ server = function(input, output, session) {
     cases <- plot_cases(
       wwtp_to_plot = input$wwtp,
       measuring_period = input$measuring_periods, 
-      disease_classes = input$influenza_type)
+      pathogen_type = input$influenza_type)
     cases
   })
 
@@ -39,7 +39,7 @@ server = function(input, output, session) {
       data_types = input$data_type,
       wwtp_to_plot = input$wwtp,
       measuring_period = input$measuring_periods,
-      disease_classes = input$influenza_type)
+      pathogen_type = input$influenza_type)
     re
   })
 
@@ -51,7 +51,7 @@ server = function(input, output, session) {
     all_re <- plot_all_re(
       data_types = input$data_type_all_catchments,
       measuring_period = input$measuring_period_all_catchments,
-      disease_classes = input$influenza_type_all_catchments)
+      pathogen_type = input$influenza_type_all_catchments)
     all_re
   })
 
@@ -65,16 +65,16 @@ server = function(input, output, session) {
       raw <- plot_ww_loads(
         wwtp_to_plot = input$wwtp,
         measuring_periods = input$measuring_periods,
-        disease_classes = input$influenza_type)
+        pathogen_type = input$influenza_type)
       cases <- plot_cases(
         wwtp_to_plot = input$wwtp,
         measuring_periods = input$measuring_periods,
-        disease_classes = input$influenza_type)
+        pathogen_type = input$influenza_type)
       re <- plot_re(
         data_types = input$data_type,
         wwtp_to_plot = input$wwtp,
         measuring_periods = input$measuring_periods, 
-        disease_classes = input$influenza_type)
+        pathogen_type = input$influenza_type)
 
       p <- patchwork::wrap_plots(raw, cases, re, nrow = 3) +
         plot_annotation(caption = paste0(
