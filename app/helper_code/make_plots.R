@@ -190,12 +190,12 @@ shared_date_scale <- scale_x_date(
   expand = c(0, 0))
 
 #' Plot wastewater loads
-plot_ww_loads <- function(data = ww_loads, wwtp_to_plot, disease_classes, measuring_periods) {
+plot_ww_loads <- function(data = ww_loads, wwtp_to_plot, pathogen_type, measuring_periods) {
 
   data_filtered <- data %>%
     filter(wwtp == wwtp_to_plot) %>%
     filter(measuring_period %in% measuring_periods) %>% 
-    filter(influenza_type %in% disease_classes) %>% 
+    filter(influenza_type %in% pathogen_type) %>% 
     group_by(influenza_type) %>% 
     mutate(latest_date = max(sample_date, na.rm = T),
            influenza_type = paste0(influenza_type," (last update: ",latest_date,")"))
@@ -221,12 +221,12 @@ plot_ww_loads <- function(data = ww_loads, wwtp_to_plot, disease_classes, measur
   p
 }
 
-plot_cases <- function(data = confirmed_cases, wwtp_to_plot, measuring_periods, disease_classes) {
+plot_cases <- function(data = confirmed_cases, wwtp_to_plot, measuring_periods, pathogen_type) {
   data_filtered <- data %>%
     filter(is_observation) %>%
     filter(wwtp == wwtp_to_plot) %>%
     filter(measuring_period %in% measuring_periods) %>% 
-    filter(influenza_type %in% disease_classes) %>% 
+    filter(influenza_type %in% pathogen_type) %>% 
     group_by(influenza_type) %>% 
     mutate(latest_date = max(date, na.rm = T),
            influenza_type = paste0(influenza_type," (last update: ",latest_date,")"))
@@ -253,12 +253,12 @@ plot_cases <- function(data = confirmed_cases, wwtp_to_plot, measuring_periods, 
 }
 
 #' Plot Re estimates
-plot_re <- function(data = re_to_plot, data_types, disease_classes, wwtp_to_plot, measuring_periods) {
+plot_re <- function(data = re_to_plot, data_types, pathogen_type, wwtp_to_plot, measuring_periods) {
   data_filtered <- data %>%
     filter(wwtp == wwtp_to_plot) %>%
     filter(data_type %in% data_types) %>%
     filter(measuring_period %in% measuring_periods) %>% 
-    filter(influenza_type %in% disease_classes)
+    filter(influenza_type %in% pathogen_type)
 
   ylimits <- c(0, 2) # TODO: re-implement reactive y limits
 
@@ -286,10 +286,10 @@ plot_re <- function(data = re_to_plot, data_types, disease_classes, wwtp_to_plot
 }
 
 # Plot Re for all catchments together
-plot_all_re <- function(data = re_to_plot, data_types, measuring_period_to_plot, disease_classes) {
+plot_all_re <- function(data = re_to_plot, data_types, measuring_period_to_plot, pathogen_type) {
   data_filtered <- data %>%
     filter(data_type %in% data_types) %>%
-    filter(influenza_type %in% disease_classes) %>% 
+    filter(influenza_type %in% pathogen_type) %>% 
     filter(measuring_period == measuring_period_to_plot)
 
   p <- ggplot(data = data_filtered) +
