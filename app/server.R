@@ -8,6 +8,9 @@ server = function(input, output, session) {
     validate(need(
       input$measuring_periods != "",
       "Please select at least one season in the menu to generate the plot."))
+    validate(need(
+      !(input$wwtp == "ARA Basel" && ("RSV" %in% input$influenza_type)),
+      paste("Wastewater data not yet available for RSV in Basel (unselect RSV to show influenza).")))
     raw <- plot_ww_loads(
       wwtp_to_plot = input$wwtp,
       measuring_period = input$measuring_periods,
@@ -20,6 +23,12 @@ server = function(input, output, session) {
     validate(need(
       input$measuring_periods != "",
       "Please select at least one season in the menu to generate the plot."))
+    validate(need(
+      !(input$wwtp == "ARA Basel" && ("RSV" %in% input$influenza_type)),
+      paste("Confirmed case data not yet available for RSV in Basel (unselect RSV to show influenza).")))
+    validate(need(
+      !(input$wwtp == "ARA Basel" && !("2022/23" %in% input$measuring_periods)),
+      "Confirmed case data not available for Basel in 2021/22"))
     cases <- plot_cases(
       wwtp_to_plot = input$wwtp,
       measuring_period = input$measuring_periods, 
@@ -35,6 +44,9 @@ server = function(input, output, session) {
     validate(need(
       input$measuring_periods != "",
       "Please select at least one season in the menu to generate the plot."))
+    validate(need(
+      !(input$wwtp == "ARA Basel" && ("RSV" %in% input$influenza_type)),
+      paste("Reproduction number estimates not yet available for RSV in Basel (unselect RSV to show influenza).")))
     re <- plot_re(
       data_types = input$data_type,
       wwtp_to_plot = input$wwtp,
