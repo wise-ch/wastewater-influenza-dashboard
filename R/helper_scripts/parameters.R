@@ -60,7 +60,7 @@ influenza_std_serial_interval_days <- 1.5  # EpiEstim example (from Ferguson et 
 #########
 # RSV Parameters
 
-#RSV shedding distribution taken from mean of posterior values in https://doi.org/10.1093/aje/kwab181 fig 2a
+#RSV infection to shedding distribution taken from mean of posterior values in https://doi.org/10.1093/aje/kwab181 fig 2a
 rsv_distribution_infection_to_shedding <- list(
   name = "gamma",
   shape = 8.8,
