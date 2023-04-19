@@ -1,0 +1,1 @@
+eawag_cloud_folder <- "PUT LOCAL PATH TO CLOUD FOLDER HERE"
