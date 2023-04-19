@@ -4,6 +4,8 @@ library(ggplot2)
 library(tidyr)
 library(dplyr)
 
+source("R/local_config.R")
+
 #' Get newest data file from EAWAG.
 #' @param path_to_data The directory where EAWAG data is stored.
 #' @return Newest data as a data frame.
@@ -11,12 +13,25 @@ get_newest_data <- function(path_to_data = "data/raw_data/eawag_data") {
   files <- list.files(path = path_to_data, pattern = "^LatestFluData.*csv$", full.names = T)
   newest_data_file <- sort(files)[length(files)]
   print(paste("Newest file found is:", newest_data_file))
-  newest_data <- read.csv(newest_data_file) %>% mutate(sample_date = as.Date(sample_date))
+  newest_data <- read.csv(newest_data_file, fileEncoding = "Windows-1252") %>% mutate(sample_date = as.Date(sample_date))
   return(newest_data)
 }
 
 print("Loading newest data from EAWAG")
 data_eawag <- get_newest_data()
+
+eawag_cloud_filepath <- file.path(eawag_cloud_folder,"LatestFluData.csv")
+newest_data_cloud <- read.csv(eawag_cloud_filepath, fileEncoding = "Windows-1252") %>%
+  mutate(sample_date = as.Date(sample_date))
+
+if (!identical(data_eawag, newest_data_cloud)) {
+  message("Copying new data from cloud folder to local folder")
+  date_cloudfile_modified <- format(as.Date(file.info(eawag_cloud_filepath)$mtime)+1, "%y-%m-%d")
+  file.copy(eawag_cloud_filepath, file.path("data/raw_data/eawag_data",paste0("LatestFluData_",date_cloudfile_modified,".csv")))
+  data_eawag <- newest_data_cloud
+} else {
+  message("No new data in cloud folder found.")
+}
 
 print(paste("Loading flow data from online EAWAG sensors"))
 flow_data_gr <- read.table(
