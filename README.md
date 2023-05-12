@@ -36,11 +36,11 @@ docker run --rm -p 8080:3838 ghcr.io/wise-ch/wastewater-influenza-dashboard:mast
 
 ## Server
 
-The dashboard is currently hosted on an AWS server managed by Chaoran.
+The dashboard is currently hosted on an server at ETH Zurich.
 
 ## Domain
 
-The app is currently tied to a domain name owned by Chaoran: wise.covidhub.science.
+The app is currently running at https://wise.ethz.ch/influenza/.
 
 ## Attribution
 
