@@ -75,7 +75,7 @@ navbarPage(
           htmlOutput("link"),
           downloadButton('download_plot', 'Download plots')
         ),
-        p("*Note that catchment area refers to the intake area for each wastewater treatment plant. Per-catchment laboratory-confirmed cases are estimated based on the number of cases per postal code and a delineation of each catchment area. This estimation can result in non-integer case numbers. For more informaton on the specific catchments studied, see the ",
+        p("*Note that catchment area refers to the intake area for each wastewater treatment plant. Laboratory-confirmed case numbers for the most recent 2-3 weeks are typically not yet complete due to reporting delays. Per-catchment case numbers are estimated based on postal code and a delineation for each catchment area, potentially resulting in non-integer case numbers. For more informaton on the specific catchments studied, see the ",
                    a(href = "https://www.eawag.ch/en/department/sww/projects/sars-cov2-in-wastewater/", "EAWAG project page for SARS-CoV-2 monitoring in wastewater", .noWS = "outside"), "."
         ) # fluid row
       ) # main panel
