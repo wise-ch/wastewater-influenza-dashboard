@@ -5,20 +5,12 @@ library(tidyr)
 library(dplyr)
 
 source("R/local_config.R")
-
-#' Get newest data file from EAWAG.
-#' @param path_to_data The directory where EAWAG data is stored.
-#' @return Newest data as a data frame.
-get_newest_data <- function(path_to_data = "data/raw_data/eawag_data") {
-  files <- list.files(path = path_to_data, pattern = "^LatestFluData.*csv$", full.names = T)
-  newest_data_file <- sort(files)[length(files)]
-  print(paste("Newest file found is:", newest_data_file))
-  newest_data <- read.csv(newest_data_file, fileEncoding = "Windows-1252") %>% mutate(sample_date = as.Date(sample_date))
-  return(newest_data)
-}
+source("R/helper_scripts/utils_preprocess.R")
 
 print("Loading newest data from EAWAG")
-data_eawag <- get_newest_data()
+file_eawag <- get_newest_file(dir = "data/raw_data/eawag_data", filename_pattern = "^LatestFluData.*csv$")
+data_eawag <- read.csv(file_eawag, fileEncoding = "Windows-1252") %>%
+  mutate(sample_date = as.Date(sample_date))
 
 eawag_cloud_filepath <- file.path(eawag_cloud_folder,"LatestFluData.csv")
 newest_data_cloud <- read.csv(eawag_cloud_filepath, fileEncoding = "Windows-1252") %>%
