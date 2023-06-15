@@ -5,7 +5,11 @@ library(dplyr)
 library(tidyr)
 library(readxl)
 
-data_bs <- readxl::read_xlsx(here::here("data/raw_data/basel_wwtp_data/Basel CoroWWmonitoring_Influenza_2023-02-20.xlsx"),sheet = 1,skip = 2)
+source("R/helper_scripts/utils_preprocess.R")
+
+print("Loading newest data from Cantonal Lab Basel")
+file_bs <- get_newest_file(dir = "data/raw_data/basel_wwtp_data", filename_pattern = "^Basel CoroWWmonitoring_Influenza_.*\\.xlsx$")
+data_bs <- readxl::read_xlsx(file_bs,sheet = 1,skip = 2)
 
 clean_data_bs <- data_bs %>%
   filter((!is.na(`InfA (gc/L)`)) | (!is.na(`InfB (gc/L)`)), !is.na(Datum)) %>%
