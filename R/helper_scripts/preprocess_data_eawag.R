@@ -92,13 +92,9 @@ clean_data_eawag <- data_eawag %>%
   rename(SARS2_N2_gc_per_mL_WW = SARS.N2_.gc.mLWW.)
 
 # Annotate different measuring periods (Re estimated for each separately)
-clean_data_eawag <- clean_data_eawag %>% mutate(
-  measuring_period = case_when(
-    sample_date <= as.Date("2022-05-01") ~ "2021/22",
-    sample_date >= as.Date("2022-09-01") ~ "2022/23",
-    T ~ "Outside of measuring period"
-  )
-)
+clean_data_eawag <- clean_data_eawag %>%
+  mutate(measuring_period = get_measuring_period(sample_date))
+
 if (any(clean_data_eawag$measuring_period == "Outside of measuring period")) {
   warning("Some data is outside of a known measuring period, have you started monitoring a new season? Add the date range to code if so.")
 }

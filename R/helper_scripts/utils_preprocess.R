@@ -8,3 +8,17 @@ get_newest_file <- function(dir, filename_pattern) {
   return(newest_data_file)
 }
 
+#' Assigns dates to measuring periods
+#' The measuring periods/seasons follow the influenza monitoring scheme by FOPH
+#' @param date A date or date vector
+#' @return A character or character vector with the measuring period(s)
+get_measuring_period <- function(date) {
+  return(
+    case_when(
+      date >= as.Date("2021-07-01") & date < as.Date("2022-07-01") ~ "2021/22",
+      date >= as.Date("2022-07-01") & date < as.Date("2023-07-01") ~ "2022/23",
+      date >= as.Date("2023-07-01") & date < as.Date("2024-07-01") ~ "2023/24",
+      T ~ "Outside of measuring period"
+    )
+  )
+}

@@ -4,6 +4,8 @@ library(dplyr)
 library(tidyr)
 library(ggplot2)
 
+source("R/helper_scripts/utils_preprocess.R")
+
 #' Get newest data file from FOPH.
 #' @param path_to_data The directory where FOPH data is stored.
 #' @return Newest data as a data frame.
@@ -109,13 +111,9 @@ case_data_all_complete <- case_data_all %>%
     mutate(total_cases = replace_na(total_cases, 0))
 
 # Annotate different measuring periods (Re estimated for each separately)
-case_data_all_complete <- case_data_all_complete %>% mutate(
-  measuring_period = case_when(
-    date <= as.Date("2022-05-01") ~ "2021/22",
-    date >= as.Date("2022-10-01") & date <= as.Date("2023-05-01") ~ "2022/23",
-    T ~ "Outside of measuring period"
-  )
-)
+case_data_all_complete <- case_data_all_complete %>%
+  mutate(measuring_period = get_measuring_period(date))
+
 if (any(case_data_all_complete$measuring_period == "Outside of measuring period")) {
   warning("Some data is outside of a known measuring period, have you started monitoring a new season? Add the date range to code if so. Currently filtering these data out.")
   case_data_all_complete <- case_data_all_complete %>% filter(measuring_period != "Outside of measuring period")
