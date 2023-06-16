@@ -9,11 +9,11 @@ source("R/helper_scripts/utils_preprocess.R")
 
 print("Loading newest data from EAWAG")
 file_eawag <- get_newest_file(dir = "data/raw_data/eawag_data", filename_pattern = "^LatestFluData.*csv$")
-data_eawag <- read.csv(file_eawag, fileEncoding = "Windows-1252") %>%
+data_eawag <- read.csv(file_eawag) %>%
   mutate(sample_date = as.Date(sample_date))
 
 eawag_cloud_filepath <- file.path(eawag_cloud_folder,"LatestFluData.csv")
-newest_data_cloud <- read.csv(eawag_cloud_filepath, fileEncoding = "Windows-1252") %>%
+newest_data_cloud <- read.csv(eawag_cloud_filepath) %>%
   mutate(sample_date = as.Date(sample_date))
 
 if (!identical(data_eawag, newest_data_cloud)) {
@@ -68,6 +68,10 @@ flow_data_zh <- read.table(
   check.names = F
 )
 colnames(flow_data_zh) <- c("date", colnames(flow_data_zh)[2:length(flow_data_zh)])
+
+if (!("ARA Werdhölzli" %in% data_eawag$wwtp)) {
+  stop("Potential encoding problem with EAWAG data file.")
+}
 
 # Remove faulty samples
 bad_samples <- read.csv("data/raw_data/eawag_data/bad samples.csv")
