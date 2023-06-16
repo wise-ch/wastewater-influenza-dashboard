@@ -174,7 +174,7 @@ shared_theme <- theme_minimal() +
 
 shared_date_scale <- scale_x_date(
   date_breaks = "months", date_labels = "%b",
-  limits = c(as.Date("1999-09-01"), as.Date("2000-08-31")),
+  limits = c(as.Date("1999-07-01"), as.Date("2000-06-30")),
   expand = c(0, 0))
 
 ma_legend_inset <- cowplot::plot_grid(
@@ -187,7 +187,7 @@ ma_legend_inset <- cowplot::plot_grid(
                           legend.title = element_blank(),
                           legend.box.margin = margin(0, 0, 0, 0),
                           legend.margin = margin(0, 0, 0, 0),
-                          legend.position = c(0.5, 0.5),
+                          legend.position = c(0, 0.5),
                           plot.margin = margin(0, 0, 0, 0),
                           legend.background = element_blank(),
                           legend.key = element_blank()
@@ -202,7 +202,7 @@ ma_legend_inset <- cowplot::plot_grid(
                           legend.title = element_blank(),
                           legend.box.margin = margin(0, 0, 0, 0),
                           legend.margin = margin(0, 0, 0, 0),
-                          legend.position = c(0.5, 0.5),
+                          legend.position = c(0, 0.5),
                           plot.margin = margin(0, 0, 0, 0),
                           legend.background = element_blank(),
                           legend.key = element_blank()
@@ -240,8 +240,8 @@ plot_ww_loads <- function(data = ww_loads, wwtp_to_plot, measuring_periods) {
     shared_theme
 
   cowplot::ggdraw(p) +
-    cowplot::draw_plot(ma_legend_inset, .2, .35, .5, .5) +
-    cowplot::draw_plot(ma_legend_inset, .67, .35, .5, .5)
+    cowplot::draw_plot(ma_legend_inset, .15, .35, .5, .5) +
+    cowplot::draw_plot(ma_legend_inset, .62, .35, .5, .5)
 }
 
 plot_cases <- function(data = confirmed_cases, wwtp_to_plot, measuring_periods) {
