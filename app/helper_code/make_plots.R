@@ -4,6 +4,7 @@ library(ggplot2)
 library(dplyr)
 library(readr)
 library(RColorBrewer)
+library(zoo)
 
 # Read in latest data
 confirmed_cases <- read_csv("data/confirmed_cases.csv", col_types = cols(date = "D"))
@@ -137,7 +138,7 @@ re_to_plot <- re_to_plot %>% mutate(color_code = factor(paste(data_type,measurin
 
 color_codes <- c(
   rgb(0.9,seq(0.6,0.1,length.out=length(all_seasons)),0.1), # confirmed cases, all seasons
-  rgb(0.1,seq(0.1,0.6,length.out=length(all_seasons)),0.9) # wastewater, all seasons
+  rgb(0.1,seq(0.6,0.1,length.out=length(all_seasons)),0.9) # wastewater, all seasons
   )
 
 #data_type_colors <- brewer.pal(n = 8, name = "Set1")[1:2]
@@ -176,6 +177,39 @@ shared_date_scale <- scale_x_date(
   limits = c(as.Date("1999-09-01"), as.Date("2000-08-31")),
   expand = c(0, 0))
 
+ma_legend_inset <- cowplot::plot_grid(
+  cowplot::get_legend(data.frame(x = rnorm(10), y = rnorm(10)) %>%
+                        ggplot(aes(x = x, y = y)) +
+                        geom_point(shape = 21, size = 2, aes(color = "Measurements")) +
+                        scale_color_manual(values = c("black","black")) +
+                        theme_bw() +
+                        theme(
+                          legend.title = element_blank(),
+                          legend.box.margin = margin(0, 0, 0, 0),
+                          legend.margin = margin(0, 0, 0, 0),
+                          legend.position = c(0.5, 0.5),
+                          plot.margin = margin(0, 0, 0, 0),
+                          legend.background = element_blank(),
+                          legend.key = element_blank()
+                        ))
+  ,
+  cowplot::get_legend(data.frame(x = rnorm(10), y = rnorm(10)) %>%
+                        ggplot(aes(x = x, y = y)) +
+                        geom_line(aes(color = "7-day moving average")) +
+                        scale_color_manual(values = c("black","black")) +
+                        theme_bw() +
+                        theme(
+                          legend.title = element_blank(),
+                          legend.box.margin = margin(0, 0, 0, 0),
+                          legend.margin = margin(0, 0, 0, 0),
+                          legend.position = c(0.5, 0.5),
+                          plot.margin = margin(0, 0, 0, 0),
+                          legend.background = element_blank(),
+                          legend.key = element_blank()
+                        )), 
+  NULL,
+  align = "v", ncol=1, rel_heights = c(1,1,5))
+
 #' Plot wastewater loads
 plot_ww_loads <- function(data = ww_loads, wwtp_to_plot, measuring_periods) {
 
@@ -185,16 +219,17 @@ plot_ww_loads <- function(data = ww_loads, wwtp_to_plot, measuring_periods) {
     group_by(influenza_type) %>% 
     mutate(latest_date = max(sample_date, na.rm = T),
            influenza_type = paste0(influenza_type," (last update: ",latest_date,")"))
-
+  
   p <- ggplot() +
+    geom_line(
+      data = data_filtered,
+      aes(x = date_to_plot, y = zoo::rollmean(observation, 7, fill = NA), color = color_code),
+      size = 1, alpha = 1, linetype = "solid"
+    ) +
     geom_point(
       data = data_filtered %>% filter(is_observation),
       aes(x = date_to_plot, y = observation, color = color_code),
-      size = 2
-    ) +
-    geom_line(
-      data = data_filtered,
-      aes(x = date_to_plot, y = observation, color = color_code)
+      size = 2, shape = 21
     ) +
     facet_grid(. ~ influenza_type) +
     scale_shape_discrete(name = "Influenza season") +
@@ -204,7 +239,9 @@ plot_ww_loads <- function(data = ww_loads, wwtp_to_plot, measuring_periods) {
     labs(x = element_blank(), y = "Genome copies per day\n(normalized by minimum value)") +
     shared_theme
 
-  p
+  cowplot::ggdraw(p) +
+    cowplot::draw_plot(ma_legend_inset, .2, .35, .5, .5) +
+    cowplot::draw_plot(ma_legend_inset, .67, .35, .5, .5)
 }
 
 plot_cases <- function(data = confirmed_cases, wwtp_to_plot, measuring_periods) {
@@ -217,14 +254,15 @@ plot_cases <- function(data = confirmed_cases, wwtp_to_plot, measuring_periods) 
            influenza_type = paste0(influenza_type," (last update: ",latest_date,")"))
 
   p <- ggplot() +
+    geom_line(
+      data = data_filtered,
+      aes(x = date_to_plot, y = zoo::rollmedian(total_cases, 1, fill = NA), color = color_code),
+      size = 1, alpha = 0.7
+    ) +
     geom_point(
       data = data_filtered,
       aes(x = date_to_plot, y = total_cases, color = color_code),
       size = 2
-    ) +
-    geom_line(
-      data = data_filtered,
-      aes(x = date_to_plot, y = total_cases, color = color_code)
     ) +
     facet_grid(. ~ influenza_type) +
     shared_date_scale +

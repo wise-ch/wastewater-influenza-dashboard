@@ -12,7 +12,8 @@ RUN install2.r --error --skipinstalled \
   shinycssloaders \
   shinyjs \
   shinyWidgets \
-  zoo
+  zoo \
+  cowplot
 
 # Copy app code into container
 COPY ./app/ /srv/shiny-server/
