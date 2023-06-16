@@ -34,14 +34,20 @@ measures_alpha_scale <- scale_alpha_manual(
     labels = c("Recommendation", "Mandate"),
     name = "Work from home")
 
-influenza_type_colors <- brewer.pal(n = 8, name = "Set2")[c(2, 1)]
-influenza_type_color_scale <- scale_color_manual(name = "Influenza type", labels = c("IAV", "IBV"), values = influenza_type_colors, aesthetics = c("color", "fill"))
+influenza_type_colors <- brewer.pal(n = 8, name = "Set2")[c(2, 1, 3)]
+influenza_type_color_scale <- scale_color_manual(
+  name = "Influenza type", 
+  values = c(
+    "IAV" = influenza_type_colors[1],
+    "IBV" = influenza_type_colors[2],
+    "All influenza" = influenza_type_colors[3]),
+  aesthetics = c("color", "fill"))
 
 catchment_area_colors <- brewer.pal(n = 8, name = "Set2")[c(4, 6, 3)]
 background_plot_color <- brewer.pal(n = 8, name = "Set2")[7]
 
-data_type_colors <- brewer.pal(n = 8, name = "Set1")[c(1, 2, 5)]
-names(data_type_colors) <- c("Cases", "Wastewater", "ILI")
+data_type_colors <- brewer.pal(n = 8, name = "Set1")[c(1, 2, 5, 7)]
+names(data_type_colors) <- c("Confirmed cases", "Wastewater", "ILI", "ILI corrected for percent positivity")
 data_type_color_scale <- scale_color_manual(name = "Estimate type", values = data_type_colors, aesthetics = c("color", "fill"))
 
 delay_dist_colors <- brewer.pal(n = 8, name = "Set1")[c(2, 8)]
@@ -75,6 +81,7 @@ ww_re <- read.csv("data/data_used_in_manuscript/ww_re_estimates.csv")
 confirmed_case_re <- read.csv("data/data_used_in_manuscript/confirmed_case_re_estimates.csv")
 ww_re_fecal_dist <- read.csv("data/data_used_in_manuscript/ww_re_estimates_fecal_sld.csv")
 ww_re_scale_sensitivity <- read.csv("data/data_used_in_manuscript/ww_re_scaling_sensitivity-2.csv")
+ili_re <- read.csv("data/data_used_in_manuscript/corrected_ili_re_estimates.csv")
 
 # Catchment area data
 catchment_area_data <- readxl::read_xlsx("proposals/commune_list.xlsx", sheet = 2) %>% 
@@ -89,8 +96,8 @@ ww_measurements <- rbind(
 # Confirmed cases
 confirmed_case_data <- read.csv("data/data_used_in_manuscript/clean_data_cases_che.csv")
 
-# Influenza-like illnss
-ili_data <- read.csv("data/data_used_in_manuscript/ili_2021_2022.csv")
+# Influenza-like illness
+ili_data <- read.csv("data/data_used_in_manuscript/corrected_ili.csv")
 
 # Delay distribution data
 fecal_delay_data <- read.csv("data/raw_data/data_for_fecal_shedding_dist.csv")
@@ -196,9 +203,9 @@ catchment_area_summary <- catchment_area_data %>%
   summarize(n_plz = n(), per_plz_mean = mean(Per_PLZ), per_plz_sd = sd(Per_PLZ), .groups = "drop") %>%
   mutate(`Wastewater facility` = recode(
     .x = ARA_NAMEN,
-    "BASEL" = "Basel (260'000 residents)",
-    "VERNIER/AIRE" = "Geneva (360'000 residents)",
-    "ZUERICH(WERDHOELZLI)" = "Zurich (450'000 residents)"
+    "BASEL" = "Basel (273'000 residents)",
+    "VERNIER/AIRE" = "Geneva (454'000 residents)",
+    "ZUERICH(WERDHOELZLI)" = "Zurich (471'000 residents)"
   )) %>%
   mutate(district = case_when(commune == "Zürich" ~ "Zürich"))
 ```
@@ -324,7 +331,7 @@ all_re_input <- rbind(
     )) %>%
     dplyr::select(data_type, influenza_type, date, observation_type, observation, is_observation),
   confirmed_cases_re_input_data %>%
-    mutate(data_type = "Cases") %>%
+    mutate(data_type = "Confirmed cases") %>%
     mutate(observation = daily_cases) %>%
     mutate(observation_type = recode(
       wwtp,
@@ -340,10 +347,16 @@ all_re_input <- rbind(
       "LAUPEN(SENSETAL)" = "Laupen")) %>%
     mutate(influenza_type = recode(influenza_type, "A" = "IAV", "B" = "IBV")) %>%
     mutate(observation_type = zoo::na.locf(observation_type), influenza_type = zoo::na.locf(influenza_type)) %>%  # fill gaps due to interpolation
+    dplyr::select(data_type, influenza_type, date, observation_type, observation, is_observation),
+  ili_data %>%
+    mutate(data_type = "ILI corrected for percent positivity") %>%
+    mutate(observation = daily_cases) %>%
+    mutate(observation_type = "All Switzerland") %>%
+    mutate(influenza_type = "All influenza") %>%
     dplyr::select(data_type, influenza_type, date, observation_type, observation, is_observation)
 ) %>% mutate(observation_type = factor(
     observation_type, 
-    levels = c("Zurich", "Geneva", "Basel", "Lugano", "Altenrhein", "Laupen", "Chur", "All provided data")))  # decreasing size order
+    levels = c("Zurich", "Geneva", "Basel", "Lugano", "Altenrhein", "Laupen", "Chur", "All provided data", "All Switzerland")))  # decreasing size order
 
 all_re <- rbind(
   ww_re %>% 
@@ -353,8 +366,11 @@ all_re <- rbind(
     dplyr::select(-X) %>%
     mutate(data_type = "Wastewater", delay_dist = "Fecal"),
   confirmed_case_re %>% 
-    mutate(data_type = "Cases", delay_dist = "Symptoms") %>% 
-    mutate(influenza_type = recode(influenza_type, "A" = "IAV", "B" = "IBV"))
+    mutate(data_type = "Confirmed cases", delay_dist = "Symptoms") %>% 
+    mutate(influenza_type = recode(influenza_type, "A" = "IAV", "B" = "IBV")),
+  ili_re %>%
+    mutate(data_type = "ILI corrected for percent positivity", delay_dist = "Symptoms") %>%
+    mutate(influenza_type = "All influenza")
   )
 all_re_clean <- all_re %>% 
   mutate(observation_type = recode(
@@ -371,7 +387,7 @@ all_re_clean <- all_re %>%
     "LAUPEN(SENSETAL)" = "Laupen")) %>%
   mutate(observation_type = factor(
     observation_type, 
-    levels = c("Zurich", "Geneva", "Basel", "Lugano", "Altenrhein", "Laupen", "Chur", "All provided data")))  # decreasing size order
+    levels = c("Zurich", "Geneva", "Basel", "Lugano", "Altenrhein", "Laupen", "Chur", "All provided data", "All Switzerland")))  # decreasing size order
 ```
 
 Plot Re input data: interpolated, scaled wastewater data and case count data
@@ -384,7 +400,7 @@ input_data_plot <- ggplot(
   geom_point(data = all_re_input %>% filter(is_observation), aes(shape = influenza_type), size = 1) +  # actual measurements
   facet_grid(observation_type ~ data_type, scales = "free_y") +
   scale_x_date(date_breaks = "2 months", date_labels = "%b\n%y") +
-  scale_shape_manual(labels = c("IAV", "IBV"), values = c(1, 4), name = "Influenza type") +
+  scale_shape_manual(labels = c("IAV", "IBV", "All influenza"), values = c(1, 4, 2), name = "Influenza type") +
   influenza_type_color_scale +
   shared_theme + 
   theme(legend.position = "bottom") +
@@ -425,9 +441,8 @@ Plot Re estimates
 data_to_plot <- all_re_clean %>% 
   filter(delay_dist != "Fecal", measuring_period == "2021/22") %>%
   mutate(Re_low = pmin(CI_down_Re_estimate, Re_lowHPD, na.rm = T), 
-         Re_high = pmax(CI_up_Re_estimate, Re_highHPD, na.rm = T)) %>%
+         Re_high = pmax(CI_up_Re_estimate, Re_highHPD, na.rm = T)) %>%  # this is to fix a bug(?) around the confidence intervals for the first weeks/months in Lugano, Laupen, and Chur, they're NA for combined uncertainty even though non-NA for Re_low/highHPD
   filter(!is.na(Re_estimate))  # this fixes figure scale
-# this is to fix a bug(?) around the confidence intervals for the first weeks/months in Lugano, Laupen, and Chur, they're NA for combined uncertainty even though non-NA for Re_low/highHPD
 
 estimated_re_plot <- ggplot(
   data = data_to_plot, 
@@ -485,70 +500,73 @@ case_data_to_plot <- confirmed_case_data %>%
   mutate(observation_type = factor(observation_type, levels = catchment_factor_levels))
 
 re_data_to_plot <- all_re_clean %>%
-  filter(observation_type %in% c("Zurich", "Geneva", "Basel")) %>%
+  filter(observation_type %in% c("Zurich", "Geneva", "Basel", "ILI corrected for percent positivity")) %>%
   filter(date >= as.Date("2021-12-01"), date < as.Date("2022-05-01")) %>%
   filter(delay_dist != "Fecal") %>%
   mutate(observation_type = factor(observation_type, levels = catchment_factor_levels)) %>%  
   mutate(
     deconvolved_incidence_per_100000 = case_when(
-      observation_type == "Basel" ~ deconvolved_incidence * 100000 / 258472.1,
-      observation_type == "Zurich" ~ deconvolved_incidence * 100000 / 454546.9,
-      observation_type == "Geneva" ~ deconvolved_incidence * 100000 / 359504.3),
+      observation_type == "Basel" ~ deconvolved_incidence * 100000 / 273000,
+      observation_type == "Zurich" ~ deconvolved_incidence * 100000 / 471000,
+      observation_type == "Geneva" ~ deconvolved_incidence * 100000 / 454000,
+      observation_type == "ILI corrected for percent positivity" ~ deconvolved_incidence / 100000),
     CI_down_deconvolved_incidence_per_100000 = case_when(
-      observation_type == "Basel" ~ CI_down_deconvolved_incidence * 100000 / 258472.1,
-      observation_type == "Zurich" ~ CI_down_deconvolved_incidence * 100000 / 454546.9,
-      observation_type == "Geneva" ~ CI_down_deconvolved_incidence * 100000 / 359504.3),
+      observation_type == "Basel" ~ CI_down_deconvolved_incidence * 100000 / 273000,
+      observation_type == "Zurich" ~ CI_down_deconvolved_incidence * 100000 / 471000,
+      observation_type == "Geneva" ~ CI_down_deconvolved_incidence * 100000 / 454000,
+      observation_type == "ILI corrected for percent positivity" ~ CI_down_deconvolved_incidence / 100000),
     CI_up_deconvolved_incidence_per_100000 = case_when(
-      observation_type == "Basel" ~ CI_up_deconvolved_incidence * 100000 / 258472.1,
-      observation_type == "Zurich" ~ CI_up_deconvolved_incidence * 100000 / 454546.9,
-      observation_type == "Geneva" ~ CI_up_deconvolved_incidence * 100000 / 359504.3)
-  )  # normalize to catchment population size, see get_wwtp_pop_coverage.R
+      observation_type == "Basel" ~ CI_up_deconvolved_incidence * 100000 / 273000,
+      observation_type == "Zurich" ~ CI_up_deconvolved_incidence * 100000 / 471000,
+      observation_type == "Geneva" ~ CI_up_deconvolved_incidence * 100000 / 454000,
+      observation_type == "ILI corrected for percent positivity" ~ CI_up_deconvolved_incidence / 100000)
+  )  # normalize to catchment population size, see FOPH dashboard: https://www.covid19.admin.ch/de/epidemiologic/waste-water
 
 highlight_data <- data.frame(
   re_threshold = 1,
   influenza_type = c("IAV", "IAV", "IAV", "IAV", "IAV", "IAV", "IBV", "IBV", "IBV", "IBV", "IBV", "IBV"),
   observation_type = rep(c("Geneva", "Zurich", "Basel"), 4),
-  data_type = c("Cases", "Cases", "Cases", "Wastewater", "Wastewater", "Wastewater", "Cases", "Cases", "Cases", "Wastewater", "Wastewater", "Wastewater")
+  data_type = c("Confirmed cases", "Confirmed cases", "Confirmed cases", "Wastewater", "Wastewater", "Wastewater", "Confirmed cases", "Confirmed cases", "Confirmed cases", "Wastewater", "Wastewater", "Wastewater")
 ) %>%
-  filter(!(influenza_type == "IBV" & data_type == "Cases")) %>%  # remove highlight for panels without Re
+  filter(!(influenza_type == "IBV" & data_type == "Confirmed cases")) %>%  # remove highlight for panels without Re
   mutate(observation_type = factor(observation_type, levels = catchment_factor_levels))
+
+ili_data_to_plot <- ili_data %>% 
+  mutate(date = as.Date(date)) %>%
+  filter(date >= as.Date("2021-12-01"), date <= as.Date("2022-05-01"), is_observation)
 ```
 
-Make main text figure for wastewater ww_measurements and case data
+Make main text figure for wastewater ww_measurements and ILI/ case data
 ```{r}
-case_scale_factor <- 5E10
+case_scale_factor <- 1/15
+ww_scale_factor <- 1E12
 
 ww_cases_plot <- ggplot(
   data = measurement_data_to_plot %>% filter(mean > 0),
-  aes(x = as.Date(sample_date), y = mean, color = "Wastewater")) + 
+  aes(x = as.Date(sample_date), y = mean / ww_scale_factor, color = "Wastewater")) + 
   geom_line(
     data = case_data_to_plot, 
-    aes(color = "Cases", x = as.Date(date), y = total_cases * case_scale_factor),
-    size = 0.5, alpha = 0.7) +
+    aes(color = "Confirmed cases", x = as.Date(date), y = total_cases * case_scale_factor),
+    linewidth = 0.5, alpha = 0.7) +
   geom_point(size = 0.5) +
   geom_point(data = measurement_data_to_plot %>% filter(mean == 0), size = 1, shape = 4) +
   geom_errorbar(
     data = measurement_data_to_plot %>% filter(mean > 0, n_measurements > 1),
-    aes(ymin = min, ymax = max), 
-    size = 0.5, width = 5) +
+    aes(ymin = min / ww_scale_factor, ymax = max / ww_scale_factor), 
+    linewidth = 0.5, width = 5) +
   facet_grid(influenza_type ~ observation_type, switch = "y") +
   shared_theme + 
   shared_date_scale_coarse +
   data_type_color_scale +
   theme(legend.position = "bottom", legend.margin = margin(), legend.box.spacing = unit(0, "pt")) +
   scale_y_continuous(sec.axis = sec_axis(trans = ~ . / case_scale_factor, name = "Confirmed cases per week")) +
-  labs(x = element_blank(), y = "Genome copies per day")
-
-ili_data_clean <- ili_data %>%
-  mutate(year_week_day = paste(Jahr, Sentinella.Woche, "0", sep = "-")) %>%
-  mutate(first_day_of_week = as.Date(year_week_day, format = "%Y-%U-%w") - 1) %>%  # Sentinella weeks are Sat-Fri
-  mutate(date = first_day_of_week + 3)  # plot by midpoint of week (Tues)
+  labs(x = element_blank(), y = "Genome copies per day\n(x10^12)")
 
 ili_plot <- ggplot(
-  data = ili_data_clean %>% filter(date >= as.Date("2021-12-01"), date <= as.Date("2022-05-01")),
-  aes(x = date, y = Konsultationen.pro.100.000.Einwohner, 
-      color = "ILI")) + 
-  geom_line() +
+  data = ili_data_to_plot,
+  aes(x = date)) + 
+  geom_line(aes(y = est_influenza_cases, color = "ILI corrected for percent positivity")) + 
+  geom_line(aes(y = Konsultationen.pro.100.000.Einwohner, color = "ILI")) +
   shared_theme + 
   scale_x_date(
     date_breaks = "1 month", date_labels = "%b\n%y",
@@ -557,9 +575,9 @@ ili_plot <- ggplot(
   labs(y = "Weekly consultations\nper 100'000 residents", x = element_blank())
 
 plots <- align_plots(ww_cases_plot, ili_plot, align = 'v', axis = 'l')
-bottom_row <- plot_grid(plots[[2]], NULL, labels = c('B'), rel_widths = c(0.6, 0.39))
+bottom_row <- plot_grid(plots[[2]], NULL, labels = c('B'), rel_widths = c(1, 0.28))
 
-plot_grid(plots[[1]], bottom_row, rel_heights = c(1, 0.47), ncol = 1, labels = c("A", ""))
+plot_grid(plots[[1]], bottom_row, rel_heights = c(1, 0.48), ncol = 1, labels = c("A", ""))
 
 ggsave("figures/ww_data_focus.png", width = 6.5, height = 4, units = "in")
 ```
@@ -849,14 +867,14 @@ ww_loads %>%
 
 # IAV and IBV confirmed cases
 re_data_to_plot %>%
-  filter(data_type == "Cases") %>%
+  filter(data_type == "Confirmed cases") %>%
   group_by(observation_type, influenza_type) %>%
   summarize(n_observations = sum(observed_incidence))
 all_re_clean %>%
-  filter(observation_type == c("Basel"), data_type == "Cases") %>%
+  filter(observation_type == c("Basel"), data_type == "Confirmed cases") %>%
   filter(delay_dist != "Respiratory") %>%
   filter(date >= as.Date("2021-12-01"), date < as.Date("2022-05-01")) %>%
-  filter(data_type == "Cases") %>%
+  filter(data_type == "Confirmed cases") %>%
   group_by(observation_type, influenza_type) %>%
   summarize(n_observations = sum(observed_incidence))
 

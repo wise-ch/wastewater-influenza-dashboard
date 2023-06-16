@@ -68,3 +68,7 @@ write.csv(
     file = "data/raw_data/symptom_score_fit.csv",
     row.names = F
 )
+
+# Get empirical median of distribution
+samples <- rgamma(n = 10000, shape = shape, scale = scale)
+median(samples)  # 3.4 days

@@ -112,3 +112,7 @@ write.csv(
     file = "data/raw_data/shedding_profile_fit.csv",
     row.names = F
 )
+
+# Get empirical median of distribution
+samples <- rgamma(n = 10000, shape = shape, scale = scale)
+median(samples)  # 2.4 days

@@ -30,7 +30,6 @@ if (length(non_matching_plz) > 0) {
 }
 
 # Join population data to WWTP coverage data
-# TODO: something wrong here: total is well above 100%
 coverage_data_w_pop <- coverage_data %>%
     left_join(population_data, by = c("PLZ" = "Postleitzahl")) %>%
     mutate(
@@ -52,20 +51,36 @@ coverage_total <- coverage_data_w_pop %>%
         est_max_percent_pop_covered = round(est_max_residents_covered / total_pop, 2)
     )
 
-alt_estimates <- data.frame(
+google_estimates <- data.frame(
     ARA_NAMEN = c("VERNIER/AIRE", "ZUERICH(WERDHOELZLI)", "BASEL"),
-    alt_est_residents_covered = c(445000, 670000, 270000),
-    alt_est_percent_pop_covered = c(445000, 670000, 270000) / total_pop,
-    alt_est_source = c(
+    google_est_residents_covered = c(445000, 670000, 270000),
+    google_est_percent_pop_covered = c(445000, 670000, 270000) / total_pop,
+    google_est_source = c(
         "https://ww2.sig-ge.ch/en/a-propos-de-sig/nous-connaitre/sites_expositions/step-aire",  # "+445000 residents are connected to the plant"
         "https://de.wikipedia.org/wiki/Kl%C3%A4rwerk_Werdh%C3%B6lzli",  # "Sie ist mit einem Einwohnerwert von 670.000 Menschen die grösste Kläranlage der Schweiz"
         "https://www.prorheno.ch/anlagen/ara-basel"  # "Im gesamten Einzugsbebiet sind rund 270'000 Einwohner angeschlossen"
     )
 )
+
+coauthor_estimates <- data.frame(
+    ARA_NAMEN = c("VERNIER/AIRE", "ZUERICH(WERDHOELZLI)", "BASEL"),
+    coauthor_est_residents_covered = c(454000, 471000, 273000),
+    coauthor_est_percent_pop_covered = c(454000, 471000, 273000) / total_pop,
+    coauthor_est_source = c(
+        "C.O. 'in consultation with WWTP operators'",
+        "BAG COVID-19 dashboard & EAWAG dashboard agree",
+        "C.B. preference, also on BAG COVID-19 dashboard"
+    )
+)
+
 coverage_summary <- coverage_total %>%
-    full_join(alt_estimates, by = "ARA_NAMEN")
+    full_join(google_estimates, by = "ARA_NAMEN") %>%
+    full_join(coauthor_estimates, by = "ARA_NAMEN")
 
 write.csv(coverage_summary, "data/data_used_in_manuscript/wwtp_population_coverage_summary.csv", row.names = F)
 
-sum(coverage_summary$alt_est_percent_pop_covered)  # 16% Swiss population covered by Zurich, Basel, Geneva WWTP
+sum(coverage_summary$google_est_percent_pop_covered)  # 16% Swiss population covered by Zurich, Basel, Geneva WWTP
+sum(coverage_summary$coauthor_est_percent_pop_covered)  # 14% Swiss population covered by Zurich, Basel, Geneva WWTP
 sum(coverage_summary$est_percent_pop_covered)  # 12% Swiss population covered by Zurich, Basel, Geneva WWTP
+
+sum(coverage_summary$coauthor_est_residents_covered)

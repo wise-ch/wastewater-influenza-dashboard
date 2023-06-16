@@ -6,23 +6,23 @@ library(MASS)
 library(fitdistrplus)
 
 # Load, clean, and filter data
-data <- readxl::read_xlsx("data/shedding_profile_data.xlsx", sheet = 2)
+data <- readxl::read_xlsx("data/data_used_in_manuscript/shedding_profile_data.xlsx", sheet = 2)
 
-data_cleaned <- data %>% group_by(specimen.type) %>%
+data_cleaned <- data %>% group_by(`specimen type`) %>%
     mutate(sample_type = case_when(
-        specimen.type == "nose-throat swab" ~ "respiratory",
-        specimen.type == "sputum" ~ "respiratory",
-        specimen.type == "faeces" ~ "stool")) %>%
+        `specimen type` == "nose-throat swab" ~ "respiratory",
+        `specimen type` == "sputum" ~ "respiratory",
+        `specimen type` == "faeces" ~ "stool")) %>%
     mutate(title_2 = paste(author_year, title, sep = ": ")) %>%
     mutate(third_sd = 3 * sd(measurement)) %>%
     mutate(outlier = case_when(measurement > third_sd ~ T, T ~ F)) %>%
-    mutate(measurement.day = as.numeric(measurement.day) + 2)  # 2-day average between infection and symptom onset according to Carrat 2008
+    mutate(measurement.day = as.numeric(`measurement day`) + 2)  # 2-day average between infection and symptom onset according to Carrat 2008
 
 data_filtered <- data_cleaned %>%
     filter(
         units != "Cycle threshold",
         !is.na(measurement.day),
-        specimen.type == "faeces",
+        `specimen type` == "faeces",
         units == "copies/g")
 
 # Write out data used
@@ -104,3 +104,7 @@ write.csv(
   file = "data/raw_data/shedding_profile_fit_fecal.csv",
   row.names = F
 )
+
+# Get empirical median of distribution
+samples <- rgamma(n = 10000, shape = shape_moments, scale = scale_moments)
+median(samples)  # 10.7 days
