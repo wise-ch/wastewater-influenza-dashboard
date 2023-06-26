@@ -9,12 +9,15 @@ source("R/helper_scripts/utils_preprocess.R")
 
 print("Loading newest data from EAWAG")
 file_eawag <- get_newest_file(dir = "data/raw_data/eawag_data", filename_pattern = "^LatestFluData.*csv$")
-data_eawag <- read.csv(file_eawag) %>%
-  mutate(sample_date = as.Date(sample_date))
+data_eawag <- read.csv(file_eawag, fileEncoding = "UTF-8") %>%
+  mutate(sample_date = as.Date(sample_date),
+         wwtp = ifelse(grepl(wwtp, pattern = "ARA Werdh"), "ARA Werdhölzli", wwtp))
+
 
 eawag_cloud_filepath <- file.path(eawag_cloud_folder,"LatestFluData.csv")
-newest_data_cloud <- read.csv(eawag_cloud_filepath) %>%
-  mutate(sample_date = as.Date(sample_date))
+newest_data_cloud <- read.csv(eawag_cloud_filepath, fileEncoding = "UTF-8") %>%
+  mutate(sample_date = as.Date(sample_date),
+         wwtp = ifelse(grepl(wwtp, pattern = "ARA Werdh"), "ARA Werdhölzli", wwtp))
 
 if (!identical(data_eawag, newest_data_cloud)) {
   message("Copying new data from cloud folder to local folder")
