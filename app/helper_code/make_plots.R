@@ -6,8 +6,14 @@ library(readr)
 library(RColorBrewer)
 library(zoo)
 
+cases_available <- FALSE
+
 # Read in latest data
-confirmed_cases <- read_csv("data/confirmed_cases.csv", col_types = cols(date = "D"))
+if (cases_available) {
+  confirmed_cases <- read_csv("data/confirmed_cases.csv", col_types = cols(date = "D"))
+  } else {
+  confirmed_cases <- NULL
+}
 ww_loads <- read_csv("data/ww_loads.csv", col_types = cols(sample_date = "D"))  # path relative to app directory
 ww_re_estimates <- read_csv("data/ww_re_estimates.csv", col_types = cols(date = "D"))
 case_re_estimates <- read_csv("data/confirmed_case_re_estimates.csv", col_types = c(date = "D"))
@@ -16,7 +22,7 @@ case_re_estimates <- read_csv("data/confirmed_case_re_estimates.csv", col_types 
 for (file in list.files(path = "data/cached_data", full.names = T)) {
   print(paste("Reading in", file))
   if (endsWith(file, "_confirmed_cases.csv")) {
-    confirmed_cases <- rbind(confirmed_cases, read_csv(file, col_types = cols(date = "D")))
+    if (cases_available) confirmed_cases <- rbind(confirmed_cases, read_csv(file, col_types = cols(date = "D")))
   } else if (endsWith(file, "_ww_loads.csv")) {
     ww_loads <- rbind(ww_loads, read_csv(file, col_types = cols(sample_date = "D")))
   } else if (endsWith(file, "_confirmed_case_re_estimates.csv")) {
@@ -29,33 +35,35 @@ for (file in list.files(path = "data/cached_data", full.names = T)) {
 }
 
 # Clean case data
-confirmed_cases <- confirmed_cases %>%
-  mutate(wwtp = recode(
-    wwtp,
-    "BASEL" = "ARA Basel",
-    "ZUERICH(WERDHOELZLI)" = "ARA Werdhölzli Zurich",
-    "VERNIER/AIRE" = "STEP Aire Geneva",
-    "BIOGGIO(LUGANO)" = "IDA CDA Lugano",
-    "CHUR" = "ARA Chur",
-    "LAUPEN(SENSETAL)" = "ARA Sensetal Laupen",
-    "THAL/ALTENRHEIN" = "ARA Altenrhein"
-  )) %>%
-  mutate(influenza_type = recode(
-    influenza_type,
-    "A" = "Influenza A virus",
-    "B" = "Influenza B virus"
-  )) %>%  # fill gaps due to interpolation
-  mutate(
-    data_type = "Confirmed cases",
-    wwtp = zoo::na.locf(wwtp),
-    influenza_type = zoo::na.locf(influenza_type),
-    measuring_period = zoo::na.locf(measuring_period)) %>%
-  mutate(dummy_year = case_when(
-    format(date, "%m") %in% c("08", "09", "10", "11", "12") ~ "1999",
-    T ~ "2000"
-  )) %>%  # start each season from Sept for plotting
-  mutate(date_to_plot = as.Date(paste0(dummy_year, format(date, "-%m-%d")))) %>%
-  mutate(data_type = factor(data_type, levels = c("Wastewater", "Confirmed cases")))
+if (cases_available) {
+  confirmed_cases <- confirmed_cases %>%
+    mutate(wwtp = recode(
+      wwtp,
+      "BASEL" = "ARA Basel",
+      "ZUERICH(WERDHOELZLI)" = "ARA Werdhölzli Zurich",
+      "VERNIER/AIRE" = "STEP Aire Geneva",
+      "BIOGGIO(LUGANO)" = "IDA CDA Lugano",
+      "CHUR" = "ARA Chur",
+      "LAUPEN(SENSETAL)" = "ARA Sensetal Laupen",
+      "THAL/ALTENRHEIN" = "ARA Altenrhein"
+    )) %>%
+    mutate(influenza_type = recode(
+      influenza_type,
+      "A" = "Influenza A virus",
+      "B" = "Influenza B virus"
+    )) %>%  # fill gaps due to interpolation
+    mutate(
+      data_type = "Confirmed cases",
+      wwtp = zoo::na.locf(wwtp),
+      influenza_type = zoo::na.locf(influenza_type),
+      measuring_period = zoo::na.locf(measuring_period)) %>%
+    mutate(dummy_year = case_when(
+      format(date, "%m") %in% c("08", "09", "10", "11", "12") ~ "1999",
+      T ~ "2000"
+    )) %>%  # start each season from Sept for plotting
+    mutate(date_to_plot = as.Date(paste0(dummy_year, format(date, "-%m-%d")))) %>%
+    mutate(data_type = factor(data_type, levels = c("Wastewater", "Confirmed cases")))
+}
 
 # Clean load data
 ww_loads <- ww_loads %>%
@@ -132,7 +140,7 @@ all_sources <- c("Confirmed cases", "Wastewater")
 all_levels <- levels(interaction(all_sources, all_seasons, sep=" ", lex.order = T))
 all_levels_verbose <- levels(interaction(c("Laboratory-confirmed cases", "Virus load in wastewater"), all_seasons, sep=" ", lex.order = T))
 
-confirmed_cases <- confirmed_cases %>% mutate(color_code = factor(paste(data_type,measuring_period,sep=" "), levels = all_levels))
+if (cases_available) confirmed_cases <- confirmed_cases %>% mutate(color_code = factor(paste(data_type,measuring_period,sep=" "), levels = all_levels))
 ww_loads <- ww_loads %>% mutate(color_code = factor(paste(data_type,measuring_period,sep=" "), levels = all_levels))
 re_to_plot <- re_to_plot %>% mutate(color_code = factor(paste(data_type,measuring_period,sep=" "), levels = all_levels))
 
