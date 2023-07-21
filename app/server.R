@@ -61,15 +61,15 @@ function(input, output, session) {
       raw <- plot_ww_loads(
         wwtp_to_plot = input$wwtp,
         measuring_periods = input$measuring_periods)
-      cases <- plot_cases(
-        wwtp_to_plot = input$wwtp,
-        measuring_periods = input$measuring_periods)
+      # cases <- plot_cases(
+      #   wwtp_to_plot = input$wwtp,
+      #   measuring_periods = input$measuring_periods)
       re <- plot_re(
         data_types = input$data_type,
         wwtp_to_plot = input$wwtp,
         measuring_periods = input$measuring_periods)
 
-      p <- patchwork::wrap_plots(raw, cases, re, nrow = 3) +
+      p <- patchwork::wrap_plots(raw, re, nrow = 3) + #cases, 
         plot_annotation(caption = paste0(
           "Generated on: ", Sys.Date(),
           " (by: WISE influenza dashboard)"

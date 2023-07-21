@@ -245,6 +245,32 @@ plot_ww_loads <- function(data = ww_loads, wwtp_to_plot, measuring_periods) {
 }
 
 plot_cases <- function(data = confirmed_cases, wwtp_to_plot, measuring_periods) {
+  
+  # placeholder for unavailable case data
+  data = ww_loads
+  
+  data_filtered <- data %>%
+    filter(wwtp == wwtp_to_plot) %>%
+    filter(measuring_period %in% measuring_periods) %>% 
+    filter(is_observation)
+  
+  p <- ggplot() +
+    geom_point(
+      data = data_filtered,
+      aes(x = date_to_plot, y = observation), color = NA
+    ) +
+    annotate("text", x=as.Date("1999-12-31"), y = Inf, vjust = 1, hjust = 0.5, size = 5, color = "red", fontface = "italic", label = "\nConfirmed case data currently unavailable\ndue to data protection regulations.") +
+    facet_grid(. ~ influenza_type) +
+    scale_shape_discrete(name = "Influenza season") +
+    shared_date_scale +
+    data_type_color_scale +
+    labs(x = element_blank(), y = "Weekly confirmed cases\nin the catchment") +
+    shared_theme +
+    theme(axis.text.y = element_text(color = NA))
+  
+  return(p)
+  
+  # actual plot
   data_filtered <- data %>%
     filter(is_observation) %>%
     filter(wwtp == wwtp_to_plot) %>%
