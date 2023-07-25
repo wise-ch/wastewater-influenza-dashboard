@@ -5,12 +5,12 @@ name: Calculate case-based Re
 on:
   # Option to manually trigger deploy
   workflow_dispatch:
-  push:
-    branches:
-      - 'master'
-    paths:
-      # Only run when a relevant file is updated
-      - 'data/clean_data_cases_che.csv'
+  #push:
+  #  branches:
+  #    - 'master'
+  #  paths:
+  #    # Only run when a relevant file is updated
+  #    - 'data/clean_data_cases_che.csv'
 
 jobs:
 
