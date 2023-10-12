@@ -81,12 +81,14 @@ wwtp_data_all <- list(
   "Zurich" = ww_data_zh
 )
 
-ww_data_all_combined <- bind_rows(wwtp_data_all) %>%
-  group_by(sample_date, measuring_period) %>% 
-  summarize(across(-wwtp,mean,na.rm=T), .groups = "drop") %>% 
-  mutate(wwtp = "All provided data", .after = measuring_period)
-
-wwtp_data_all <- c(wwtp_data_all, list("All provided data" = ww_data_all_combined))
+# Note that this does not properly weigh the representativeness of the different
+# treatment plants (i.e. population sizes and how loads translate into
+# measurements at the specific sampling site)
+# ww_data_all_combined <- bind_rows(wwtp_data_all) %>%
+#   group_by(sample_date, measuring_period) %>% 
+#   summarize(across(-wwtp,mean,na.rm=T), .groups = "drop") %>% 
+#   mutate(wwtp = "All provided data", .after = measuring_period)
+# wwtp_data_all <- c(wwtp_data_all, list("All provided data" = ww_data_all_combined))
 
 # Estimate Re for each data stream
 is_first <- T
