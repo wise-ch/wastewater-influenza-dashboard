@@ -44,7 +44,7 @@ The app is currently running at https://wise.ethz.ch/influenza/.
 
 ## Attribution
 
-The dashboard was developed by Sarah Nadeau. It is based on work by Taru Singhal and Jana Huisman for SARS-CoV-2. Chaoran Chen and Adrian Lison helped set up and maintain the dashboard.
+The dashboard was developed by Sarah Nadeau. It is based on work by Taru Singhal and Jana Huisman for SARS-CoV-2. Chaoran Chen helped set up and maintains the infrastructure. Adrian Lison is maintaining and further developing the dashboard.
 
 ## Debugging the docker image
 Build the image, then run a container locally in interactive mode:
