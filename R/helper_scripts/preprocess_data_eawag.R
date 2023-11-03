@@ -65,8 +65,8 @@ data_eawag6 <- data_eawag6 |>
 data_eawag6 <- data_eawag6 %>%
   mutate(gc.per.mLWW. = gc_per_Lww/1000, target = stringr::str_replace(target, "-", ".")) %>%
   select(sample_date, wwtp, target, ChamberID, replicate, gc.per.mLWW., file_name, sample_type, flow) %>%
-  filter(!(wwtp=="CDA Lugano" & sample_date=="2023-08-30" & flow ==26669.00)) |> # temporary workaround: filter out smaller value
-  filter(!(wwtp=="CDA Lugano" & sample_date=="2023-08-30" & flow ==19761.00)) |> # temporary workaround: filter out smaller value
+  filter(!(wwtp=="CDA Lugano" & sample_date=="2023-08-30" & flow ==26669.00)) |> # temporary workaround: filter out wrong value
+  filter(!(wwtp=="CDA Lugano" & sample_date=="2023-09-01" & flow ==19761.00)) |> # temporary workaround: filter out wrong value
   pivot_wider(id_cols = -c(target, gc.per.mLWW.),
               names_from = target, values_from = gc.per.mLWW., names_glue = "{target}_.gc.mLWW.")
 
