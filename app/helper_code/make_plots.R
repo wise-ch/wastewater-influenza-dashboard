@@ -159,9 +159,12 @@ data_type_color_scale <- scale_color_manual(
 )
 
 # WWTP names to display
-wwtp_levels <- c("ARA Werdhölzli Zurich", "STEP Aire Geneva", "ARA Basel", "IDA CDA Lugano", "ARA Chur", "ARA Sensetal Laupen", "ARA Altenrhein", "All provided data")
-wwtp_labels <- c("Zurich", "Geneva", "Basel", "Lugano", "Chur", "Laupen", "Altenrhein", "All\ncatchments")
-re_to_plot <- re_to_plot %>% mutate(wwtp_factor = factor(wwtp, levels = wwtp_levels, labels = wwtp_labels))
+wwtp_levels <- c("ARA Werdhölzli Zurich", "STEP Aire Geneva", "ARA Basel", "IDA CDA Lugano", "ARA Chur", "ARA Sensetal Laupen", "ARA Altenrhein")
+wwtp_labels <- c("Zurich", "Geneva", "Basel", "Lugano", "Chur", "Laupen", "Altenrhein")
+re_to_plot <- re_to_plot %>%
+  mutate(wwtp_factor = factor(wwtp, levels = wwtp_levels, labels = wwtp_labels)) %>% 
+  filter(!is.na(wwtp_factor))
+  
 
 # y-axis limits for Re plots
 re_ylimits <- c(0, 2)
