@@ -34,8 +34,8 @@ navbarPage(
         checkboxGroupInput(
           inputId = "measuring_periods",
           label = "Influenza season (select to compare):",
-          choices = c("2021/22", "2022/23"),
-          selected = c("2021/22", "2022/23")
+          choices = c("2021/22", "2022/23", "2023/24"),
+          selected = c("2021/22", "2022/23", "2023/24")
         ),
         checkboxGroupInput(
           inputId = "data_type",
@@ -97,7 +97,7 @@ navbarPage(
         radioButtons(
           inputId = "measuring_period_all_catchments",
           label = "Influenza season:",
-          choices = c("2021/22", "2022/23"),
+          choices = c("2021/22", "2022/23", "2023/24"),
           selected = "2021/22"
         ),
         width = 3
