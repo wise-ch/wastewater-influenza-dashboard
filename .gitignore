@@ -15,4 +15,6 @@ wastewater-influenza-dashboard_clean_data_cases_che/
 *clean_data_cases_che.csv
 *confirmed_cases.csv
 
+git filter notes
+
 *.bash
