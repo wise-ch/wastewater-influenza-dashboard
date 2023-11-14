@@ -22,13 +22,13 @@ case_re_estimates <- read_csv("data/confirmed_case_re_estimates.csv", col_types 
 for (file in list.files(path = "data/cached_data", full.names = T)) {
   print(paste("Reading in", file))
   if (endsWith(file, "_confirmed_cases.csv")) {
-    if (cases_available) confirmed_cases <- rbind(confirmed_cases, read_csv(file, col_types = cols(date = "D")))
+    if (cases_available) confirmed_cases <- bind_rows(confirmed_cases, read_csv(file, col_types = cols(date = "D")))
   } else if (endsWith(file, "_ww_loads.csv")) {
-    ww_loads <- rbind(ww_loads, read_csv(file, col_types = cols(sample_date = "D")))
+    ww_loads <- bind_rows(ww_loads, read_csv(file, col_types = cols(sample_date = "D")))
   } else if (endsWith(file, "_confirmed_case_re_estimates.csv")) {
-    case_re_estimates <- rbind(case_re_estimates, read_csv(file, col_types = cols(date = "D")))
+    case_re_estimates <- bind_rows(case_re_estimates, read_csv(file, col_types = cols(date = "D")))
   } else if (endsWith(file, "_ww_re_estimates.csv")) {
-    ww_re_estimates <- rbind(ww_re_estimates, read_csv(file, col_types = cols(date = "D")))
+    ww_re_estimates <- bind_rows(ww_re_estimates, read_csv(file, col_types = cols(date = "D")))
   } else {
     warning(paste("Unknown cached data file", file, "ignored."))
   }
@@ -145,8 +145,8 @@ ww_loads <- ww_loads %>% mutate(color_code = factor(paste(data_type,measuring_pe
 re_to_plot <- re_to_plot %>% mutate(color_code = factor(paste(data_type,measuring_period,sep=" "), levels = all_levels))
 
 color_codes <- c(
-  rgb(0.9,seq(0.6,0.1,length.out=length(all_seasons)),0.1), # confirmed cases, all seasons
-  rgb(0.1,seq(0.6,0.1,length.out=length(all_seasons)),0.9) # wastewater, all seasons
+  rgb(0.9,seq(0.9,0.1,length.out=length(all_seasons)),0.1), # confirmed cases, all seasons
+  rgb(0.1,seq(0.9,0.1,length.out=length(all_seasons)),0.9) # wastewater, all seasons
   )
 
 #data_type_colors <- brewer.pal(n = 8, name = "Set1")[1:2]

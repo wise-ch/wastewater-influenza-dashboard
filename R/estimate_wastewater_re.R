@@ -126,7 +126,7 @@ for (wwtp_name in names(wwtp_data_all)) {
     values_to = "observation",
     names_to = c("influenza_type", "observation_units"),
     names_pattern = "([A-Z]{3})_(.*)"
-  )
+  ) |> select(sample_date, measuring_period, wwtp, influenza_type, observation_units, observation)
 
   # Iterate over influenza types and seasons (if multiple)
   for (influenza_type_j in unique(data_long$influenza_type)) {
