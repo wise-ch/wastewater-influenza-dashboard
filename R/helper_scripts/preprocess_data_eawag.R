@@ -82,8 +82,8 @@ data_eawag <- bind_rows(list(
     SARS.N1_.gc.mLWW.,
     SARS.N2_.gc.mLWW.
   ),
-  resp6 = data_eawag6 |> 
-    mutate(assay = "resp6") |> select(
+  respv6 = data_eawag6 |> 
+    mutate(assay = "respv6") |> select(
     assay,
     sample_date, wwtp, ChamberID, replicate,
     file_name, sample_type,
@@ -310,24 +310,83 @@ clean_data_long_means_eawag_for_analysis <- clean_data_long_eawag_for_analysis %
     assays = paste(unique(assay), collapse = "+"),
     .groups = "drop")
 
+# Add data from repo
+print("Loading newest RESP6 data from EAWAG github repo")
+system("cd /Users/alison/Documents/dev/RespiratoryVirusesWastewater; git pull")
+data_eawag6_git <- readr::read_csv("/Users/alison/Documents/dev/RespiratoryVirusesWastewater/LatestRESP6Data-filtered.csv")
+
+data_eawag6_git <- data_eawag6_git |> 
+  mutate(measuring_period = get_measuring_period(sample_date), measurement_type = paste0(Target, "_gc_per_day")) |> 
+  transmute(sample_date, wwtp, measuring_period, measurement_type, mean = Load, assays = "respv6") |> 
+  mutate(wwtp = ifelse(grepl(wwtp, pattern = "ARA Werdh"), "ARA Werdhölzli", wwtp))
+
+data_eawag6_git <- data_eawag6_git |> filter(!(wwtp == "ARA Buholz" & sample_date == "2023-10-03")) # remove duplicate, inconsistent data
+if (data_eawag6_git |> count(across(-mean)) |> pull(n) |> max() > 1) {
+  stop("There are duplicate measurements for some samples in the github data.")
+}
+
+catchment_pops <- tribble(
+  ~wwtp, ~pop,
+  "ARA Altenrhein", 64000,
+  "ARA Chur", 55000,
+  "ARA Sensetal", 62000,
+  "ARA Werdhölzli", 471000,
+  "CDA Lugano", 124000,
+  "STEP Aire", 454000
+)
+
+data_eawag6_git <- data_eawag6_git |> 
+  left_join(catchment_pops, by = "wwtp") |> 
+  mutate(mean = mean * pop)  |> select(-pop)
+
+data_eawag6_git |> count(wwtp, isna = is.na(mean)) |> filter(isna)
+
+clean_data_long_means_eawag_for_analysis <- bind_rows(
+  polybox = clean_data_long_means_eawag_for_analysis,
+  github = data_eawag6_git,
+  .id = "source"
+  )
+
+# check pop coverage
+data_eawag6_git |> group_by(sample_date, wwtp, measuring_period, measurement_type) |> count() |> arrange(desc(n))
+
+# check duplicates between polybox and github
+clean_data_long_means_eawag_for_analysis |> 
+  filter(stringr::str_detect(measurement_type, "gc_per_day")) |> 
+  pivot_wider(id_cols = c(sample_date, wwtp, measuring_period, measurement_type, assays), names_from = source, values_from = mean) |> 
+  mutate(across(c(polybox,github), as.numeric)) |> 
+  mutate(pop = round(polybox / github, 2)) |> 
+  filter(!is.na(pop)) |> 
+  filter(pop!=1)
+
+# Select values from duplicate information
+clean_data_long_means_eawag_for_analysis <- clean_data_long_means_eawag_for_analysis |> 
+  arrange(source, desc(assays)) |> # this picks github before polybox, and respv6 before respv4
+  group_by(sample_date, wwtp, measuring_period, measurement_type) |> 
+  summarize(mean = first(na.omit(mean)))
+
+## Select only currently supported wwtps
+clean_data_long_means_eawag_for_analysis <- clean_data_long_means_eawag_for_analysis |> 
+  filter(wwtp %in% catchment_pops$wwtp)
+  
 # Plot data used in analysis
-ggplot(data = clean_data_long_means_eawag_for_analysis,
+(ggplot(data = clean_data_long_means_eawag_for_analysis,
        aes(x = as.Date(sample_date), y = mean)) +
-  geom_point() +
-  geom_errorbar(aes(ymin = min, ymax = max), width = 5) +
+  geom_point(size = 0.2) + geom_line() +
+  #geom_errorbar(aes(ymin = min, ymax = max), width = 5) +
   facet_grid(measurement_type ~ wwtp, scales = "free") +
   scale_x_date(date_breaks = "1 month", date_labels = "%b\n%Y") +
   theme(legend.position = "bottom") +
-  labs(x = element_blank(), y = "Mean and min/max measurement across analyzed replicates")
+  labs(x = element_blank(), y = "Mean and min/max measurement across analyzed replicates")) |> plotly::ggplotly()
 
-ggplot(data = clean_data_long_means_eawag_for_analysis,
-       aes(x = as.Date(sample_date), y = mean)) +
-  geom_point() +
-  geom_errorbar(aes(ymin = min, ymax = max), width = 5) +
-  facet_grid(measurement_type ~ wwtp + measuring_period, scales = "free") +
-  scale_x_date(date_breaks = "1 month", date_labels = "%b\n%Y") +
-  theme(legend.position = "bottom") +
-  labs(x = element_blank(), y = "Mean and min/max measurement across analyzed replicates")
+# ggplot(data = clean_data_long_means_eawag_for_analysis,
+#        aes(x = as.Date(sample_date), y = mean)) +
+#   geom_point() +
+#   geom_errorbar(aes(ymin = min, ymax = max), width = 5) +
+#   facet_grid(measurement_type ~ wwtp + measuring_period, scales = "free") +
+#   scale_x_date(date_breaks = "1 month", date_labels = "%b\n%Y") +
+#   theme(legend.position = "bottom") +
+#   labs(x = element_blank(), y = "Mean and min/max measurement across analyzed replicates")
 
 ggsave("figures/analyzed_data_eawag.png", width = 9, height = 9, units = "in")
 
