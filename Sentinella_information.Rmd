@@ -1,0 +1,165 @@
+---
+title: "Sentinella data summary v1"
+author: "James Munday"
+date: "2023-04-28"
+output: pdf_document
+---
+
+knitr::
+
+```{r setup, include=FALSE}
+library(data.table)
+library(ggplot2)
+library(tidyverse)
+
+sentinella_summary_tests = fread('data/fuller_sentinealla_data.csv')
+region_numbers = fread('data/raw_data/sentinella_data/region_numbers.csv')
+```
+
+
+## Summary of components
+
+The sentinella data is made up of 2 basic components. 
+
+- Consulations. These are clinical consultations reported by general doctors for both ARI (Acute respiratory infections) and ILI (Influenza Like Infections) - According to FOPH ILI is a subset of ARI - so I use ARI as 'total consultations'
+
+- Test results. A selection of consultations are then swabbed and the samples are sent for laboritory testing. They test for a panel of pathogens - we get data on positive/negative test results for Influenza A, Influenza B, RSV and SARS-CoV-2. 
+
+## Sentinella regions
+All the data we recieve is reported weekly for 6 'sentinella regions': 
+
+```{r sentinella_regions, echo = FALSE, warning=FALSE}
+knitr::kable(region_numbers[, -c('V1')], caption = 'Table 1. Sentinella regions')
+
+```
+## Consultations
+we have data since autumn 2020. The number of consultations reported in a given week ranges between 3 and 392. Here are the consultations for the past 3 seasons by region.
+
+ 
+```{r consultations, echo=FALSE, warning=FALSE}
+
+# Define shared theme for plots
+shared_theme <- theme_minimal() +
+  theme(
+    strip.text = element_text(size = 12, hjust = 0),
+    axis.text = element_text(size = 10),
+    axis.title = element_text(size = 12),
+    legend.text = element_text(size = 12),
+    legend.title = element_text(size = 12),
+    plot.title = element_text(size = 12),
+    panel.spacing.y = unit(0.5, "lines"),
+    panel.spacing.x = unit(0.5, "lines"),
+    legend.position = 'bottom'
+  )
+
+sentinella_summary_tests[, c('date', 'total_ari', 'total_ili', 'region', 'measuring_period')] |>
+                           melt(
+                             measure.vars = c('total_ili', 'total_ari'), 
+                             value.name = 'consultations', 
+                             variable.name = 'consultation_type') |>
+ggplot()+
+  geom_line(aes(x=date, y=consultations, color=consultation_type))  +
+  facet_grid(region~measuring_period, scales='free') +
+  scale_color_discrete(name='Consultation type')+ 
+  theme(legend.position = 'bottom')+
+  shared_theme
+  
+  
+  
+```
+
+## Tests
+Test results are also reported by region weekly and represent a subset of the consultaions. 
+
+```{r testing, echo=FALSE, warning=FALSE}
+sentinella_summary_tests[, n_other := n_samples - n_rsv - n_influ_a - n_influ_b - n_sars_cov2]
+sentinella_summary_tests[, c('date', 'n_samples', 'n_rsv', 'n_influ_a', 'n_influ_b', 'n_sars_cov2', 'n_other', 'region', 'measuring_period')] |>
+                           melt(
+                             measure.vars = c('n_other', 'n_rsv', 'n_influ_a', 'n_influ_b', 'n_sars_cov2'), 
+                             value.name = 'tests', 
+                             variable.name = 'test_type') |>
+ggplot()+
+  geom_area(aes(x=date, y=tests, fill=test_type)) +
+  geom_line(aes(x=date, y=n_samples), color='red', size=0.5, alpha=0.5)  +
+  facet_grid(region~measuring_period, scales='free') +
+  scale_fill_manual(name='Pathogen', values = c('#B2BEB5', scales::hue_pal()(4)))+ 
+  shared_theme
+
+```
+
+Note that SARS-CoV-2 really dominates the positive tests for much of the monitored period.
+
+## proportion of consultations tested
+- Strong correlation between samples and consultations in some regions 
+- Some substantial outliers with very few tests for large numbers of consultations. 
+- In general  proportion of consultations sent for testing reduced with the number of consultations.
+
+```{r proptested, echo=FALSE, warning=FALSE}
+sentinella_summary_tests[,c('date', 'total_ari', 'total_ili', 'n_samples', 'region', 'measuring_period')] |>
+ggplot() + 
+  geom_point(aes(x=total_ari, y=n_samples))+
+  facet_grid(region~measuring_period, scales='free')+
+  shared_theme
+
+sentinella_summary_tests[,c('date', 'total_ari', 'total_ili', 'n_samples', 'region', 'measuring_period')] |>
+ggplot() + 
+  geom_line(aes(x=date, y=n_samples/total_ari))+
+  facet_grid(region~measuring_period, scales='free')+
+  ylab('proportion of consultations sent for testing')+
+  xlab('consultations (ARI)')+
+  shared_theme
+  
+sentinella_summary_tests[,c('date', 'total_ari', 'total_ili', 'n_samples', 'region', 'measuring_period')] |>
+ggplot() + 
+  geom_point(aes(x=total_ari, y=n_samples/total_ari))+
+  facet_grid(measuring_period~region, scales='free') +
+  shared_theme
+
+```
+
+
+So far i have assumed the proportion of consultations resulting from each pathogen is reflected in the proportion of tests positive for the pathogen. 
+
+
+```{r Rt estimates, fig.height = 8, fig.width = 15, echo=FALSE, warning=FALSE}
+sent_re_estimates = fread("app/data/confirmed_cnslt_re_estimates.csv")
+data_all = fread("app/data/sentinella_consultations.csv")
+
+colors = c("IVA" = "DodgerBlue", "RSV" = "red")
+
+
+data_all = data_all |> mutate(date_to_plot = as.Date(paste0(2000, format(date, "-%m-%d"))))
+
+ggplot(data_all |> drop_na()) + 
+  geom_line(aes(x=date_to_plot, y=total_cnslt, color= measuring_period) ) +
+  facet_grid(pathogen~region_nr, scales = 'free_y')+
+  shared_theme+
+  theme(
+    legend.position = 'top'
+  )
+
+
+  data.table::data.table(sent_re_estimates)[pathogen %in% c('RSV', 'IVA') & measuring_period == '2022/23',] |>
+  ggplot() +
+  geom_line(data = data.table::data.table(sent_re_estimates)[pathogen %in% c('RSV') & measuring_period == '2022/23',], 
+            aes(x=date, y=Re_estimate, color="RSV")) + 
+  geom_line(data = data.table::data.table(sent_re_estimates)[pathogen %in% c('IVA') & measuring_period == '2022/23',], 
+            aes(x=date, y=Re_estimate, color="IVA")) + 
+  geom_ribbon(data = data.table::data.table(sent_re_estimates)[pathogen %in% c('RSV') & measuring_period == '2022/23',],
+              aes(x=date, ymin=CI_down_Re_estimate, ymax=CI_up_Re_estimate), fill='red', alpha=0.2)+
+  geom_ribbon(data = data.table::data.table(sent_re_estimates)[pathogen %in% c('IVA') & measuring_period == '2022/23',],
+              aes(x=date, ymin=CI_down_Re_estimate, ymax=CI_up_Re_estimate), fill='DodgerBlue', alpha=0.2)+
+  geom_hline(yintercept = 1, color='black')+
+  facet_wrap(~observation_type, nrow=1)+
+  labs(x = "",
+       y = "Rt",
+       color = "Pathogen") +
+  scale_color_manual(values = colors)+
+  shared_theme +
+  theme(
+    legend.position = "bottom",
+    strip.text.x = element_text(size=0)
+  ) 
+
+
+```
