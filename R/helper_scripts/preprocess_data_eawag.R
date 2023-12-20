@@ -270,14 +270,14 @@ clean_data_long_means_eawag <- clean_data_long_eawag %>%
     .groups = "drop")
 
 # Plot controls (manually inspect)
-try({
-  ggplot(data = control_data_long_eawag, aes(x = assay, y = value)) +
-  geom_boxplot(aes(color = assay)) +
-  facet_grid(name ~ sample_type, scales = "free_y") +
-  labs(x = "Assay", y = "Measurement (genome copies per mL wastewater)")
-
-ggsave("figures/all_controls_eawag.png", width = 7, height = 7, units = "in")
-})
+# try({
+#   ggplot(data = control_data_long_eawag, aes(x = assay, y = value)) +
+#   geom_boxplot(aes(color = assay)) +
+#   facet_grid(name ~ sample_type, scales = "free_y") +
+#   labs(x = "Assay", y = "Measurement (genome copies per mL wastewater)")
+# 
+# ggsave("figures/all_controls_eawag.png", width = 7, height = 7, units = "in")
+# })
 
 # Plot all data
 ggplot(data = clean_data_long_means_eawag,
@@ -316,11 +316,13 @@ system("cd /Users/alison/Documents/dev/RespiratoryVirusesWastewater; git pull")
 data_eawag6_git <- readr::read_csv("/Users/alison/Documents/dev/RespiratoryVirusesWastewater/LatestRESP6Data-filtered.csv")
 
 data_eawag6_git <- data_eawag6_git |> 
-  mutate(measuring_period = get_measuring_period(sample_date), measurement_type = paste0(Target, "_gc_per_day")) |> 
+  mutate(Protein = ifelse(Protein %in% c("N1","N2"), Protein, "")) |> # all other targets only have one Protein anyways
+  mutate(measuring_period = get_measuring_period(sample_date), measurement_type = paste0(Target, Protein, "_gc_per_day")) |> 
   transmute(sample_date, wwtp, measuring_period, measurement_type, mean = Load, assays = "respv6") |> 
   mutate(wwtp = ifelse(grepl(wwtp, pattern = "ARA Werdh"), "ARA Werdhölzli", wwtp))
 
 data_eawag6_git <- data_eawag6_git |> filter(!(wwtp == "ARA Buholz" & sample_date == "2023-10-03")) # remove duplicate, inconsistent data
+
 if (data_eawag6_git |> count(across(-mean)) |> pull(n) |> max() > 1) {
   stop("There are duplicate measurements for some samples in the github data.")
 }
