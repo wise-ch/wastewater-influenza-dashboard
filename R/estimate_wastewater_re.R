@@ -10,6 +10,7 @@ library(estimateR)
 
 source("R/helper_scripts/functions.R")
 source("R/helper_scripts/parameters.R")
+source("R/helper_scripts/fitopts.R")
 
 # Set variables
 output_suffix <- "" # Dashboard uses data with default output name, i.e. output_suffix = ""
@@ -93,6 +94,8 @@ wwtp_data_all <- list(
 # Estimate Re for each data stream
 is_first <- T
 for (wwtp_name in names(wwtp_data_all)) {
+
+  set.seed(estimateR_seed)
 
   df <- wwtp_data_all[[wwtp_name]]
   wwtp_i <- unique(df$wwtp)  # should be single plant
