@@ -10,7 +10,7 @@ source("R/helper_scripts/utils_preprocess.R")
 #' @param path_to_data The directory where FOPH data is stored.
 #' @return Newest data as a data frame.
 get_newest_data <- function(path_to_data = "data/raw_data/foph_case_data") {
-  files <- list.files(path = path_to_data, pattern = ".*Influenza_daten_nach_plz.xlsx$", full.names = T)
+  files <- list.files(path = path_to_data, pattern = ".*Influenza_daten_nach_plz.xlsx$", full.names = T, all.files = FALSE)
   newest_data_file <- sort(files)[length(files)]
   print(paste("Newest file found is:", newest_data_file))
   newest_data <- readxl::read_xlsx(newest_data_file, sheet = 1) %>%
