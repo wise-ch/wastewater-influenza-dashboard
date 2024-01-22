@@ -6,9 +6,9 @@ name: build-and-publish-app-image
 on:
   # Option to manually trigger deploy
   workflow_dispatch:
-  # Automatic re-deploy at 3:07AM every Mon, Wed, and Fri
+  # Automatic re-deploy at 3:07AM every Fri
   schedule:
-    - cron: '7 3 * * 1,3,5'
+    - cron: '7 3 * * 5'
 
 env:
   REGISTRY: ghcr.io
