@@ -9,6 +9,12 @@ on:
   # Automatic re-deploy at 3:07AM every Fri
   schedule:
     - cron: '7 3 * * 5'
+  push:
+    branches:
+      - 'master'
+    paths:
+      # Only run when a relevant file is updated
+      - 'app/data/ww_re_estimates.csv'
 
 env:
   REGISTRY: ghcr.io
